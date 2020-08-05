@@ -1,0 +1,10 @@
+.vscode/
+build/
+.platformio/
+.pio/
+.DS_Store
+*.elf
+*.key
+*.pem
+*.srl
+*.csr

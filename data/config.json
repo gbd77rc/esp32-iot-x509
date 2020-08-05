@@ -1,0 +1,33 @@
+{
+    "logging": {
+        "level": "ALL"
+    },
+    "led": {
+        "green": 26,
+        "red": 27
+    },
+    "wifi":{
+        "ssid": ""
+    },
+    "gpsInfo": {
+        "enabled": true,
+        "tx": 16,
+        "rx": 17,
+        "baud": 9600
+    },
+    "device": {
+        "prefix": "OT",
+        "wakeup": 1200,
+        "location": "<UNKNOWN>"
+    },
+    "azure": {
+        "hub_name": "",
+        "canSend": true,
+        "port": 8883,
+        "hub_connection": "",
+        "certificate": "/azure/cert.pem",
+        "key": "/azure/key.pem",
+        "ca": "/azure/portal-azure-com.pem",
+        "telemetry": true
+    }
+}
