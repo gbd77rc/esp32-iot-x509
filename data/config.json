@@ -2,23 +2,22 @@
     "logging": {
         "level": "ALL"
     },
-    "led": {
-        "green": 36,
-        "red": 27
-    },
-    "wifi":{
-        "ssid": ""
+    "ledInfo": {
+        "enabled": true,
+        "write": 25,
+        "read": 26,
+        "power": 27
     },
     "gpsInfo": {
-        "enabled": true,
-        "tx": 16,
-        "rx": 17,
+        "enabled": false,
+        "tx": 38,
+        "rx": 39,
         "baud": 9600
     },
     "lidarInfo": {
         "enabled": true,
-        "tx": 5,
-        "rx": 4,
+        "tx": 19,
+        "rx": 18,
         "baud": 115200
     },    
     "device": {

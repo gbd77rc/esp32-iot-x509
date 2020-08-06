@@ -12,10 +12,11 @@ void LiDARInfoClass::readTask(void *parameters)
 {
     for (;;)
     {
-        //vTaskSuspend(LiDARInfoClass::readTaskHandle);
+        //vTaskSuspend(LiDARInfoClass::readTaskHandle);    
         if (xSemaphoreTake(LiDARInfoClass::semaphoreFlag, portMAX_DELAY))
         {
-            LiDARInfo.read();
+            Logging.log(LOG_VERBOSE, "Resuming Read LiDAR Task...");    
+            Logging.log(LOG_VERBOSE, "LiDAR Valid Data: %s", LiDARInfo.read() ? "Yes" : "No");
             xSemaphoreGive(LiDARInfoClass::semaphoreFlag);
         }
         delay(200);
@@ -94,9 +95,19 @@ bool LiDARInfoClass::connect()
             0);
         LiDARInfoClass::taskCreated = true;
         this->_isConnected = true;
+        LiDARInfo.resumeTask();
     }
     Logging.log(LOG_VERBOSE, "LiDAR is running  : %s", this->_isConnected ? "Yes" : "No");
     return this->_isConnected;
+}
+
+uint16_t LiDARInfoClass::resumeTask()
+{
+    if (LiDARInfo.isConnected())
+    {
+        vTaskResume(LiDARInfoClass::readTaskHandle);
+    }
+    return 10000;
 }
 
 bool LiDARInfoClass::read()

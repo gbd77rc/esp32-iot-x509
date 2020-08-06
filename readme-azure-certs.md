@@ -55,7 +55,3 @@ Check Expiry in Cert
 
     az login
     az iot hub show-connection-string -n <iot-hub-name>
-
-
-
-

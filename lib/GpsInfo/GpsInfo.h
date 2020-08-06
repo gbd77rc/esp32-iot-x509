@@ -1,18 +1,20 @@
-#ifndef LIDARINFO_H
-#define LIDARINFO_H
+#ifndef GPSINFO_H
+#define GPSINFO_H
 
 #define ARDUINOJSON_USE_LONG_LONG 1
 #include <ArduinoJson.h>
+#include <TinyGPS++.h>
+//#include <SoftwareSerial.h>
 #include <HardwareSerial.h>
-#include <TFmini_plus.h>
 #include "Config.h"
 
-class LiDARInfoClass : public BaseConfigInfoClass
+class GpsInfoClass : public BaseConfigInfoClass
 {
 public:
-    LiDARInfoClass() : BaseConfigInfoClass("lidarInfo"), _lidarSerial(1) {}
+    GpsInfoClass() : BaseConfigInfoClass("gpsInfo"), _gpsSerial(2) {}
+
     static void readTask(void *parameters);
-    static uint16_t resumeTask();    
+    static uint16_t resumeTask();
     static TaskHandle_t readTaskHandle;
     static SemaphoreHandle_t semaphoreFlag;
     static bool taskCreated;
@@ -20,23 +22,28 @@ public:
     void begin();
     bool read();
     void toJson(JsonObject ob) override;
+    void toGeoJson(JsonObject ob);
     void load(JsonObjectConst obj) override;
     void save(JsonObject ob) override;
     bool isConnected();
-    bool connect();    
+    bool connect();
+    const char *location();
+
 private:
     bool _isConnected;
-    bool _isEnabled;
+    uint32_t _count;
     long _last_read;
     uint16_t _txPin;
     uint16_t _rxPin;
     uint32_t _baud;
-    HardwareSerial _lidarSerial;
-    TFminiPlus _lidar;
-    tfminiplus_data_t _data;
-    bool _isValid;
+    char _location[65];
+
+    bool _isEnabled;
+    TinyGPSPlus _gps;
+    //SoftwareSerial _gpsSerial;
+    HardwareSerial _gpsSerial;
 };
 
-extern LiDARInfoClass LiDARInfo;
+extern GpsInfoClass GpsInfo;
 
 #endif

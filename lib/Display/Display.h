@@ -16,7 +16,7 @@ public:
     void displayLine(u8g2_uint_t x, u8g2_uint_t y, const __FlashStringHelper *ifsh);    
     void displayLine(u8g2_uint_t x, u8g2_uint_t y, const char *format, ...);
 private:
-    char _chBuffer[128];
+    char _chBuffer[768];
     void writeLine(u8g2_uint_t x, u8g2_uint_t y, const char *msg);
 };
 
