@@ -7,18 +7,23 @@
 #include "DeviceInfo.h"
 #include "WiFiInfo.h"
 #include "NTPInfo.h"
+#include "LiDARInfo.h"
 
 const int redPin = 27;
 const int greenPin = 26;
+SemaphoreHandle_t xSemaphore;
 
 void setup()
 {
     Serial.begin(115200);
+    xSemaphore = xSemaphoreCreateMutex();
+    LiDARInfoClass::semaphoreFlag = xSemaphore;
 
     Logging.begin();
     OledDisplay.begin();
     DeviceInfo.begin();
     WiFiInfo.begin();
+    LiDARInfo.begin();
 
     if (!SPIFFS.begin(true))
     {
@@ -28,6 +33,7 @@ void setup()
     Configuration.begin("/config.json");
     Configuration.add(&Logging);
     Configuration.add(&DeviceInfo);
+    Configuration.add(&LiDARInfo);
     Configuration.load();
 
     OledDisplay.displayLine(0,10,F("Dev : Blink Lights"));
@@ -36,6 +42,7 @@ void setup()
     OledDisplay.displayLine(0,40,"WiFi: %s", "connecting....");
     WiFiInfo.connect(0,40);
     NTPInfo.begin();
+    LiDARInfo.connect();
 
     pinMode(redPin, OUTPUT);
     pinMode(greenPin, OUTPUT);
@@ -53,7 +60,7 @@ void loop()
     digitalWrite(greenPin, HIGH);
     delay(1000);
     digitalWrite(greenPin, LOW);
-    delay(500);
+    delay(500); §
     digitalWrite(redPin, LOW);
     OledDisplay.displayLine(0, 60, "Led : %s  ", "OFF");
     delay(1000);

@@ -37,8 +37,8 @@ boolean WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
             {
                 if(WiFi.status() == WL_CONNECTED)
                 {
-                    Logging.log(LOG_INFO, "Connected to : %s", WiFi.SSID().c_str());
-                    Logging.log(LOG_INFO, "Got IP       : %s", WiFi.localIP().toString().c_str());        
+                    Logging.log(LOG_INFO, "Connected to        : %s", WiFi.SSID().c_str());
+                    Logging.log(LOG_INFO, "Got IP              : %s", WiFi.localIP().toString().c_str());        
                     OledDisplay.displayLine(x, y, "WiFi: %s ", WiFi.SSID().c_str());
                     break;
                 }
@@ -53,8 +53,8 @@ boolean WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
     }
     else 
     {
-        Logging.log(LOG_INFO, "Connected to : %s", WiFi.SSID().c_str());
-        Logging.log(LOG_INFO, "Got IP       : %s", WiFi.localIP().toString().c_str());        
+        Logging.log(LOG_INFO, "Connected to        : %s", WiFi.SSID().c_str());
+        Logging.log(LOG_INFO, "Got IP              : %s", WiFi.localIP().toString().c_str());        
         OledDisplay.displayLine(x, y, "WiFi: %s ", WiFi.SSID().c_str());
     }
     return true;
@@ -86,8 +86,8 @@ void WiFiInfoClass::WiFiEvent(WiFiEvent_t event, system_event_info_t info) {
         Logging.log(LOG_INFO, F("Station Mode Started"));
         break;
     case SYSTEM_EVENT_STA_GOT_IP:
-        Logging.log(LOG_INFO, "Connected to : %s", WiFi.SSID().c_str());
-        Logging.log(LOG_INFO, "Got IP       : %s", WiFi.localIP().toString());
+        Logging.log(LOG_INFO, "Connected to        : %s", WiFi.SSID().c_str());
+        Logging.log(LOG_INFO, "Got IP              : %s", WiFi.localIP().toString());
         break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
         Logging.log(LOG_WARNING, F("Disconnected from station, attempting reconnection"));

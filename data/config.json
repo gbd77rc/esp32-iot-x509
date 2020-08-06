@@ -3,7 +3,7 @@
         "level": "ALL"
     },
     "led": {
-        "green": 26,
+        "green": 36,
         "red": 27
     },
     "wifi":{
@@ -15,6 +15,12 @@
         "rx": 17,
         "baud": 9600
     },
+    "lidarInfo": {
+        "enabled": true,
+        "tx": 5,
+        "rx": 4,
+        "baud": 115200
+    },    
     "device": {
         "prefix": "OT",
         "wakeup": 1200,
