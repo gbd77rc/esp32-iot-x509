@@ -1,5 +1,5 @@
-#ifndef LOGGING_H
-#define LOGGING_H
+#ifndef LogInfo_H
+#define LogInfo_H
 #include <Arduino.h>
 #define ARDUINOJSON_USE_LONG_LONG 1
 #include <ArduinoJson.h>
@@ -15,14 +15,14 @@ typedef enum
     LOG_ALL = 5
 } LogType;
 
-class LoggingClass: public BaseConfigInfoClass
+class LogInfoClass : public BaseConfigInfoClass
 {
-    public:
-    LoggingClass(): BaseConfigInfoClass("logging"), _reportingLevel(LOG_ALL) {}
+public:
+    LogInfoClass() : BaseConfigInfoClass("LogInfo"), _reportingLevel(LOG_ALL) {}
     void begin();
     void load(JsonObjectConst obj) override;
     void save(JsonObject ob) override;
-    void toJson(JsonObject ob) override;    
+    void toJson(JsonObject ob) override;
 
     const char* getUniqueId();
     size_t log(LogType level, const char *format, ...);
@@ -32,17 +32,17 @@ class LoggingClass: public BaseConfigInfoClass
     void setLogLevel(LogType logType);
     void setLogLevel(const char* logType);
     const char* getLogLevel();
-    private:
+private:
     const char* logTypeToShortString(LogType level);
     const char* logTypeToString(LogType level);
-    LogType stringToLogType(const char* level);      
+    LogType stringToLogType(const char* level);
     LogType _reportingLevel;
-    size_t write(LogType level, const char msg[], const char hdr[] = "Information" );
+    size_t write(LogType level, const char msg[], const char hdr[] = "Information");
     size_t writePrefix(LogType level);
     size_t writeSectionHeader(const char hdr[]);
     char _uniqueId[23];
 };
 
-extern LoggingClass Logging;
+extern LogInfoClass LogInfo;
 
 #endif

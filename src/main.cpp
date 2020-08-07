@@ -2,7 +2,7 @@
 
 #include "SPIFFS.h"
 
-#include "Logging.h"
+#include "LogInfo.h"
 #include "Display.h"
 #include "DeviceInfo.h"
 #include "WiFiInfo.h"
@@ -20,7 +20,7 @@ void setup()
     LiDARInfoClass::semaphoreFlag = xSemaphore;
     GpsInfoClass::semaphoreFlag = xSemaphore;
 
-    Logging.begin();
+    LogInfo.begin();
     OledDisplay.begin();
     DeviceInfo.begin();
     WiFiInfo.begin();
@@ -34,7 +34,7 @@ void setup()
     }    
 
     Configuration.begin("/config.json");
-    Configuration.add(&Logging);
+    Configuration.add(&LogInfo);
     Configuration.add(&LedInfo);
     Configuration.add(&DeviceInfo);
     Configuration.add(&LiDARInfo);
@@ -49,22 +49,24 @@ void setup()
     NTPInfo.begin();
     LiDARInfo.connect();
     GpsInfo.connect();
+    OledDisplay.displayLine(0,60,F("Initialize Completed....."));    
+    delay(1000);
+    OledDisplay.clear();
+    OledDisplay.displayLine(0,10,"ID  : %s", DeviceInfo.deviceId());
+    OledDisplay.displayLine(0,20,"Loc : %s", DeviceInfo.location());  
+    OledDisplay.displayLine(0,30,F("Time: "));
+    OledDisplay.displayLine(0,40,F("Dist: "));
+    OledDisplay.displayLine(0,50,F("GPS : Lat: "));     
+    OledDisplay.displayLine(0,60,F("      Lng: "));     
 }
 
 void loop()
 {
-    NTPInfo.tick();
-    OledDisplay.displayLine(0, 50, "Time: %s  ", NTPInfo.getFormattedTime().c_str());
-    OledDisplay.displayLine(0, 60, "Led : %s  ", "ON");
-    LedInfo.switchOn(LED_READ);
-    delay(1000);
-    LedInfo.switchOn(LED_WRITE);
-    delay(1000);
-    LedInfo.switchOff(LED_WRITE);
-    delay(500);
-    LedInfo.switchOff(LED_READ);
-    delay(500);
-    OledDisplay.displayLine(0, 60, "Led : %s  ", "OFF");    
+    LiDARInfo.resumeTask();
     GpsInfo.resumeTask();
-    delay(1000);
+    OledDisplay.displayLine(36,30,"%s", NTPInfo.getFormattedTime());
+    OledDisplay.displayLine(36,40,"%icm", LiDARInfo.getDistance());
+    OledDisplay.displayLine(64,50,"%09.5f", GpsInfo.getLat());
+    OledDisplay.displayLine(64,60,"%09.5f", GpsInfo.getLong());
+    delay(500);
 }

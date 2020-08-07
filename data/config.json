@@ -4,20 +4,21 @@
     },
     "ledInfo": {
         "enabled": true,
-        "write": 25,
-        "read": 26,
+        "gps": 25,
+        "lidar": 26,
         "power": 27
     },
     "gpsInfo": {
-        "enabled": false,
-        "tx": 38,
-        "rx": 39,
-        "baud": 9600
+        "enabled": true,
+        "tx": 23,
+        "rx": 22,
+        "baud": 9600,
+        "sim808": true
     },
     "lidarInfo": {
         "enabled": true,
-        "tx": 19,
-        "rx": 18,
+        "tx": 4,
+        "rx": 17,
         "baud": 115200
     },    
     "device": {

@@ -10,8 +10,8 @@
 typedef enum
 {
     LED_POWER = 0,
-    LED_READ = 1,
-    LED_WRITE = 2,
+    LED_LIDAR = 1,
+    LED_GPS = 2,
 } LedType;
 
 class LedInfoClass : public BaseConfigInfoClass

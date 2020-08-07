@@ -16,6 +16,7 @@ public:
     static TaskHandle_t readTaskHandle;
     static SemaphoreHandle_t semaphoreFlag;
     static bool taskCreated;
+    static long lastCheck;    
 
     void begin();
     bool read();
@@ -24,6 +25,7 @@ public:
     void save(JsonObject ob) override;
     bool isConnected();
     bool connect();    
+    uint16_t getDistance();
 private:
     bool _isConnected;
     bool _isEnabled;

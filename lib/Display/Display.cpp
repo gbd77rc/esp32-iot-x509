@@ -1,5 +1,5 @@
 #include "Display.h"
-#include "Logging.h"
+#include "LogInfo.h"
 
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, 16, 15, 4);
 
@@ -13,13 +13,18 @@ void DisplayClass::begin()
     u8g2.clearBuffer();
 }
 
+void DisplayClass::clear()
+{
+    u8g2.clearBuffer();
+}
+
 void DisplayClass::displayExit(const __FlashStringHelper *ifsh)
 {
     u8g2.clearDisplay();
     u8g2.setFontPosTop();
     u8g2.setFontDirection(0);
     u8g2.clearBuffer();
-    Logging.log(LOG_ERROR, ifsh);
+    LogInfo.log(LOG_ERROR, ifsh);
     u8g2.setDrawColor(1);
     sprintf(this->_chBuffer, "%s", reinterpret_cast<const char *>(ifsh));
     u8g2.drawStr(64 - (u8g2.getStrWidth(this->_chBuffer) / 2), 0, this->_chBuffer);
@@ -80,7 +85,7 @@ void DisplayClass::writeLine(u8g2_uint_t x, u8g2_uint_t y, const char *msg)
     {
         yt = FONT_ONE_HEIGHT / 2;
     }
-    u8g2.drawBox(0, yt, 128, (FONT_ONE_HEIGHT + 5));
+    u8g2.drawBox(x, yt, 128, (FONT_ONE_HEIGHT + 5));
     u8g2.setDrawColor(1);
     u8g2.drawStr(x, yt, msg);
     u8g2.sendBuffer();

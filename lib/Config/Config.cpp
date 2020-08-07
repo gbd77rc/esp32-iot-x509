@@ -1,6 +1,6 @@
 #include "Config.h"
 #include "Utilities.h"
-#include "Logging.h"
+#include "LogInfo.h"
 
 ConfigClass::~ConfigClass()
 {
@@ -16,19 +16,19 @@ void ConfigClass::begin(const char *filename, uint8_t defaultSize, uint16_t maxD
 
 bool ConfigClass::load()
 {
-    Logging.log(LOG_VERBOSE, "Loading configuration (%s)", this->_fileName);
+    LogInfo.log(LOG_VERBOSE, "Loading configuration (%s)", this->_fileName);
     File json = Utilities::openFile(this->_fileName);
     if (!json)
     {
-        Logging.log(LOG_ERROR, F("Loading configuration error!!!!"));
+        LogInfo.log(LOG_ERROR, F("Loading configuration error!!!!"));
         return false;
     }
 
     DynamicJsonDocument doc(this->_maxDocSize);
     auto err = deserializeJson(doc, json);
-    if ( err )
+    if (err)
     {
-        Logging.log(LOG_ERROR, "Loading configuration error (%s)", err.c_str());
+        LogInfo.log(LOG_ERROR, "Loading configuration error (%s)", err.c_str());
         json.close();
         return false;
     }
@@ -36,13 +36,13 @@ bool ConfigClass::load()
     auto root = doc.as<JsonObject>();
     if (this->_total > 0)
     {
-        for (JsonPair kv : root) 
+        for (JsonPair kv : root)
         {
             for (uint8_t i = 0; i < this->_total; i++)
             {
-                if (this->_configs[i]->isSection(kv.key().c_str()) )
+                if (this->_configs[i]->isSection(kv.key().c_str()))
                 {
-                    Logging.log(LOG_VERBOSE, "Loading section (%s)", kv.key().c_str());
+                    LogInfo.log(LOG_VERBOSE, "Loading section (%s)", kv.key().c_str());
                     this->_configs[i]->load(kv.value().as<JsonObject>());
                 }
             }
@@ -64,12 +64,12 @@ bool ConfigClass::save()
         {
             this->_configs[i]->save(json);
         }
-        Logging.log(LOG_VERBOSE, F("Saving JSON"), json);
+        LogInfo.log(LOG_VERBOSE, F("Saving JSON"), json);
         File file = Utilities::openFile(this->_fileName, false);
         if (!file)
         {
             return false;
-        }        
+        }
         size_t saved = serializeJson(doc, file);
         file.close();
         for (uint8_t i = 0; i < this->_total; i++)
@@ -78,7 +78,7 @@ bool ConfigClass::save()
         }
 
         return saved > 0;
-    }    
+    }
     return false;
 }
 
@@ -90,9 +90,9 @@ bool ConfigClass::shouldSave()
         {
             return true;
         }
-    }    
+    }
     return false;
-} 
+}
 
 void ConfigClass::add(BaseConfigInfoClass *config)
 {

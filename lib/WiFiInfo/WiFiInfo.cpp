@@ -1,7 +1,7 @@
 
 #include "esp_wps.h"
 #include "WiFiInfo.h"
-#include "Logging.h"
+#include "LogInfo.h"
 #include "DeviceInfo.h"
 
 static esp_wps_config_t config;
@@ -13,7 +13,7 @@ void WiFiInfoClass::begin()
 
 boolean WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
 {
-    Logging.log(LOG_VERBOSE, F("Initialising WiFi...."));
+    LogInfo.log(LOG_VERBOSE, F("Initialising WiFi...."));
     while (WiFi.status() != WL_CONNECTED) {
         if (this->previousMillisWiFi < this->intervalWiFi)
         {
@@ -25,7 +25,7 @@ boolean WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
 
     if (WiFi.status() != WL_CONNECTED) {
         OledDisplay.displayLine(x, y, "WiFi: %s", "STA Mode WPA");
-        Logging.log(LOG_VERBOSE, F("Not Connected so switching to STA Mode...."));
+        LogInfo.log(LOG_VERBOSE, F("Not Connected so switching to STA Mode...."));
         WiFi.onEvent(WiFiInfoClass::WiFiEvent);
         WiFi.mode(WIFI_MODE_STA);
         WiFiInfoClass::wpsInitConfig();
@@ -35,10 +35,10 @@ boolean WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
             uint16_t count = 0;
             while (WiFi.status() != WL_CONNECTED)
             {
-                if(WiFi.status() == WL_CONNECTED)
+                if (WiFi.status() == WL_CONNECTED)
                 {
-                    Logging.log(LOG_INFO, "Connected to        : %s", WiFi.SSID().c_str());
-                    Logging.log(LOG_INFO, "Got IP              : %s", WiFi.localIP().toString().c_str());        
+                    LogInfo.log(LOG_INFO, "Connected to        : %s", WiFi.SSID().c_str());
+                    LogInfo.log(LOG_INFO, "Got IP              : %s", WiFi.localIP().toString().c_str());
                     OledDisplay.displayLine(x, y, "WiFi: %s ", WiFi.SSID().c_str());
                     break;
                 }
@@ -51,10 +51,10 @@ boolean WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
             }
         }
     }
-    else 
+    else
     {
-        Logging.log(LOG_INFO, "Connected to        : %s", WiFi.SSID().c_str());
-        Logging.log(LOG_INFO, "Got IP              : %s", WiFi.localIP().toString().c_str());        
+        LogInfo.log(LOG_INFO, "Connected to        : %s", WiFi.SSID().c_str());
+        LogInfo.log(LOG_INFO, "Got IP              : %s", WiFi.localIP().toString().c_str());
         OledDisplay.displayLine(x, y, "WiFi: %s ", WiFi.SSID().c_str());
     }
     return true;
@@ -83,36 +83,36 @@ void WiFiInfoClass::wpsInitConfig() {
 void WiFiInfoClass::WiFiEvent(WiFiEvent_t event, system_event_info_t info) {
     switch (event) {
     case SYSTEM_EVENT_STA_START:
-        Logging.log(LOG_INFO, F("Station Mode Started"));
+        LogInfo.log(LOG_INFO, F("Station Mode Started"));
         break;
     case SYSTEM_EVENT_STA_GOT_IP:
-        Logging.log(LOG_INFO, "Connected to        : %s", WiFi.SSID().c_str());
-        Logging.log(LOG_INFO, "Got IP              : %s", WiFi.localIP().toString());
+        LogInfo.log(LOG_INFO, "Connected to        : %s", WiFi.SSID().c_str());
+        LogInfo.log(LOG_INFO, "Got IP              : %s", WiFi.localIP().toString());
         break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
-        Logging.log(LOG_WARNING, F("Disconnected from station, attempting reconnection"));
+        LogInfo.log(LOG_WARNING, F("Disconnected from station, attempting reconnection"));
         WiFi.reconnect();
         break;
     case SYSTEM_EVENT_STA_WPS_ER_SUCCESS:
-        Logging.log(LOG_INFO, "WPS Successfull, stopping WPS and connecting to: %s", WiFi.SSID().c_str());
+        LogInfo.log(LOG_INFO, "WPS Successfull, stopping WPS and connecting to: %s", WiFi.SSID().c_str());
         esp_wifi_wps_disable();
         delay(10);
         WiFi.begin();
         break;
     case SYSTEM_EVENT_STA_WPS_ER_FAILED:
-        Logging.log(LOG_WARNING, F("WPS Failed, retrying"));
+        LogInfo.log(LOG_WARNING, F("WPS Failed, retrying"));
         esp_wifi_wps_disable();
         esp_wifi_wps_enable(&config);
         esp_wifi_wps_start(0);
         break;
     case SYSTEM_EVENT_STA_WPS_ER_TIMEOUT:
-        Logging.log(LOG_WARNING, F("WPS Timedout, retrying"));
+        LogInfo.log(LOG_WARNING, F("WPS Timedout, retrying"));
         esp_wifi_wps_disable();
         esp_wifi_wps_enable(&config);
         esp_wifi_wps_start(0);
         break;
     case SYSTEM_EVENT_STA_WPS_ER_PIN:
-        Logging.log(LOG_VERBOSE, "WPS_PIN: %s", WiFiInfoClass::numbersToString(info.sta_er_pin.pin_code));
+        LogInfo.log(LOG_VERBOSE, "WPS_PIN: %s", WiFiInfoClass::numbersToString(info.sta_er_pin.pin_code));
         break;
     default:
         break;

@@ -12,6 +12,7 @@ class DisplayClass
 {
 public:
     void begin();
+    void clear();
     void displayExit(const __FlashStringHelper *ifsh);
     void displayLine(u8g2_uint_t x, u8g2_uint_t y, const __FlashStringHelper *ifsh);    
     void displayLine(u8g2_uint_t x, u8g2_uint_t y, const char *format, ...);
