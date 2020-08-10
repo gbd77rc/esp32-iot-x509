@@ -42,12 +42,22 @@ I am using [JSON](https://www.json.org/json-en.html) file layout for the configu
 
 See [Device Sensor Configuration](./DeviceConfigSetup.md) for full details.
 
-## Building
+## Building The System
 
-I have already pre-soldered ESP32 Development board pins.  From the photo you can see I am not that good at soldering.
+I have already pre-soldered ESP32 Development board, GPS NEO-6M, and DHT-22 pins.  From the photos you can see I am not that good at soldering.
 
 ![ESP32 Device Board](./images/ESP32DevBoard.jpg)
 
-The following circuit diagram will help out here.
+The following circuit diagram will help with the connecting of pins.
 
 ![Circuit Diagram](./images/CircuitDiagram.svg)
+
+The pin numbers are the physical pin layout on the board.  The configuration settings uses logical pin layout.  
+
+### Battery Connected Issue
+
+There is an issue in that when the lithium battery is connected the device will stay switched on.  This will not be too much of issue when we have the full firmware loaded as it will automatically go to deep sleep (switched off) after an idle period.  The real issue is if you connect the battery up before connecting all the sensors etc you may short ciruit something and then damage the sensor, or the development board.
+
+The process to connect up the sensors, ESP32 development board and battery will be outline below.
+
+## 
