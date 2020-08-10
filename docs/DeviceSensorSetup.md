@@ -44,4 +44,10 @@ See [Device Sensor Configuration](./DeviceConfigSetup.md) for full details.
 
 ## Building
 
-I have already pre-soldered ESP32 Development board pins.  From 
+I have already pre-soldered ESP32 Development board pins.  From the photo you can see I am not that good at soldering.
+
+![ESP32 Device Board](./images/ESP32DevBoard.jpg)
+
+The following circuit diagram will help out here.
+
+![Circuit Diagram](./images/CircuitDiagram.svg)
