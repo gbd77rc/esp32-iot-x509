@@ -11,9 +11,9 @@ This introduction blog will outline the use case story, and how we are going to 
 * Development Setup and source control
 * Serverless and Containers
 * CI/CD Pipelines
-* Multitenants
+* Multi-Tenants
 
-There are many short tutorial out in the internet, but nothing to really show a journey on how to get a device securely connected to the cloud and make use of the data in visualization application.  It will cover the developement and CI/CD processing in a cloud enabled ecosystem.  I will try to keep the costs of the cloud down to the miniumum by using the free tier where I can and be able to undeploy automatically when I can't.
+There are many short tutorial out in the internet, but nothing to really show a journey on how to get a device securely connected to the cloud and make use of the data in visualization application.  It will cover the development and CI/CD processing in a cloud enabled ecosystem.  I will try to keep the costs of the cloud down to the minimum by using the free tier where I can and be able to undeploy automatically when I can't.
 
 Each of these blogs maybe broken into smaller ones, depending on the size of each one.  I will try to limit them to 10 minutes of reading, just to keep it interesting.  This introduction one will be shorter just to wet your appetite.
 
@@ -24,7 +24,7 @@ We are a manufacturer of the devices which are based on ESP32 chip for this seri
 * Temperature/Humidity Detecting using DHT-22 sensor
 * LiDAR distance sensor
 * GPS for outdoor positioning
-* WiFi signal strenght detection for indoor positioning
+* WiFi signal strength detection for indoor positioning
 
 Each sensor and how to wire them up will be covered in the [Device Sensor Setup](./DeviceSensorSetup.md).  
 
@@ -41,15 +41,15 @@ The device will make use of Shadow/Device Twin features for configuration/connec
 
 ### Why NOT Google Cloud Platform (GCP)
 
-I will not cover Google Cloud Platform, as it currently stands.  I believe it is currently not fully featured yet.  I expect it to be in the next year, if Google don't do their normal, its not making money so lets close it mind set.  GCP has survived a few years now so it just may do it, also last year it seemed they have given up to compete with AWS as a SAAS platform and gone thier own way.  Which I am really glad about.  We don't need another AWS look-a-like, but something different.
+I will not cover Google Cloud Platform, as it currently stands.  I believe it is currently not fully featured yet.  I expect it to be in the next year, if Google don't do their normal, its not making money so lets close it mind set.  GCP has survived a few years now so it just may do it, also last year it seemed they have given up to compete with AWS as a SAAS platform and gone their own way.  Which I am really glad about.  We don't need another AWS look-a-like, but something different.
 
 ## The Application Story
 
-Once the device is registered and the cloud platform is recieving telemetry we will switch to how to show this data in a web based application.  This application will make use of [OpenId Connect](https://openid.net/connect/) for authentication and the backend service for authorisation.  Both Azure and AWS support OpenId Connect and I will show how to use [Key Cloak](https://www.keycloak.org/) for developing the application before being deployed to the cloud.
+Once the device is registered and the cloud platform is receiving telemetry we will switch to how to show this data in a web based application.  This application will make use of [OpenId Connect](https://openid.net/connect/) for authentication and the backend service for authorization.  Both Azure and AWS support OpenId Connect and I will show how to use [Key Cloak](https://www.keycloak.org/) for developing the application before being deployed to the cloud.
 
-### MultiTenant Story
+### Multi-Tenant Story
 
-This application is fine if its just the manufacturer who will see and want to the devices/data, but what if they are selling them to the end user.  For that the application will need to support multitenant.  This is will limit the device data to juse one tenant and if the tenant gives permission, some of the data can be given back to the manufacturer, like the aggregated telemetry feed.  
+This application is fine if its just the manufacturer who will see and want to the devices/data, but what if they are selling them to the end user.  For that the application will need to support multi-tenant.  This is will limit the device data to just one tenant and if the tenant gives permission, some of the data can be given back to the manufacturer, like the aggregated telemetry feed.  
 
 Each tenant may have one user or multiple different users assigned, so roles will need to be given each user.  Invitations process will need to be created so that the owner of the tenant can invite other users to manage or just view the data.
 
@@ -57,4 +57,4 @@ Each tenant may have one user or multiple different users assigned, so roles wil
 
 Each cloud provider has it own way for deploying resources to themselves, AWS using [CloudFormation](https://aws.amazon.com/cloudformation/) and Azure using [ARM - Azure Resource Manager](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/overview) for this.  I will cover both.  There are other 3rd party deployment systems that make simple to deploy to either without much change in the templates, like [Terraform](https://www.terraform.io/) from HashiCorp.  I will highlight some of the advantages and disadvantages of using it.
 
-Using the cloud providers serverless and container services will be covered, to show when to use each type and what to lookout for.  
+Using the cloud providers serverless and container services will be covered, to show when to use each type and what to lookout for.

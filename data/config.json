@@ -13,7 +13,7 @@
         "tx": 23,
         "rx": 22,
         "baud": 9600,
-        "sim808": true
+        "sim808": false
     },
     "lidarInfo": {
         "enabled": true,
