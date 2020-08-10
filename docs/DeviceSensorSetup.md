@@ -10,11 +10,13 @@ We are going to create a device from the following components.  Links will redir
 * [DSD Tech DHT22](https://www.amazon.co.uk/gp/product/B07CM2VLBK/ref=ppx_yo_dt_b_asin_title_o03_s00?ie=UTF8&psc=1)
 * [LiDAR Sensor](https://www.amazon.co.uk/MakerHawk-Single-Point-Compatible-Communication-Interface/dp/B0778B15G7/ref=sr_1_5?dchild=1&keywords=lidar+sensor&qid=1597056770&sr=8-5)
 
+![All Devices](./images/AllDevices.jpg)
+
 The _**GPS External Ariel/5 U.FL Mini PCI to SMA Female**_ is really only needed if you want to program the device inside a warm environment or not.  I know you can sometimes get a satellite lock indoors, but its not reliable as you need line of sight for this lock.
 
 I have added in a 3 LED's to show power on, reading sensors and sending to the cloud status.
 
-The OLED display on the ESP32 board will display the following information on startup and normal mode.
+The OLED display on the ESP32 board will display information on startup and normal mode.
 
 ## Startup Process
 
@@ -39,3 +41,7 @@ The ESP 32 device has the ability to store files in the flash area of memory.  I
 I am using [JSON](https://www.json.org/json-en.html) file layout for the configuration.  I know its not the most efficient file structure, but it is easy to read and modify by a human.
 
 See [Device Sensor Configuration](./DeviceConfigSetup.md) for full details.
+
+## Building
+
+I have already pre-soldered ESP32 Development board pins.  From 
