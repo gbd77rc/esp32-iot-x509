@@ -38,4 +38,4 @@ The ESP 32 device has the ability to store files in the flash area of memory.  I
 
 I am using [JSON](https://www.json.org/json-en.html) file layout for the configuration.  I know its not the most efficient file structure, but it is easy to read and modify by a human.
 
-See [Device Sensor Configuration](./DeviceSensorSetup.md) for full details.
+See [Device Sensor Configuration](./DeviceConfigSetup.md) for full details.
