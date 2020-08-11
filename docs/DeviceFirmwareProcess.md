@@ -27,3 +27,8 @@ I am using [JSON](https://www.json.org/json-en.html) file layout for the configu
 See [Device Sensor Configuration](./DeviceConfigSetup.md) for full details.
 
 ## Normal Process
+
+![Normal Process Flow](./images/esp-normal.svg)
+
+The flows that are coloured are running on core 0 and are independent of each other.  This will use the FreeRTOS [xTaskCreatePinnedToCore](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/freertos.html) function for creating tasks with specific affinity and assign them to a specific processor core.  In this case core 0.
+

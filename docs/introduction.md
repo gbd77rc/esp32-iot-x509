@@ -17,6 +17,12 @@ There are many short tutorial out in the internet, but nothing to really show a 
 
 Each of these blogs maybe broken into smaller ones, depending on the size of each one.  I will try to limit them to 10 minutes of reading, just to keep it interesting.  This introduction one will be shorter just to wet your appetite.
 
+## Terminology
+
+| Term | Meaning
+|---|---
+|SOC| System on a chip
+
 ## The Device Story
 
 We are a manufacturer of the devices which are based on ESP32 chip for this series.  The device will contain the following features, so we have a list of telemetry data points.
@@ -26,9 +32,11 @@ We are a manufacturer of the devices which are based on ESP32 chip for this seri
 * GPS for outdoor positioning
 * WiFi signal strength detection for indoor positioning
 
-Each sensor and how to wire them up will be covered in the [Device Sensor Setup](./DeviceSensorSetup.md).  
+Each sensor and how to wire them up will be covered in the [Device Sensor Setup](./DeviceSensorSetup.md).
 
-> **TODO Insert Device Image**
+![Device Setup](./images/Step3.png)
+
+Why multiple different sensors?  Good question, and the answer is that I want to show how to use tasks within Arduino that can run at different times on the core or different core on the ESP32 dual core SOC.
 
 The device will have individual x509 certificate so it can Just-In-Time register with a cloud platform.  Each platform have their own process for Just-In-Time registration.
 

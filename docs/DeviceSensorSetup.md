@@ -38,7 +38,7 @@ The process to connect up the sensors, ESP32 development board and battery will 
 
 ### Testing LED
 
-The LED has a negative and positive leg.  Its important that you get them the right way around or else at best it does not light up or worst you will blow it.  Not seen them blow, with these types of setups, but if you apply enough voltage they can. Generally you the short leg is the negative and the long leg is positive.  If you have cut the legs to fit a circuit, how can you tell.  The best way I have found is using a multimeter. They generally have a diode tester option, well thats what I call it, I bet someone will correct me here. 
+The LED has a negative and positive leg.  Its important that you get them the right way around or else at best it does not light up or worst you will blow it.  Not seen them blown up with these types of setups, but if you apply enough voltage they can. Generally the short leg is the negative and the long leg is positive.  If you have cut the legs to fit a circuit, how can you tell.  The best way I have found is using a multimeter. They generally have a diode tester option, well thats what I call it, I bet someone will correct me here.
 
 ![LED Checking](./images/LEDCheck.png)
 
@@ -48,7 +48,7 @@ Connect the negative and positive probes and the LED should light up.  Switch th
 
 #### Step 1
 
-Now using a breadboard, I have added pre-cut wires and sensors to it.  These can be sourced from Amazon as well. You will notice that the wire colours are different to the circuit diagram.  The pre-cut wires are a jumpable of colours, so I have used wire that has the correct length or nearest correct length.  Then worry about the colours later.
+Now using a breadboard, I have added pre-cut wires and sensors to it.  These can be sourced from Amazon as well. You will notice that the wire colours are different to the circuit diagram.  The pre-cut wires are a jumpable of colours, so I have used wire that have the correct length or nearest correct length.  Then worry about the colours later.
 
 ![Step 1](./images/Step1.png)
 
@@ -64,4 +64,4 @@ Now insert the ESP32 development board into the breadboard, aligning the pins co
 
 ![Step 3](./images/Step3.png)
 
-Once the external ariel is connected and end of the GPS Antenna is placed outside, or has a direct line of sight to the sky.  Make sure if you have double glazing, this can cause interference as well, so open up the window if you can.
+Once the external ariel is connected and end of the GPS Antenna is placed outside, or has a direct line of sight to the sky.  Make sure if you have double glazing, this can cause interference as well, open up the window if you can.
