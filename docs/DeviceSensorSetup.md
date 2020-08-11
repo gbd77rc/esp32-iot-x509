@@ -20,7 +20,7 @@ The OLED display on the ESP32 board will display information on startup and norm
 
 ## Building The System
 
-I have already pre-soldered ESP32 Development board, GPS NEO-6M, and DHT-22 pins.  From the photos you can see I am not that good at soldering.
+I have already pre-soldered ESP32 Development board.  From the photos you can see I am not that good at soldering.
 
 ![ESP32 Device Board](./images/ESP32DevBoard.jpg)
 
@@ -35,3 +35,25 @@ The pin numbers are the physical pin layout on the board.  The configuration set
 There is an issue in that when the lithium battery is connected the device will stay switched on.  This will not be too much of issue when we have the full firmware loaded as it will automatically go to deep sleep (switched off) after an idle period.  The real issue is if you connect the battery up before connecting all the sensors etc you may short circuit something and then damage the sensor, or the development board.
 
 The process to connect up the sensors, ESP32 development board and battery will be outline below.
+
+### Testing LED
+
+The LED has a negative and positive leg.  Its important that you get them the right way around or else at best it does not light up or worst you will blow it.  Not seen them blow, with these types of setups, but if you apply enough voltage they can. Generally you the short leg is the negative and the long leg is positive.  If you have cut the legs to fit a circuit, how can you tell.  The best way I have found is using a multimeter. They generally have a diode tester option, well thats what I call it, I bet someone will correct me here. 
+
+![LED Checking](./images/LEDCheck.jpg)
+
+Connect the negative and positive probes and the LED should light up.  Switch the probes around if not.  Now you know which side is the negative.
+
+### Wiring The Sensors
+
+#### Step 1
+
+Now using a breadboard, I have added pre-cut wires and sensors to it.  These can be sourced from Amazon as well. You will notice that the wire colours are different to the circuit diagram.  The pre-cut wires are a jumpable of colours, so I have used wire that has the correct length or nearest correct length.  Then worry about the colours later.
+
+![Step 1](./images/Step1.jpg)
+
+#### Step 2
+
+Plug in the battery to the bottom of the ESP32 development board.  It can only connect one way.
+
+![Step 2](./images/Step2.jpg)
