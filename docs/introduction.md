@@ -3,7 +3,7 @@
 This introduction blog will outline the use case story, and how we are going to do it.  The following links will take the reader to the sections they are interested in.  Some of you may just want to know how to get x509 certificates on the device and link it to AWS or Azure or even both.  Well the the both is just an idea at the moment, still not done the actual work, but the theory is there.
 
 * [Device Sensor Setup](./DeviceSensorSetup.md)
-* Firmware Development
+* [Firmware Processing](./DeviceFirmwareProcess.md)
 * x509 creation
 * Azure IoT Hub device registration
 * AWS IoT core device registration

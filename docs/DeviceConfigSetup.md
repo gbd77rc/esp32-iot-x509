@@ -29,7 +29,7 @@ The following information describes the configuration file layout and the sensor
         },
         "tempInfo": {
             "enabled": true,
-            "data": 32,
+            "data": 14,
             "scale": 1
         },
         "device": {
