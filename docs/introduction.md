@@ -4,6 +4,7 @@ This introduction blog will outline the use case story, and how we are going to 
 
 * [Device Sensor Setup](./DeviceSensorSetup.md)
 * [Firmware Processing](./DeviceFirmwareProcess.md)
+* [Firmware Development](./FirmwareDevelopment.md)
 * x509 creation
 * Azure IoT Hub device registration
 * AWS IoT core device registration

@@ -1,6 +1,6 @@
 # Device Firmware Processing
 
-This blog will outline the firmware development and how it work on the ESP32 device.
+This blog will outline the firmware development and how it work on the ESP32 device.  We will be developing the firmware using [Arduino](https://arduino.cc) open-source electronics platform, using [Platform.io](https://platform.io/) as the development platform.
 
 ## Startup Process
 
@@ -30,5 +30,5 @@ See [Device Sensor Configuration](./DeviceConfigSetup.md) for full details.
 
 ![Normal Process Flow](./images/esp-normal.svg)
 
-The flows that are coloured are running on core 0 and are independent of each other.  This will use the FreeRTOS [xTaskCreatePinnedToCore](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/freertos.html) function for creating tasks with specific affinity and assign them to a specific processor core.  In this case core 0.
+The flows that are coloured are running on core 0 and are independent of each other.  This will use the FreeRTOS [xTaskCreatePinnedToCore](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/freertos.html) function for creating tasks with specific affinity and assign them to a specific processor core.  In this case core 0.  Everything else runs on Core 1.  This is Arduino default core.
 
