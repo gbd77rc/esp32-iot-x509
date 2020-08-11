@@ -1,6 +1,6 @@
 # Device and Sensors Setup
 
-We are going to create a device from the following components.  Links will redirect you to Amazon website for the UK.  You will have to convert to your own region Amazon or use related website for the devices.  
+We are going to create a device from the following components.  Links will redirect you to Amazon website for the UK.  You will have to convert to your own region Amazon or use related website for the components.  
 
 * [ESP32 Development board](https://www.amazon.co.uk/gp/product/B076P8GRWV/ref=ppx_od_dt_b_asin_title_s00?ie=UTF8&psc=1)
 * [Lithium Recharge Battery](https://www.amazon.co.uk/gp/product/B07CYMYMS9/ref=ppx_yo_dt_b_asin_title_o02_s00?ie=UTF8&psc=1)
@@ -57,3 +57,11 @@ Now using a breadboard, I have added pre-cut wires and sensors to it.  These can
 Plug in the battery to the bottom of the ESP32 development board.  It can only connect one way.
 
 ![Step 2](./images/Step2.png)
+
+#### Step 3
+
+Now insert the ESP32 development board into the breadboard, aligning the pins correctly.
+
+![Step 3](./images/Step3.png)
+
+Once the external ariel is connected and end of the GPS Antenna is placed outside, or has a direct line of sight to the sky.  Make sure if you have double glazing, this can cause interference as well, so open up the window if you can.
