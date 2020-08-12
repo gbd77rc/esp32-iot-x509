@@ -39,7 +39,7 @@ private:
     LogType _reportingLevel;
     size_t write(LogType level, const char msg[], const char hdr[] = "Information");
     size_t writePrefix(LogType level);
-    size_t writeSectionHeader(const char hdr[]);
+    size_t buildSectionHeader(const char hdr[]);
     char _uniqueId[23];
 };
 

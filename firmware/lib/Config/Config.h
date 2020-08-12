@@ -38,6 +38,7 @@ class BaseConfigInfoClass
          * Check to see if the sensor/configuration instance supports this section
          * 
          * @param sectionName The section to check compare
+         * @return True if section names are the same or not
          */ 
         bool isSection(const char* sectionName)
         {
@@ -46,6 +47,8 @@ class BaseConfigInfoClass
 
         /**
          * The sensor/configuration instance section name
+         * 
+         * @return pointer to the section name
          */ 
         const char* getSectionName()
         {
@@ -54,6 +57,8 @@ class BaseConfigInfoClass
 
         /**
          * Check to see if any of the configuration values have changed or not
+         * 
+         * @return True if the configuration has changed and we wait it saved
          */ 
         bool hasChanged()
         {

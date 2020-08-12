@@ -1,13 +1,22 @@
 #include "LogInfo.h"
 
+/**
+ * Begin the initialization of the logging system
+ */
 void LogInfoClass::begin()
 {
     uint64_t chipid;
 
     chipid = ESP.getEfuseMac(); //The chip ID is essentially its MAC address(length: 6 bytes).
+                                //It should be unique per ESP32 
     snprintf(this->_uniqueId, 23, "%04X%08X", (uint16_t)(chipid >> 32), (uint32_t)chipid);
 }
 
+/**
+ * overridden load JSON element into the logging instance
+ * 
+ * @param json The ArduinoJson object that this element will be loaded from
+ */ 
 void LogInfoClass::load(JsonObjectConst obj)
 {
     this->setLogLevel(obj["level"].as<const char*>());
@@ -15,23 +24,44 @@ void LogInfoClass::load(JsonObjectConst obj)
     this->_changed = false;
 }
 
+/**
+ * overridden save JSON element from the logging instance
+ * 
+ * @param json The ArduinoJson object that this element will be loaded from
+ */ 
 void LogInfoClass::save(JsonObject obj)
 {
     auto json = obj.createNestedObject(this->_sectionName);
     json["level"] = logTypeToString(this->_reportingLevel);
 }
 
+/**
+ * overridden create a JSON element that will show the current logging level
+ * 
+ * @param json The ArduinoJson object that this element will be added to.
+ */   
 void LogInfoClass::toJson(JsonObject ob)
 {
     auto json = ob.createNestedObject(this->getSectionName());
     json["level"] = logTypeToString(this->_reportingLevel);
 }
 
+/**
+ * Retrieve the current uniqueId that has been detected.
+ * 
+ *  @return the pointer to the string.
+ */ 
 const char* LogInfoClass::getUniqueId()
 {
     return this->_uniqueId;
 }
 
+/**
+ * Workout the short string name for the logType enum
+ * 
+ *  @param level The LogType enum level to work with
+ *  @return the pointer to the string.
+ */ 
 const char* LogInfoClass::logTypeToShortString(LogType level)
 {
     switch (level)
@@ -54,6 +84,12 @@ const char* LogInfoClass::logTypeToShortString(LogType level)
     return "UNK";
 }
 
+/**
+ * Workout the string for the logType enum
+ * 
+ *  @param level The LogType enum level to work with
+ *  @return the pointer to the string.
+ */ 
 const char* LogInfoClass::logTypeToString(LogType level)
 {
     switch (level)
@@ -76,6 +112,12 @@ const char* LogInfoClass::logTypeToString(LogType level)
     return "UNK";
 }
 
+/**
+ * Workout the logType enum value from the string specificed
+ * 
+ *  @param level The string level to work with
+ *  @return the LogType associated with the string
+ */ 
 LogType LogInfoClass::stringToLogType(const char* level)
 {
     if (strcasecmp(level, "OFF") == 0)
@@ -105,26 +147,56 @@ LogType LogInfoClass::stringToLogType(const char* level)
     return LOG_WARNING;
 }
 
-void LogInfoClass::setLogLevel(LogType logType)
+/**
+ * Set the current log report level.
+ * 
+ *  @param level The logType level to report on.
+ */ 
+void LogInfoClass::setLogLevel(LogType level)
 {
-    this->_reportingLevel = logType;
+    this->_reportingLevel = level;
 }
 
+/**
+ * Set the current log report level.
+ * 
+ *  @param level The logType level to report on.
+ */ 
 void LogInfoClass::setLogLevel(const char* logType)
 {
     this->_reportingLevel = LogInfoClass::stringToLogType(logType);
 }
 
+/**
+ * Set the current log report level.
+ * 
+ *  @return The current logType level being reported on
+ */ 
 const char* LogInfoClass::getLogLevel()
 {
     return LogInfoClass::logTypeToString(this->_reportingLevel);
 }
 
+/**
+ * Write the message to the log level.  The message is using the embedded flash support.
+ * 
+ *  @param level The logType level being assigned to.
+ *  @param ifsh The pointer to the Flash String Helper
+ *  @return The size of the string written.
+ */ 
 size_t LogInfoClass::log(LogType level, const __FlashStringHelper *ifsh)
 {
     return this->write(level, reinterpret_cast<const char *>(ifsh));
 }
 
+/**
+ * Write the message to the log level.  The message is using the embedded flash support.
+ * 
+ *  @param level The logType level being assigned to.
+ *  @param ifsh The pointer to the Flash String Helper
+ *  @param object The Arduino JSON object/element to write out
+ *  @return The size of the string written.
+ */ 
 size_t LogInfoClass::log(LogType level, const __FlashStringHelper *ifsh, JsonObject object)
 {
     if (level > this->_reportingLevel)
@@ -133,7 +205,7 @@ size_t LogInfoClass::log(LogType level, const __FlashStringHelper *ifsh, JsonObj
     }
     int len = 0;
     len += writePrefix(level);
-    int section = writeSectionHeader(reinterpret_cast<const char *>(ifsh));
+    int section = buildSectionHeader(reinterpret_cast<const char *>(ifsh));
     len += section;
     len += serializeJsonPretty(object, Serial);
     len += Serial.println();
@@ -145,6 +217,14 @@ size_t LogInfoClass::log(LogType level, const __FlashStringHelper *ifsh, JsonObj
     return 0;
 }
 
+/**
+ * Write the message to the log level.  The message is using the embedded flash support.
+ * 
+ *  @param level The logType level being assigned to.
+ *  @param ifsh The pointer to the Flash String Helper
+ *  @param object The Arduino JSON object/element to write out
+ *  @return The size of the string written.
+ */ 
 size_t LogInfoClass::log(LogType level, const __FlashStringHelper *ifsh, JsonObjectConst object)
 {
     if (level > this->_reportingLevel)
@@ -153,7 +233,7 @@ size_t LogInfoClass::log(LogType level, const __FlashStringHelper *ifsh, JsonObj
     }
     int len = 0;
     len += writePrefix(level);
-    int section = writeSectionHeader(reinterpret_cast<const char *>(ifsh));
+    int section = buildSectionHeader(reinterpret_cast<const char *>(ifsh));
     len += section;
     len += serializeJsonPretty(object, Serial);
     len += Serial.println();
@@ -165,6 +245,12 @@ size_t LogInfoClass::log(LogType level, const __FlashStringHelper *ifsh, JsonObj
     return 0;
 }
 
+/**
+ * Write the prefix header to the message
+ * 
+ *  @param level The logType level being assigned to.
+ *  @return The size of the string written.
+ */ 
 size_t LogInfoClass::writePrefix(LogType level)
 {
     int len = 0;
@@ -177,7 +263,13 @@ size_t LogInfoClass::writePrefix(LogType level)
     return len;
 }
 
-size_t LogInfoClass::writeSectionHeader(const char hdr[])
+/**
+ * build the message section header to the log level.
+ * 
+ *  @param hdr The character array to write
+ *  @return The size of the string written.
+ */ 
+size_t LogInfoClass::buildSectionHeader(const char hdr[])
 {
     int len = 0;
     len = Serial.println("");
@@ -187,6 +279,14 @@ size_t LogInfoClass::writeSectionHeader(const char hdr[])
     return len;
 }
 
+/**
+ * Write the message to the log level. 
+ * 
+ *  @param level The logType level being assigned to.
+ *  @param msg The character array to write
+ *  @param hdr The character array to write
+ *  @return The size of the string written.
+ */ 
 size_t LogInfoClass::write(LogType level, const char msg[], const char hdr[])
 {
     if (level > this->_reportingLevel)
@@ -200,7 +300,7 @@ size_t LogInfoClass::write(LogType level, const char msg[], const char hdr[])
     if (strstr(msg, "\r"))
     {
         multiline = true;
-        len += this->writeSectionHeader(hdr);
+        len += this->buildSectionHeader(hdr);
     }
     len += Serial.write((uint8_t*)msg, strlen(msg));
     len += Serial.println();
@@ -212,6 +312,14 @@ size_t LogInfoClass::write(LogType level, const char msg[], const char hdr[])
     return len;
 }
 
+/**
+ * Write the message to the log level.  The message is using the embedded flash support.
+ * 
+ *  @param level The logType level being assigned to.
+ *  @param format The format string that the extra parameters can be written to.
+ *  @param ... The Arduino JSON object/element to write out
+ *  @return The size of the string written.
+ */ 
 size_t LogInfoClass::log(LogType level, const char *format, ...)
 {
     if (level > this->_reportingLevel)

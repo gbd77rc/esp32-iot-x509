@@ -56,7 +56,7 @@ The `ConfigClass` does make uses of the `LogInfoClass`, so you may think there i
 
 #### Arduino JSON
 
-The configuration library depends heavily on the [ArduinoJSON](https://arduinojson.org/) v6 library for handling of the JSON file.  I would recommended at least reading their [common errors and problems](https://arduinojson.org/v6/error/) section.\
+The configuration library depends heavily on the [ArduinoJSON](https://arduinojson.org/) v6 library for handling of the JSON file.  I would recommended at least reading their [common errors and problems](https://arduinojson.org/v6/error/) section.
 
 ### Logging
 

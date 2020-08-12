@@ -16,7 +16,6 @@ ConfigClass::~ConfigClass()
  * @param filename Where the configuration is stored
  * @param defaultSize Set the default number of instances that can referenced
  * @param maxDocSize  Where is the maximum JSON size being read in
- * @return void
  */
 void ConfigClass::begin(const char *filename, uint8_t defaultSize, uint16_t maxDocSize)
 {
@@ -124,7 +123,6 @@ bool ConfigClass::shouldSave()
  * Register the instance that requires a configuration JSON element
  * 
  * @param config A pointer to the instance
- * @return void
  */
 void ConfigClass::add(BaseConfigInfoClass *config)
 {
