@@ -2,6 +2,20 @@
 
 I will not be going thought the firmware line by line as that will be boring.  I will leave it up to you to decide you wish to do that.  Instead I will go through the why of each library and what to look out for.  By the time these blogs are published I will have commented each library and give some examples where I think the code is not clear enough.
 
+## Platform IO - Non-standard
+
+If you open up the `platformio.ini` file in the root of the github repo you will notice this sections
+
+    [platformio]
+    data_dir = firmware/data
+    src_dir = firmware/src
+    include_dir = firmware/include
+    lib_dir = firmware/lib
+
+Normally, this would not be included.  As I will be including multiple different sources in this repo, generally just to keep them all self contained, I have add it in.  
+
+For general development practices, which app, program, website, documentation would have its own repo to build from.  This will be covered in the [CI/CD Pipelines](./CICDPipeLines.md) blog.
+
 ## Multiple Threads/Tasks
 
 The ESP32 device have 2 cores, this allows for multiple processes/task to be performed at once.  The timing is will be issue here with the possible race conditions that could follow, like reading of pins that share the same hardware interrupts. With that being said some of tasks will take Mutex before beginning checking the sensor and then hand back the Mutex when finished.  
