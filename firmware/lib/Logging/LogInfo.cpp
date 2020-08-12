@@ -23,7 +23,7 @@ void LogInfoClass::save(JsonObject obj)
 
 void LogInfoClass::toJson(JsonObject ob)
 {
-    auto json = ob.createNestedObject(this->sectionName());
+    auto json = ob.createNestedObject(this->getSectionName());
     json["level"] = logTypeToString(this->_reportingLevel);
 }
 

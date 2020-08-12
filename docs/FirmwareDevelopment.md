@@ -14,7 +14,7 @@ If you open up the `platformio.ini` file in the root of the github repo you will
 
 Normally, this would not be included.  As I will be including multiple different sources in this repo, generally just to keep them all self contained, I have add it in.  
 
-For general development practices, which app, program, website, documentation would have its own repo to build from.  This will be covered in the [CI/CD Pipelines](./CICDPipeLines.md) blog.
+For general development practices, each app, program, website, documentation would have its own repo to build from.  This will be covered in the [CI/CD Pipelines](./CICDPipeLines.md) blog.
 
 ## Multiple Threads/Tasks
 
@@ -49,4 +49,14 @@ This board has some nice features, like inbuilt WiFi controller, 8MB of flash st
 All sensors, logging and sleep/wake are controlled via a configuration.  So to make this easier to manipulate we will create a base class that this libraries can inherit from.  Therefore the first library to be created is the configuration manipulation one.
 
 ### Configuration
+
+This library will have two classes defined in it. The `BaseConfigInfoClass` is really just an interface that each class the needs to handle configuration must inherit from.  The `ConfigClass` handles the actual loading/saving of the configuration file and the logic around when to save.  We don't want to save always, as their is limit on the number times the flash memory can be written to.
+
+The `ConfigClass` does make uses of the `LogInfoClass`, so you may think there is race/deadlock condition here, as logging requires configuration.  It does not, as it just sets the level that the log messages are sent to the serial port and nothing else.
+
+#### Arduino JSON
+
+The configuration library depends heavily on the [ArduinoJSON](https://arduinojson.org/) v6 library for handling of the JSON file.  I would recommended at least reading their [common errors and problems](https://arduinojson.org/v6/error/) section.\
+
+### Logging
 

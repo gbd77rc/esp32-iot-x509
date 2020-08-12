@@ -43,7 +43,7 @@ void LiDARInfoClass::load(JsonObjectConst obj)
 
 void LiDARInfoClass::save(JsonObject obj)
 {
-    auto json = obj.createNestedObject(this->_sectionName);
+    auto json = obj.createNestedObject(this->getSectionName());
     //json["level"] = (int)this->_reportingLevel;
     json["enabled"] = this->_isEnabled;
     json["baud"] = this->_baud;

@@ -2,11 +2,22 @@
 #include "Utilities.h"
 #include "LogInfo.h"
 
+/**
+ * During destruction may sure the internal array is deleted.
+ */
 ConfigClass::~ConfigClass()
 {
     delete[] this->_configs;
 }
 
+/**
+ * Begin the initialization of the configuration handler
+ * 
+ * @param filename Where the configuration is stored
+ * @param defaultSize Set the default number of instances that can referenced
+ * @param maxDocSize  Where is the maximum JSON size being read in
+ * @return void
+ */
 void ConfigClass::begin(const char *filename, uint8_t defaultSize, uint16_t maxDocSize)
 {
     this->_fileName = filename;
@@ -14,6 +25,11 @@ void ConfigClass::begin(const char *filename, uint8_t defaultSize, uint16_t maxD
     this->_maxDocSize = maxDocSize;
 }
 
+/**
+ * Load the configuration file and give each registered instance the correct JSON element.
+ * 
+ * @return True if successful or not
+ */
 bool ConfigClass::load()
 {
     LogInfo.log(LOG_VERBOSE, "Loading configuration (%s)", this->_fileName);
@@ -54,6 +70,11 @@ bool ConfigClass::load()
     return false;
 }
 
+/**
+ * Save the configuration from each registered instance to the configuration file
+ * 
+ * @return True if successful or not
+ */
 bool ConfigClass::save()
 {
     DynamicJsonDocument doc(this->_maxDocSize + 100);
@@ -82,6 +103,11 @@ bool ConfigClass::save()
     return false;
 }
 
+/**
+ * Check if any registered instance needs it configuration saved or not.  If any do then all are saved.
+ * 
+ * @return True if saving is required.
+ */
 bool ConfigClass::shouldSave()
 {
     for (uint8_t i = 0; i < this->_total; i++)
@@ -94,6 +120,12 @@ bool ConfigClass::shouldSave()
     return false;
 }
 
+/**
+ * Register the instance that requires a configuration JSON element
+ * 
+ * @param config A pointer to the instance
+ * @return void
+ */
 void ConfigClass::add(BaseConfigInfoClass *config)
 {
     this->_configs[this->_total++] = config;

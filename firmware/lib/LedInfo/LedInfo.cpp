@@ -21,7 +21,7 @@ void LedInfoClass::load(JsonObjectConst obj)
 
 void LedInfoClass::save(JsonObject obj)
 {
-    auto json = obj.createNestedObject(this->_sectionName);
+    auto json = obj.createNestedObject(this->getSectionName());
     //json["level"] = (int)this->_reportingLevel;
     json["enabled"] = this->_isEnabled;
     json["power"] = this->_pins[LedType::LED_POWER];

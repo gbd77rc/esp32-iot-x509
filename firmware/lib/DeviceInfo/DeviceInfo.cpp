@@ -37,7 +37,7 @@ void DeviceInfoClass::save(JsonObject obj)
 
 void DeviceInfoClass::toJson(JsonObject ob)
 {
-    auto json = ob.createNestedObject(this->sectionName());
+    auto json = ob.createNestedObject(this->getSectionName());
     json["device_id"] = this->deviceId();
     json["location"] = this->_location;
 }

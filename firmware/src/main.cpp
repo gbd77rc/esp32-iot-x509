@@ -33,13 +33,13 @@ void setup()
         OledDisplay.displayExit(F("An Error has occurred while mounting SPIFFS"));
     }    
 
-    // Configuration.begin("/config.json");
-    // Configuration.add(&LogInfo);
+    Configuration.begin("/config.json");
+    Configuration.add(&LogInfo);
     // Configuration.add(&LedInfo);
     // Configuration.add(&DeviceInfo);
     // Configuration.add(&LiDARInfo);
     // Configuration.add(&GpsInfo);
-    // Configuration.load();
+    Configuration.load();
     // LedInfo.switchOn(LED_POWER);
     // OledDisplay.displayLine(0,10,F("Dev : Blink Lights"));
     // OledDisplay.displayLine(0,20,"ID  : %s", DeviceInfo.deviceId());
