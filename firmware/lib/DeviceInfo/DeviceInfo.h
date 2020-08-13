@@ -10,13 +10,16 @@ class DeviceInfoClass : public BaseConfigInfoClass
 {
 public:
     DeviceInfoClass() : BaseConfigInfoClass("device") {}
-    void begin();
+    /**
+     * Begin the initialization, not really required for this instance.  Just following the pattern.
+     */
+    void begin(){};
     void load(JsonObjectConst obj) override;
     void save(JsonObject ob) override;
     void toJson(JsonObject ob) override;
-    const char *deviceId();
+    const char *getDeviceId();
     bool setLocation(const char *newLocation);
-    const char *location();
+    const char *getLocation();
 
 private:
     char _prefix[20];

@@ -84,4 +84,11 @@ To disable LED's set the brightness level to 0;
 
 This library relies on the [ESP32 analogWrite](https://github.com/ERROPiX/ESP32_AnalogWrite) library and the native framework for ESP32 does not support support Arduino analogWrite function.
 
+> Interesting this library uses [Task Notification](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/freertos.html#_CPPv411xTaskNotify12TaskHandle_t8uint32_t13eNotifyAction) message to control blinking on or off.  
+
 The single instance name is `LedInfo`.
+
+### Device Information
+
+This library is a catch all one, in that it contains the actual full ID, location and wake up details at least.  During the development if other options that are specific to the device they may appear here.
+

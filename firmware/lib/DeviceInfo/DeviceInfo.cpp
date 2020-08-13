@@ -1,11 +1,11 @@
 #include "DeviceInfo.h"
 #include "LogInfo.h"
 
-void DeviceInfoClass::begin()
-{
-
-}
-
+/**
+ * overridden load JSON element into the device instance
+ * 
+ * @param json The ArduinoJson object that this element will be loaded from
+ */
 void DeviceInfoClass::load(JsonObjectConst obj)
 {
     strcpy(this->_prefix, obj.containsKey("prefix") ?obj["prefix"].as<const char*>() : "DEVTMP");
@@ -18,15 +18,15 @@ void DeviceInfoClass::load(JsonObjectConst obj)
     // {
     //     WakeUp.setTimerWakeUp(wakeup);
     // }
-    LogInfo.log(LOG_INFO, "Device Id           : %s", this->deviceId());
-    LogInfo.log(LOG_INFO, "Location            : %s", this->location());
+    LogInfo.log(LOG_INFO, "Device Id           : %s", this->getDeviceId());
+    LogInfo.log(LOG_INFO, "Location            : %s", this->getLocation());
 }
 
-const char* DeviceInfoClass::deviceId()
-{
-    return this->_device_id;
-}
-
+/**
+ * overridden save JSON element from the device instance
+ * 
+ * @param json The ArduinoJson object that this element will be loaded from
+ */
 void DeviceInfoClass::save(JsonObject obj)
 {
     auto json = obj.createNestedObject(this->_sectionName);
@@ -35,18 +35,38 @@ void DeviceInfoClass::save(JsonObject obj)
     json["location"] = this->_location;
 }
 
+/**
+ * overridden create a JSON element that will show the current device related instance data
+ * 
+ * @param json The ArduinoJson object that this element will be added to.
+ */
 void DeviceInfoClass::toJson(JsonObject ob)
 {
     auto json = ob.createNestedObject(this->getSectionName());
-    json["device_id"] = this->deviceId();
-    json["location"] = this->_location;
+    json["device_id"] = this->getDeviceId();
+    json["location"] = this->getLocation();
 }
 
+/**
+ * overridden save JSON element from the led instance
+ * 
+ * @param json The ArduinoJson object that this element will be loaded from
+ */
+const char* DeviceInfoClass::getDeviceId()
+{
+    return this->_device_id;
+}
+
+/**
+ * set the current location
+ * 
+ * @param newLocation The new location name
+ * @return True if it has changed
+ */
 bool DeviceInfoClass::setLocation(const char* newLocation)
 {
     if (strcmp(this->_location, newLocation) != 0)
     {
-        LogInfo.log(LOG_VERBOSE, "Location has changed! (%s)", newLocation);
         strcpy(this->_location, newLocation);
         this->_changed = true;
         return true;
@@ -54,7 +74,12 @@ bool DeviceInfoClass::setLocation(const char* newLocation)
     return false;
 }
 
-const char* DeviceInfoClass::location()
+/**
+ * Get the current location
+ * 
+ * @return Pointer to the location name string
+ */
+const char* DeviceInfoClass::getLocation()
 {
     return this->_location;
 }
