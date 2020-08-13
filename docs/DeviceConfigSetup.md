@@ -9,7 +9,7 @@ The following information describes the configuration file layout and the sensor
             "level": "ALL"
         },
         "ledInfo": {
-            "enabled": true,
+            "brightness": 100,
             "sensors": 25,
             "cloud": 26,
             "power": 27
@@ -76,17 +76,17 @@ Using the level will determine which message types are echoed.  Example if the l
 ## LED Information Section
 
     "ledInfo": {
-        "enabled": true,
-        "sensors": 25,
+        "brightness": 100,
+        "wifi": 25,
         "cloud": 26,
         "power": 27
     }
 
-The LED's will show the user what the device is doing or is active.
+The LED's will show the user what the device is doing or is active.  The `brightness` is a percentage value.  0 is off and 100 is fully bright.
 
 The configuration is for the pin numbers that control which LED's is for which function.  
 
-The `enabled` flag can set via the cloud Shadow/Device Twin setting.  It will automatically switch LED's on or off when set.  The pin values, once set should never need changing.
+The `brightness` flag can set via the cloud Shadow/Device Twin setting.  It will automatically dim the LED's when set.  The pin values, once set should never need changing.
 
 ## GPS Information Section
 

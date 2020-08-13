@@ -118,7 +118,6 @@ bool LiDARInfoClass::read()
     this->_isValid = false;
     if (this->_isEnabled)
     {
-        LedInfo.switchOn(LED_LIDAR);
         this->_isValid = this->_lidar.read_data(this->_data, true);
         if (this->_isValid)
         {
@@ -131,7 +130,6 @@ bool LiDARInfoClass::read()
                     this->_data.strength,                     this->_data.temperature);
             }
         }
-        LedInfo.switchOff(LED_LIDAR);
     }
     return this->_isValid;
 }

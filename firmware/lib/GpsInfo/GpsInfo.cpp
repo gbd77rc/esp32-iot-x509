@@ -155,7 +155,6 @@ bool GpsInfoClass::read()
 {
     if (this->_isEnabled)
     {
-        LedInfo.switchOn(LED_GPS);
         int count = 0;
         uint64_t now = millis();
         this->_isValid = false;
@@ -214,7 +213,6 @@ bool GpsInfoClass::read()
             }
             vTaskDelay(50);
         }
-        LedInfo.switchOff(LED_GPS);
     }
     return this->_isValid;
 }

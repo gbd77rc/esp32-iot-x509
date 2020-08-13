@@ -56,7 +56,32 @@ The `ConfigClass` does make uses of the `LogInfoClass`, so you may think there i
 
 #### Arduino JSON
 
-The configuration library depends heavily on the [ArduinoJSON](https://arduinojson.org/) v6 library for handling of the JSON file.  I would recommended at least reading their [common errors and problems](https://arduinojson.org/v6/error/) section.
+The configuration library depends heavily on the [ArduinoJSON](https://arduinojson.org/) v6 library for handling of the JSON file.  I would recommended at least reading their [common errors and problems](https://arduinojson.org/v6/error/) section.  The single instance name is `Configuration`.
 
 ### Logging
 
+The logging library uses the configuration to determine which level it will report on.  The single instance name is `LogInfo`.  Why LogInfo, basically because this is another 3rd party library that uses `Logging` as their instance name, so to avoid conflicts I renamed mine.
+
+### LED Control
+
+There are 3 LED's to control.  These will give out state to the local environment, if someone is watching that it.  The following states are.
+
+|Colour|State|Meaning
+|---|---|---
+|Power|Blinking|Initialising System
+|Power|Steady|Working Normally
+|Power|Off|Deep Sleep Mode
+|WiFi|Blinking|Try to connect to WiFi
+|WiFi|Steady|Connect to WiFi and have access to internet
+|WiFi|Off|If Power On then WiFi off means no internet detected or can't connect to router
+|Cloud|Blinking|Send/Receive Data
+|Cloud|Steady|Connected to the cloud provider successfully
+|Cloud|Off|If Power On and WiFi On then issue with cloud provider communication
+
+The blinking state will be handle by a separate task. This task will check a state flag, and if set will automatically set the LED on/off depending on the state flag and then delete itself.
+
+To disable LED's set the brightness level to 0;
+
+This library relies on the [ESP32 analogWrite](https://github.com/ERROPiX/ESP32_AnalogWrite) library and the native framework for ESP32 does not support support Arduino analogWrite function.
+
+The single instance name is `LedInfo`.

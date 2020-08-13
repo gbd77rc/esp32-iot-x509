@@ -4,8 +4,8 @@
     },
     "ledInfo": {
         "enabled": true,
-        "gps": 25,
-        "lidar": 26,
+        "cloud": 25,
+        "wifi": 26,
         "power": 27
     },
     "gpsInfo": {

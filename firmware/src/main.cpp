@@ -13,6 +13,8 @@
 
 SemaphoreHandle_t xSemaphore;
 
+long blinkUntil = 10000;
+
 void setup()
 {
     Serial.begin(115200);
@@ -21,11 +23,11 @@ void setup()
     GpsInfoClass::semaphoreFlag = xSemaphore;
 
     LogInfo.begin();
-    OledDisplay.begin();
-    DeviceInfo.begin();
-    WiFiInfo.begin();
-    LiDARInfo.begin();
-    GpsInfo.begin();
+    //OledDisplay.begin();
+    //DeviceInfo.begin();
+    // WiFiInfo.begin();
+    // LiDARInfo.begin();
+    // GpsInfo.begin();
     LedInfo.begin();
 
     if (!SPIFFS.begin(true))
@@ -35,12 +37,14 @@ void setup()
 
     Configuration.begin("/config.json");
     Configuration.add(&LogInfo);
-    // Configuration.add(&LedInfo);
+    Configuration.add(&LedInfo);
     // Configuration.add(&DeviceInfo);
     // Configuration.add(&LiDARInfo);
     // Configuration.add(&GpsInfo);
     Configuration.load();
-    // LedInfo.switchOn(LED_POWER);
+    LedInfo.switchOn(LED_POWER);
+    LedInfo.blinkOn(LED_CLOUD);
+    LedInfo.blinkOn(LED_WIFI);
     // OledDisplay.displayLine(0,10,F("Dev : Blink Lights"));
     // OledDisplay.displayLine(0,20,"ID  : %s", DeviceInfo.deviceId());
     // OledDisplay.displayLine(0,30,"Loc : %s", DeviceInfo.location());
@@ -68,5 +72,18 @@ void loop()
     // OledDisplay.displayLine(36,40,"%icm", LiDARInfo.getDistance());
     // OledDisplay.displayLine(64,50,"%09.5f", GpsInfo.getLat());
     // OledDisplay.displayLine(64,60,"%09.5f", GpsInfo.getLong());
-    delay(500);
+    if (millis() > blinkUntil)
+    {
+        LedInfo.setBrightness(10);
+        LedInfo.blinkOff(LED_CLOUD);
+    }
+    if (millis() > blinkUntil*2)
+    {
+        LedInfo.blinkOff(LED_WIFI);
+    }    
+    delay(5000);
+    DynamicJsonDocument payload(800);
+    auto root = payload.to<JsonObject>();
+    LedInfo.toJson(root);
+    LogInfo.log(LOG_VERBOSE, F("LED State"), root);
 }
