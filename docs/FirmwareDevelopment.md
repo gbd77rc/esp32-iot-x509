@@ -92,3 +92,6 @@ The single instance name is `LedInfo`.
 
 This library is a catch all one, in that it contains the actual full ID, location and wake up details at least.  During the development if other options that are specific to the device they may appear here.
 
+### Environment Sensor
+
+This library will handle environment 
