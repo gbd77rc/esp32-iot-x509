@@ -77,7 +77,7 @@ void WiFiInfoClass::wpsInitConfig() {
     strcpy_P(config.factory_info.manufacturer, PSTR("LUXOFT"));
     strcpy_P(config.factory_info.model_number, PSTR("OT-1000-ESP32"));
     strcpy_P(config.factory_info.model_name, PSTR("OT-1000-IOT"));
-    strcpy(config.factory_info.device_name, DeviceInfo.deviceId());
+    strcpy(config.factory_info.device_name, DeviceInfo.getDeviceId());
 }
 
 void WiFiInfoClass::WiFiEvent(WiFiEvent_t event, system_event_info_t info) {

@@ -313,11 +313,11 @@ size_t LogInfoClass::write(LogType level, const char msg[], const char hdr[])
 }
 
 /**
- * Write the message to the log level.  The message is using the embedded flash support.
+ * Write the message to the log level.  The message has formatting information
  * 
  *  @param level The logType level being assigned to.
  *  @param format The format string that the extra parameters can be written to.
- *  @param ... The Arduino JSON object/element to write out
+ *  @param ... parameters to be added on the message
  *  @return The size of the string written.
  */ 
 size_t LogInfoClass::log(LogType level, const char *format, ...)

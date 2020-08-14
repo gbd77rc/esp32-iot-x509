@@ -23,7 +23,7 @@ void setup()
     GpsInfoClass::semaphoreFlag = xSemaphore;
 
     LogInfo.begin();
-    //OledDisplay.begin();
+    OledDisplay.begin();
     //DeviceInfo.begin();
     // WiFiInfo.begin();
     // LiDARInfo.begin();
@@ -45,6 +45,12 @@ void setup()
     LedInfo.switchOn(LED_POWER);
     LedInfo.blinkOn(LED_CLOUD);
     LedInfo.blinkOn(LED_WIFI);
+    OledDisplay.displayLine(0,10,F("123456789012345678901234567890"));
+    OledDisplay.displayLine(0,20,F("123456789012345678901234567890"));
+    OledDisplay.displayLine(0,30,F("123456789012345678901234567890"));
+    OledDisplay.displayLine(0,40,F("123456789012345678901234567890"));
+    OledDisplay.displayLine(0,50,F("123456789012345678901234567890"));
+    OledDisplay.displayLine(0,60,F("123456789012345678901234567890"));
     // OledDisplay.displayLine(0,10,F("Dev : Blink Lights"));
     // OledDisplay.displayLine(0,20,"ID  : %s", DeviceInfo.deviceId());
     // OledDisplay.displayLine(0,30,"Loc : %s", DeviceInfo.location());

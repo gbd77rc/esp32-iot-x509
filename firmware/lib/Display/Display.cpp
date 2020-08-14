@@ -3,6 +3,9 @@
 
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, 16, 15, 4);
 
+/**
+ * Begin the initialization of the OLED Screen
+ */
 void DisplayClass::begin()
 {
     u8g2.begin();
@@ -13,11 +16,19 @@ void DisplayClass::begin()
     u8g2.clearBuffer();
 }
 
+/**
+ * Clear the internal buffer
+ */
 void DisplayClass::clear()
 {
     u8g2.clearBuffer();
 }
 
+/**
+ * Display an Error Message and reset ESP32
+ * 
+ * @param ifsh Flash Helper String
+ */
 void DisplayClass::displayExit(const __FlashStringHelper *ifsh)
 {
     u8g2.clearDisplay();
@@ -41,11 +52,26 @@ void DisplayClass::displayExit(const __FlashStringHelper *ifsh)
     ESP.restart();
 }
 
+/**
+ * Display Flash String at x,y
+ * 
+ * @param x vertical position in pixels
+ * @param y horizontal position in pixels
+ * @param ifsh  flash string to be displayed
+ */
 void DisplayClass::displayLine(u8g2_uint_t x, u8g2_uint_t y, const __FlashStringHelper *ifsh)
 {
     this->writeLine(x, y, reinterpret_cast<const char *>(ifsh));
 }
 
+/**
+ * Display string at x,y
+ * 
+ * @param x vertical position in pixels
+ * @param y horizontal position in pixels
+ * @param format The format string that the extra parameters can be written to.
+ * @param ... parameters to be added on the message 
+ */
 void DisplayClass::displayLine(u8g2_uint_t x, u8g2_uint_t y, const char *format, ...)
 {
     char * temp = this->_chBuffer;
@@ -77,6 +103,13 @@ void DisplayClass::displayLine(u8g2_uint_t x, u8g2_uint_t y, const char *format,
     }
 }
 
+/**
+ * Write the actual msg to screen
+ * 
+ * @param x vertical position in pixels
+ * @param y horizontal position in pixels
+ * @param msg The string that is written
+ */
 void DisplayClass::writeLine(u8g2_uint_t x, u8g2_uint_t y, const char *msg)
 {
     u8g2.setDrawColor(0);

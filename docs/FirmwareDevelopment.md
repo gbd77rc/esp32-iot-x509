@@ -92,6 +92,10 @@ The single instance name is `LedInfo`.
 
 This library is a catch all one, in that it contains the actual full ID, location and wake up details at least.  During the development if other options that are specific to the device they may appear here.
 
+### Display Information Control
+
+This library will control and printout information to the embedded OLED display.  It is a wrapper for the [U8g2](https://github.com/olikraus/U8g2_Arduino) library which knows how to communicate with the display.
+
 ### Environment Sensor
 
-This library will handle environment 
+This library will handle environment sensor reading.  
