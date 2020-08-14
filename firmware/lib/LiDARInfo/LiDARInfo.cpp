@@ -3,28 +3,31 @@
 #include "NTPInfo.h"
 #include "LedInfo.h"
 
-const static long interval = 2000;
-TaskHandle_t LiDARInfoClass::readTaskHandle;
-bool LiDARInfoClass::taskCreated;
-long LiDARInfoClass::lastCheck;
-SemaphoreHandle_t LiDARInfoClass::semaphoreFlag;
+// const static long interval = 2000;
+// TaskHandle_t LiDARInfoClass::readTaskHandle;
+// bool LiDARInfoClass::taskCreated;
+// long LiDARInfoClass::lastCheck;
+// SemaphoreHandle_t LiDARInfoClass::semaphoreFlag;
 
-void LiDARInfoClass::readTask(void *parameters)
-{
-    for (;;)
-    {
-        vTaskSuspend(LiDARInfoClass::readTaskHandle);
-        if (xSemaphoreTake(LiDARInfoClass::semaphoreFlag, portMAX_DELAY))
-        {
-            LogInfo.log(LOG_VERBOSE, "Resuming Read LiDAR Task...");
-            LogInfo.log(LOG_VERBOSE, "LiDAR Valid Data: %s", LiDARInfo.read() ? "Yes" : "No");
-            xSemaphoreGive(LiDARInfoClass::semaphoreFlag);
-        }
-    }
-}
+// void LiDARInfoClass::readTask(void *parameters)
+// {
+//     for (;;)
+//     {
+//         vTaskSuspend(LiDARInfoClass::readTaskHandle);
+//         if (xSemaphoreTake(LiDARInfoClass::semaphoreFlag, portMAX_DELAY))
+//         {
+//             LogInfo.log(LOG_VERBOSE, "Resuming Read LiDAR Task...");
+//             LogInfo.log(LOG_VERBOSE, "LiDAR Valid Data: %s", LiDARInfo.read() ? "Yes" : "No");
+//             xSemaphoreGive(LiDARInfoClass::semaphoreFlag);
+//         }
+//     }
+// }
 
-void LiDARInfoClass::begin()
+void LiDARInfoClass::begin(SemaphoreHandle_t flag)
 {
+    this->sensorState.semaphoreFlag = flag;
+    strcpy(this->sensorState.sensorName, "LiDARInfo");
+    this->sensorState.sensor = this;    
     // Check if we are waking up or we have started because of manual reset or power on
     this->_isEnabled = false;
 }
@@ -60,54 +63,68 @@ void LiDARInfoClass::toJson(JsonObject ob)
     json["timestamp"] = this->_last_read;
 }
 
-bool LiDARInfoClass::isConnected()
+bool LiDARInfoClass::taskToRun() 
+{
+    LogInfo.log(LOG_VERBOSE, F("Reading LiDAR"));
+    return true;
+}
+
+const bool LiDARInfoClass::getIsConnected()
 {
     return this->_isConnected;
 }
 
-bool LiDARInfoClass::connect()
+const bool LiDARInfoClass::connect()
 {
-    if (this->_isEnabled)
-    {
-        // SoftwareSerialConfig config = SWSERIAL_8N1;
-        // this->_gpsSerial.begin(this->_baud, config, this->_rxPin, this->_txPin);
-        LogInfo.log(LOG_VERBOSE, F("Initialising LiDAR..."));
-        this->_lidarSerial.begin(this->_baud,
-            SERIAL_8N1,
-            this->_rxPin,
-            this->_txPin);
-        this->_lidar.begin(&this->_lidarSerial);
+    // if (this->_isEnabled)
+    // {
+    //     // SoftwareSerialConfig config = SWSERIAL_8N1;
+    //     // this->_gpsSerial.begin(this->_baud, config, this->_rxPin, this->_txPin);
+    //     LogInfo.log(LOG_VERBOSE, F("Initialising LiDAR..."));
+    //     this->_lidarSerial.begin(this->_baud,
+    //         SERIAL_8N1,
+    //         this->_rxPin,
+    //         this->_txPin);
+    //     this->_lidar.begin(&this->_lidarSerial);
 
-        // Set lidar options (saving is important)
-        this->_lidar.set_framerate(TFMINI_PLUS_FRAMERATE_10HZ);
-        this->_lidar.set_output_format(TFMINI_PLUS_OUTPUT_CM);
-        this->_lidar.set_communication_interface(TFMINI_PLUS_UART);
-        this->_lidar.enable_output(true);
-        this->_lidar.save_settings();
-    }
-    if (LiDARInfoClass::taskCreated == false)
-    {
-        LogInfo.log(LOG_VERBOSE, F("Creating LiDAR Reading Task on Core 0"));
-        xTaskCreatePinnedToCore(LiDARInfoClass::readTask, "ReadLiDARTask",
-            10000, NULL, 1,
-            &LiDARInfoClass::readTaskHandle,
-            0);
-        LiDARInfoClass::taskCreated = true;
-        this->_isConnected = true;
-    }
-    LogInfo.log(LOG_INFO, "LiDAR is running  : %s", this->_isConnected ? "Yes" : "No");
+    //     // Set lidar options (saving is important)
+    //     this->_lidar.set_framerate(TFMINI_PLUS_FRAMERATE_10HZ);
+    //     this->_lidar.set_output_format(TFMINI_PLUS_OUTPUT_CM);
+    //     this->_lidar.set_communication_interface(TFMINI_PLUS_UART);
+    //     this->_lidar.enable_output(true);
+    //     this->_lidar.save_settings();
+    // }
+    // if (LiDARInfoClass::taskCreated == false)
+    // {
+    //     LogInfo.log(LOG_VERBOSE, F("Creating LiDAR Reading Task on Core 0"));
+    //     xTaskCreatePinnedToCore(LiDARInfoClass::readTask, "ReadLiDARTask",
+    //         10000, NULL, 1,
+    //         &LiDARInfoClass::readTaskHandle,
+    //         0);
+    //     LiDARInfoClass::taskCreated = true;
+    //     this->_isConnected = true;
+    // }
+    // LogInfo.log(LOG_INFO, "LiDAR is running  : %s", this->_isConnected ? "Yes" : "No");
+    LogInfo.log(LOG_VERBOSE, "Creating %s Task on Core 0", this->sensorState.sensorName);
+    xTaskCreatePinnedToCore(LiDARInfoClass::task, "ReadLiDARTask",
+        10000, 
+        (void *)&this->sensorState, 
+        1,
+        &this->sensorState.taskHandle,
+        0);    
+    this->_isConnected = true;
     return this->_isConnected;
 }
 
-uint16_t LiDARInfoClass::resumeTask()
-{
-    if (LiDARInfo.isConnected() && (millis() - LiDARInfoClass::lastCheck) > interval)
-    {
-        LiDARInfoClass::lastCheck = millis();
-        vTaskResume(LiDARInfoClass::readTaskHandle);
-    }
-    return 10000;
-}
+// uint16_t LiDARInfoClass::resumeTask()
+// {
+//     if (LiDARInfo.isConnected() && (millis() - LiDARInfoClass::lastCheck) > interval)
+//     {
+//         LiDARInfoClass::lastCheck = millis();
+//         vTaskResume(LiDARInfoClass::readTaskHandle);
+//     }
+//     return 10000;
+// }
 
 bool LiDARInfoClass::read()
 {

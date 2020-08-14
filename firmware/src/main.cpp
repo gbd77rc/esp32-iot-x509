@@ -10,6 +10,7 @@
 #include "LiDARInfo.h"
 #include "GpsInfo.h"
 #include "LedInfo.h"
+#include "EnvSensor.h"
 
 SemaphoreHandle_t xSemaphore;
 
@@ -19,14 +20,13 @@ void setup()
 {
     Serial.begin(115200);
     xSemaphore = xSemaphoreCreateMutex();
-    LiDARInfoClass::semaphoreFlag = xSemaphore;
-    GpsInfoClass::semaphoreFlag = xSemaphore;
 
     LogInfo.begin();
     OledDisplay.begin();
     //DeviceInfo.begin();
     // WiFiInfo.begin();
-    // LiDARInfo.begin();
+    EnvSensor.begin(xSemaphore);
+    LiDARInfo.begin(xSemaphore);
     // GpsInfo.begin();
     LedInfo.begin();
 
@@ -39,9 +39,14 @@ void setup()
     Configuration.add(&LogInfo);
     Configuration.add(&LedInfo);
     // Configuration.add(&DeviceInfo);
-    // Configuration.add(&LiDARInfo);
+    Configuration.add(&EnvSensor);
+    Configuration.add(&LiDARInfo);
     // Configuration.add(&GpsInfo);
     Configuration.load();
+
+    LogInfo.log(LOG_VERBOSE,"Connecting to sensors");
+    EnvSensor.connect();
+    LiDARInfo.connect();
     LedInfo.switchOn(LED_POWER);
     LedInfo.blinkOn(LED_CLOUD);
     LedInfo.blinkOn(LED_WIFI);
@@ -92,4 +97,7 @@ void loop()
     auto root = payload.to<JsonObject>();
     LedInfo.toJson(root);
     LogInfo.log(LOG_VERBOSE, F("LED State"), root);
+
+    EnvSensor.tick();
+    LiDARInfo.tick();
 }

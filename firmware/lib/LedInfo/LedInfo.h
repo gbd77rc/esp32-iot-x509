@@ -28,7 +28,6 @@ public:
     LedInfoClass() : BaseConfigInfoClass("ledInfo") {}
 
     static void blinkTask(void *parameters);
-    static SemaphoreHandle_t semaphoreFlag;
     static TaskHandle_t blinkTaskHandles[];    
 
     void begin(){};

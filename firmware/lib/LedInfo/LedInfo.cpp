@@ -2,7 +2,6 @@
 #include "LedInfo.h"
 #include "LogInfo.h"
 
-SemaphoreHandle_t LedInfoClass::semaphoreFlag;
 TaskHandle_t LedInfoClass::blinkTaskHandles[LED_COUNT];
 
 /**

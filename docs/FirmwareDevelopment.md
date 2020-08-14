@@ -98,4 +98,5 @@ This library will control and printout information to the embedded OLED display.
 
 ### Environment Sensor
 
-This library will handle environment sensor reading.  
+This library will handle environment sensor reading.  It will wrap the [SimpleDHT](https://github.com/winlinvip/SimpleDHT?utm_source=platformio&utm_medium=piohome) library.  It will make sure the reading of the sensor is done core 0.
+

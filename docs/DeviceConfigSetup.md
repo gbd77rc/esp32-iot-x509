@@ -14,20 +14,20 @@ The following information describes the configuration file layout and the sensor
             "cloud": 26,
             "power": 27
         },
-        "gpsInfo": {
+        "gpsSensor": {
             "enabled": true,
             "tx": 23,
             "rx": 22,
             "baud": 9600,
             "sim808": false
         },
-        "lidarInfo": {
+        "lidarSensor": {
             "enabled": true,
             "tx": 4,
             "rx": 17,
             "baud": 115200
         },
-        "tempInfo": {
+        "envSensor": {
             "enabled": true,
             "data": 14,
             "scale": 1
@@ -127,7 +127,7 @@ The `enabled` flag can set via the cloud Shadow/Device Twin setting.  It will au
 
 ## Temperature/Humidity Information Section
 
-    "tempInfo": {
+    "envSensor": {
         "enabled": true,
         "data": 32,
         "scale": 1

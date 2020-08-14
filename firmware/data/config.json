@@ -8,18 +8,23 @@
         "wifi": 26,
         "power": 27
     },
-    "gpsInfo": {
+    "gpsSensor": {
         "enabled": true,
         "tx": 23,
         "rx": 22,
         "baud": 9600,
         "sim808": false
     },
-    "lidarInfo": {
+    "lidarSensor": {
         "enabled": true,
         "tx": 4,
         "rx": 17,
         "baud": 115200
+    },    
+    "envSensor": {
+        "enabled": true,
+        "data": 14,
+        "scale": 1
     },    
     "device": {
         "prefix": "OT",

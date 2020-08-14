@@ -5,27 +5,31 @@
 #include <ArduinoJson.h>
 #include <HardwareSerial.h>
 #include <TFmini_plus.h>
+#include "BaseSensor.h"
 #include "Config.h"
 
-class LiDARInfoClass : public BaseConfigInfoClass
+class LiDARInfoClass : public BaseConfigInfoClass, public BaseSensorClass
 {
 public:
     LiDARInfoClass() : BaseConfigInfoClass("lidarInfo"), _lidarSerial(1) {}
-    static void readTask(void *parameters);
-    static uint16_t resumeTask();    
-    static TaskHandle_t readTaskHandle;
-    static SemaphoreHandle_t semaphoreFlag;
-    static bool taskCreated;
-    static long lastCheck;    
+    // static void readTask(void *parameters);
+    // static uint16_t resumeTask();    
+    // static TaskHandle_t readTaskHandle;
+    // static SemaphoreHandle_t semaphoreFlag;
+    // static bool taskCreated;
+    // static long lastCheck;    
 
-    void begin();
+    void begin(SemaphoreHandle_t flag) override;
     bool read();
     void toJson(JsonObject ob) override;
     void load(JsonObjectConst obj) override;
     void save(JsonObject ob) override;
-    bool isConnected();
-    bool connect();    
+    virtual const bool getIsConnected();      
+    const bool connect() override;    
     uint16_t getDistance();
+
+    bool taskToRun() override;  
+
 private:
     bool _isConnected;
     bool _isEnabled;
