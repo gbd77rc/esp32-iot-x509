@@ -11,7 +11,7 @@
 class LiDARInfoClass : public BaseConfigInfoClass, public BaseSensorClass
 {
 public:
-    LiDARInfoClass() : BaseConfigInfoClass("lidarInfo"), _lidarSerial(1) {}
+    LiDARInfoClass() : BaseConfigInfoClass("lidarInfo"), BaseSensorClass("lidar"), _lidarSerial(1) {}
     // static void readTask(void *parameters);
     // static uint16_t resumeTask();    
     // static TaskHandle_t readTaskHandle;
@@ -23,15 +23,13 @@ public:
     bool read();
     void toJson(JsonObject ob) override;
     void load(JsonObjectConst obj) override;
-    void save(JsonObject ob) override;
-    virtual const bool getIsConnected();      
+    void save(JsonObject ob) override; 
     const bool connect() override;    
     uint16_t getDistance();
 
     bool taskToRun() override;  
 
 private:
-    bool _isConnected;
     bool _isEnabled;
     long _last_read;
     uint16_t _txPin;

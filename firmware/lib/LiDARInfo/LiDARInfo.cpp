@@ -25,9 +25,7 @@
 
 void LiDARInfoClass::begin(SemaphoreHandle_t flag)
 {
-    this->sensorState.semaphoreFlag = flag;
-    strcpy(this->sensorState.sensorName, "LiDARInfo");
-    this->sensorState.sensor = this;    
+    this->_semaphoreFlag = flag;
     // Check if we are waking up or we have started because of manual reset or power on
     this->_isEnabled = false;
 }
@@ -69,11 +67,6 @@ bool LiDARInfoClass::taskToRun()
     return true;
 }
 
-const bool LiDARInfoClass::getIsConnected()
-{
-    return this->_isConnected;
-}
-
 const bool LiDARInfoClass::connect()
 {
     // if (this->_isEnabled)
@@ -105,15 +98,15 @@ const bool LiDARInfoClass::connect()
     //     this->_isConnected = true;
     // }
     // LogInfo.log(LOG_INFO, "LiDAR is running  : %s", this->_isConnected ? "Yes" : "No");
-    LogInfo.log(LOG_VERBOSE, "Creating %s Task on Core 0", this->sensorState.sensorName);
+    LogInfo.log(LOG_VERBOSE, "Creating %s Task on Core 0", this->getName());
     xTaskCreatePinnedToCore(LiDARInfoClass::task, "ReadLiDARTask",
         10000, 
-        (void *)&this->sensorState, 
+        (void *)&this->_instance, 
         1,
-        &this->sensorState.taskHandle,
+        &this->_taskHandle,
         0);    
-    this->_isConnected = true;
-    return this->_isConnected;
+    this->_connected = true;
+    return  this->getIsConnected();
 }
 
 // uint16_t LiDARInfoClass::resumeTask()

@@ -18,14 +18,13 @@ typedef enum
 class EnvSensorClass : public BaseConfigInfoClass, public BaseSensorClass
 {
 public:
-    EnvSensorClass() : BaseConfigInfoClass("envSensor") {}
+    EnvSensorClass() : BaseConfigInfoClass("envSensor"), BaseSensorClass("env") {}
 
     void begin(SemaphoreHandle_t flag) override;
     void toJson(JsonObject ob) override;
     void load(JsonObjectConst obj) override;
     void save(JsonObject ob) override;
 
-    const bool getIsConnected() override; 
     const bool connect() override;
 
     // static TaskHandle_t readTaskHandle;
@@ -48,7 +47,6 @@ private:
     char _symbol[2];
     uint64_t _last_read;
     uint8_t _address;
-    bool _isConnected;
     bool _canRead;
 };
 

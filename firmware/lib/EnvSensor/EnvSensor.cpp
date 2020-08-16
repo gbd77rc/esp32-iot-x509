@@ -43,9 +43,7 @@ RTC_DATA_ATTR int _count;
 
 void EnvSensorClass::begin(SemaphoreHandle_t flag)
 {
-    this->sensorState.semaphoreFlag = flag;
-    strcpy(this->sensorState.sensorName, "EnvInfo");
-    this->sensorState.sensor = this;
+    this->_semaphoreFlag = flag;
     // Check if we are waking up or we have started because of manual reset or power on
     // if (WakeUp.isPoweredOn())
     // {
@@ -55,7 +53,6 @@ void EnvSensorClass::begin(SemaphoreHandle_t flag)
     this->_humidity = 0.0;
     this->_pressure = 0.0;
     this->_temperature = 0.0;
-    this->_isConnected = true;
 }
 
 void EnvSensorClass::load(JsonObjectConst obj)
@@ -114,22 +111,17 @@ bool EnvSensorClass::taskToRun()
     return true;
 }
 
-const bool EnvSensorClass::getIsConnected()
-{
-    return this->_isConnected;
-}
-
 const bool EnvSensorClass::connect()
 {
-    LogInfo.log(LOG_VERBOSE, "Creating %s Task on Core 0", this->sensorState.sensorName);
+    LogInfo.log(LOG_VERBOSE, "Creating %s Task on Core 0", this->getName());
     xTaskCreatePinnedToCore(EnvSensorClass::task, "ReadEnvTask",
         10000, 
-        (void *)&this->sensorState, 
+        (void *)&this->_instance, 
         1,
-        &this->sensorState.taskHandle,
+        &this->_taskHandle,
         0);
-    this->_isConnected = true;
-    return this->_isConnected;
+    this->_connected = true;
+    return  this->_connected;
 }
 
 // bool EnvSensorClass::connect()
