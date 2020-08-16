@@ -58,7 +58,12 @@ void NTPInfoClass::tick()                  // Call the NTP update function to po
 
 long NTPInfoClass::getEpoch()                // Get the current epoch time
 {
-    return this->_ntp.getEpochTime();
+    long epoch = this->_ntp.getEpochTime();
+    if ( epoch > 1577836800)
+    {
+        return epoch;
+    }
+    return millis();
 }
 
 NTPInfoClass NTPInfo;                     // Single instance declaration

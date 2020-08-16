@@ -30,7 +30,8 @@ The following information describes the configuration file layout and the sensor
         "envSensor": {
             "enabled": true,
             "data": 14,
-            "scale": 1
+            "scale": 1,
+            "sampleRate": 10000
         },
         "device": {
             "prefix": "OT",
@@ -130,7 +131,8 @@ The `enabled` flag can set via the cloud Shadow/Device Twin setting.  It will au
     "envSensor": {
         "enabled": true,
         "data": 32,
-        "scale": 1
+        "scale": 1,
+        "sampleRate": 10000
     }
 
 The sensor will retrieve the current temperature and humidity.  The sensor being used for this is the DHT-22, which has a bigger range and is more sensitive.  
@@ -141,6 +143,8 @@ The sensor will retrieve the current temperature and humidity.  The sensor being
 The `data` pin is used for communication.  The device will use this pin for receiving of data.  Once set should never need changing.
 
 The `enabled` flag can set via the cloud Shadow/Device Twin setting.  It will automatically switch the sensor on or off when set.
+
+The `sampleRate` is how often should it be read.  There is a minimum sample rate of 0.5Hz for DHT22 sensor (about 2.5 seconds).
 
 ## Device Information Section
 

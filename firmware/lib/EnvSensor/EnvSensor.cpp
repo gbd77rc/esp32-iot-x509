@@ -5,42 +5,11 @@
 
 RTC_DATA_ATTR int _count;
 
-// TaskHandle_t EnvSensorClass::readTaskHandle;
-// bool EnvSensorClass::taskCreated;
-// SemaphoreHandle_t EnvSensorClass::semaphoreFlag;
-
-// uint16_t EnvSensorClass::resumeTask()
-// {
-//     if (EnvSensor.isConnected())
-//     {
-//         vTaskResume(EnvSensorClass::readTaskHandle);
-//     }
-//     return 5000;
-// }
-
-// void EnvSensorClass::readTask(void *parameters)
-// {
-//     for (;;)
-//     {
-//         vTaskSuspend(EnvSensorClass::readTaskHandle);
-//         if (xSemaphoreTake(EnvSensorClass::semaphoreFlag, portMAX_DELAY))
-//         {
-//             Logging.log(LOG_VERBOSE, "Resuming Read Env Task...");
-//             if (EnvSensor.isConnected())
-//             {
-//                 EnvSensor.read();
-//             }
-//             xSemaphoreGive(EnvSensorClass::semaphoreFlag);
-//         }
-//     }
-// }
-
-// uint16_t updateInfo()
-// {
-//     EnvSensor.displayInfo();
-//     return 5000;
-// }
-
+/**
+ * overridden begin method to initialise the environment sensor and assign the semaphore flag
+ * 
+ * @param flag The semaphore flag to use
+ */
 void EnvSensorClass::begin(SemaphoreHandle_t flag)
 {
     this->_semaphoreFlag = flag;
@@ -51,219 +20,111 @@ void EnvSensorClass::begin(SemaphoreHandle_t flag)
     // }
 
     this->_humidity = 0.0;
-    this->_pressure = 0.0;
     this->_temperature = 0.0;
 }
 
+/**
+ * overridden load JSON element into the envInfo instance
+ * 
+ * @param json The ArduinoJson object that this element will be loaded from
+ */
 void EnvSensorClass::load(JsonObjectConst obj)
 {
-    int scale = obj["scale"].as<int>();
-    if (scale == 0)
-    {
-        this->_scale = ENV_CELSIUS;
-    }
-    else
-    {
-        this->_scale = (ScaleType)obj["scale"].as<int>();
-    }
-
-    switch (this->_scale)
-    {
-    case ENV_CELSIUS:
-        strcpy(this->_symbol, "C");
-        break;
-    case ENV_FAHRENHEIT:
-        strcpy(this->_symbol, "F");
-        break;
-    case ENV_KELVIN:
-        strcpy(this->_symbol, "K");
-        break;
-    };
-    this->_testOnly = obj["test_mode"].as<bool>();
-
-    this->_id = 92;
-    this->_address = 118;
+    this->_scale = obj.containsKey("scale") ? static_cast<ScaleType>(obj["scale"].as<int>()) : ENV_CELSIUS;
+    this->_dataPin = obj.containsKey("data") ? obj["data"].as<int>() : 14;
+    this->_enabled = obj.containsKey("enabled") ? obj["enabled"].as<bool>() : false;
+    this->_sampleRate = obj.containsKey("sampleRate") ? obj["sampleRate"].as<int>() : 2500;
+    this->_sensor = SimpleDHT22(this->_dataPin);
+    LogInfo.log(LOG_VERBOSE, "Env Data Pin is %i and is enabled %s", this->_dataPin, this->getIsEnabled() ? "Yes" : "No");
 }
 
+/**
+ * overridden save JSON element from the envInfo instance
+ * 
+ * @param json The ArduinoJson object that this element will be loaded from
+ */
 void EnvSensorClass::save(JsonObject obj)
 {
     auto json = obj.createNestedObject(this->_sectionName);
-    //json["level"] = (int)this->_reportingLevel;
-    json["ic2_id"] = this->_id;
-    json["address"] = this->_address;
     json["scale"] = (int)this->_scale;
-    json["test_mode"] = this->_testOnly;
+    json["data"] = this->_dataPin;
+    json["enabled"] = this->_enabled;
+    json["sampleRate"] = this->_sampleRate;
 }
 
+/**
+ * overridden create a JSON element that will show the current envInfo telemetry
+ * 
+ * @param json The ArduinoJson object that this element will be added to.
+ */
 void EnvSensorClass::toJson(JsonObject ob)
 {
     auto json = ob.createNestedObject("EnvSensor");
     json["temperature"] = this->_temperature;
     json["humidity"] = this->_humidity;
-    json["pressure"] = this->_pressure;
     json["read_count"] = _count;
-    json["read_session_time"] = this->_last_read;
+    json["epoch"] = this->_epoch_time;
 }
 
-bool EnvSensorClass::taskToRun() 
+/**
+ * overridden task that will be ran every n sample rate
+ * 
+ * @return True if successfully read the DHT22 sensor
+ */
+bool EnvSensorClass::taskToRun()
 {
     LogInfo.log(LOG_VERBOSE, F("Reading Temperature"));
+    int err = this->_sensor.read2(&this->_temperature, &this->_humidity, NULL);
+    if (err != SimpleDHTErrSuccess)
+    {
+        LogInfo.log(LOG_WARNING, "Problem reading %s sensor - 0x%x", this->getName(), err);
+        vTaskDelay(2000 / portTICK_PERIOD_MS); // Just incase of timing issues with the sensor
+        return false;
+    } 
+    this->_last_read = millis();
+    this->_epoch_time =  NTPInfo.getEpoch();
+    _count++;
     return true;
 }
 
+/**
+ * overridden connect to the sensor and see it is working or not
+ * 
+ * @return True if successfully connect
+ */
 const bool EnvSensorClass::connect()
 {
     LogInfo.log(LOG_VERBOSE, "Creating %s Task on Core 0", this->getName());
-    xTaskCreatePinnedToCore(EnvSensorClass::task, "ReadEnvTask",
-        10000, 
-        (void *)&this->_instance, 
-        1,
-        &this->_taskHandle,
-        0);
-    this->_connected = true;
-    return  this->_connected;
+    if (this->taskToRun())
+    {
+        xTaskCreatePinnedToCore(EnvSensorClass::task, "ReadEnvTask",
+                                10000,
+                                (void *)&this->_instance,
+                                1,
+                                &this->_taskHandle,
+                                0);
+        this->_connected = true;
+    }
+    return this->_connected;
 }
 
-// bool EnvSensorClass::connect()
-// {
-//     this->_connected = bme.begin(this->_address);
-
-//     if (this->_connected == false)
-//     {
-//         Logging.log(LOG_ERROR, F("Could not find a valid BMP280 sensor, check the wiring!"));
-//     }
-//     else
-//     {
-//         this->_canRead = true;
-//     }
-//     if (EnvSensorClass::taskCreated == false && this->_connected)
-//     {
-//         Logging.log(LOG_VERBOSE, F("Creating Environment Reading Task on Core 0"));
-//         xTaskCreatePinnedToCore(EnvSensorClass::readTask, "ReadEnvTask",
-//                                 10000, NULL, 1,
-//                                 &EnvSensorClass::readTaskHandle,
-//                                 0);
-//         EnvSensorClass::taskCreated = true;
-//         ez.addEvent(EnvSensorClass::resumeTask, 5000);
-//     }
-//     Logging.log(LOG_VERBOSE, "Env Sensor is connected : %s", this->_connected ? "Yes" : "No");
-//     return this->_connected;
-// }
-
-
-
-// bool EnvSensorClass::isConnected()
-// {
-//     return this->_connected;
-// }
-
-// boolean EnvSensorClass::read()
-// {
-
-//     if (this->_canRead)
-//     {
-//         this->_canRead = false;
-//         this->_last_read = NTPInfo.getEpoch() < 1577836800 ? millis() : NTPInfo.getEpoch();
-//         if (this->_testOnly == false && this->_connected)
-//         {
-//             this->_temperature = this->readTemperature();
-//             this->_humidity = this->readHumidity();
-//             this->_pressure = bme.readPressure();
-//             Logging.log(LOG_VERBOSE, "Temperature Read is %0.3f%s",
-//                         EnvSensor.getTemperature(),
-//                         EnvSensor.getSymbol());
-//         }
-//         else
-//         {
-//             this->_temperature = 23.3;
-//             this->_humidity = 45.5;
-//             this->_pressure = 10856.0;
-//             Logging.log(LOG_VERBOSE, F("Testing Mode - Using Dummy Values!"));
-//         }
-//         this->_canRead = true;
-//         if (isnan(this->_temperature))
-//         {
-//             Logging.log(LOG_ERROR, F("No temperature read!!!!"));
-//             return false;
-//         }
-//         _count++;
-//     }
-//     return true;
-// }
-
-// const char *EnvSensorClass::getSymbol()
-// {
-//     return this->_symbol;
-// }
-
-// float EnvSensorClass::getTemperature()
-// {
-//     return this->_temperature;
-// }
-
-// JsonObject EnvSensorClass::toJson()
-// {
-//     this->_doc["sensor_reads"] = _count;
-//     return this->_doc.as<JsonObject>();
-// }
-
-
-// Read the sensor data from the 1 Wire
-// byte EnvSensorClass::readDevice()
-// {
-//     Wire.beginTransmission(this->_id);
-//     Wire.write(0);
-//     if (Wire.endTransmission() != 0)
-//     {
-//         return 1;
-//     }
-//     Wire.requestFrom(this->_id, (uint8_t)5);
-
-//     for (int i = 0; i < 5; i++)
-//     {
-//         _datos[i] = Wire.read();
-//     };
-//     delay(50);
-//     if (Wire.available() != 0)
-//         return 2;
-//     if (_datos[4] != (_datos[0] + _datos[1] + _datos[2] + _datos[3]))
-//         return 3;
-//     return 0;
-// }
-
-// convert the data read from sensor to temperature
-// float EnvSensorClass::readTemperature()
-// {
-//     float resultado = 0;
-//     byte error = this->readDevice();
-
-//     if (error != 0)
-//         return (float)error / 100;
-
-//     switch (this->_scale)
-//     {
-//     case ENV_CELSIUS:
-//         resultado = (_datos[2] + (float)_datos[3] / 10);
-//         break;
-//     case ENV_FAHRENHEIT:
-//         resultado = ((_datos[2] + (float)_datos[3] / 10) * 1.8 + 32);
-//         break;
-//     case ENV_KELVIN:
-//         resultado = (_datos[2] + (float)_datos[3] / 10) + 273.15;
-//         break;
-//     };
-//     return resultado;
-// }
-
-// convert the data read from sensor to humidity
-// float EnvSensorClass::readHumidity()
-// {
-//     float resultado;
-//     byte error = this->readDevice();
-//     if (error != 0)
-//         return (float)error / 100;
-//     resultado = (_datos[0] + (float)_datos[1] / 10);
-//     return resultado;
-// }
+/**
+ * get the current scale temperature symbol
+ * 
+ * @return The symbol
+ */
+const char *EnvSensorClass::getSymbol()
+{
+    switch (this->_scale)
+    {
+    case ENV_CELSIUS:
+        return "°C";
+    case ENV_FAHRENHEIT:
+        return "°F";
+    case ENV_KELVIN:
+        return "°K";
+    };
+    return "UNK";
+}
 
 EnvSensorClass EnvSensor;

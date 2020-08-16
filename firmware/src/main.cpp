@@ -92,12 +92,15 @@ void loop()
     {
         LedInfo.blinkOff(LED_WIFI);
     }    
+    EnvSensor.tick();
+    delayMicroseconds(10000);
+    LiDARInfo.tick();    
     delay(5000);
     DynamicJsonDocument payload(800);
     auto root = payload.to<JsonObject>();
     LedInfo.toJson(root);
-    LogInfo.log(LOG_VERBOSE, F("LED State"), root);
+    EnvSensor.toJson(root);
+    LogInfo.log(LOG_VERBOSE, F("Current State"), root);
 
-    EnvSensor.tick();
-    LiDARInfo.tick();
+    delay(1000);
 }

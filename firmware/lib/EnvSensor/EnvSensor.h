@@ -24,30 +24,18 @@ public:
     void toJson(JsonObject ob) override;
     void load(JsonObjectConst obj) override;
     void save(JsonObject ob) override;
-
     const bool connect() override;
-
-    // static TaskHandle_t readTaskHandle;
-    // static SemaphoreHandle_t semaphoreFlag;
-    // static bool taskCreated;
     bool taskToRun() override;   
 
+    const char* getSymbol();
+
 private:
-    // void pageInfo();
     ScaleType _scale;
     float _humidity;
     float _temperature;
-    float _pressure;
-    bool _testOnly;
-    uint8_t _id;
-    byte _datos[5];
-    // byte readDevice();
-    // float readTemperature();
-    // float readHumidity();
-    char _symbol[2];
-    uint64_t _last_read;
-    uint8_t _address;
-    bool _canRead;
+    uint8_t _dataPin;
+    SimpleDHT22 _sensor;
+    long _epoch_time;
 };
 
 extern EnvSensorClass EnvSensor;

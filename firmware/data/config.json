@@ -19,12 +19,14 @@
         "enabled": true,
         "tx": 4,
         "rx": 17,
-        "baud": 115200
+        "baud": 115200,
+        "sampleRate": 1000
     },    
     "envSensor": {
         "enabled": true,
         "data": 14,
-        "scale": 1
+        "scale": 1,
+        "sampleRate": 10000
     },    
     "device": {
         "prefix": "OT",
