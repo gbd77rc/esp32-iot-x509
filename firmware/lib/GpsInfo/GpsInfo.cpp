@@ -55,11 +55,9 @@ void GpsInfoClass::load(JsonObjectConst obj)
     this->_baud = obj.containsKey("baud") ? obj["baud"].as<uint32_t>() : 9600;
     this->_rxPin = obj.containsKey("rx") ? obj["rx"].as<uint16_t>() : 17;
     this->_txPin = obj.containsKey("tx") ? obj["tx"].as<uint16_t>() : 16;
-    this->_isSim808 = obj.containsKey("sim808") ? obj["sim808"].as<bool>(): false;
-    LogInfo.log(LOG_VERBOSE, "RX: %i TX: %i Baud: %i Enabled: %s Sim808: %s",
-        this->_rxPin, this->_txPin,
-        this->_baud, this->_isEnabled ? "Yes" : "No",
-        this->_isSim808  ? "Yes": "No");
+    LogInfo.log(LOG_VERBOSE, "RX: %i TX: %i Baud: %i Enabled: %s",
+                this->_rxPin, this->_txPin,
+                this->_baud, this->_isEnabled ? "Yes" : "No");
 }
 
 void GpsInfoClass::save(JsonObject obj)
@@ -70,7 +68,6 @@ void GpsInfoClass::save(JsonObject obj)
     json["baud"] = this->_baud;
     json["rx"] = this->_rxPin;
     json["tx"] = this->_txPin;
-    json["sim808"] = this->_isSim808;
 }
 
 void GpsInfoClass::toJson(JsonObject ob)
@@ -117,22 +114,9 @@ bool GpsInfoClass::connect()
         // this->_gpsSerial.begin(this->_baud, config, this->_rxPin, this->_txPin);
 
         this->_gpsSerial.begin(this->_baud,
-            SERIAL_8N1,
-            this->_rxPin,
-            this->_txPin);
-
-        if (this->_isSim808)
-        {
-            this->_sim.begin(this->_gpsSerial);
-            //this->_sim.powerOnOff(true);
-            LogInfo.log(LOG_VERBOSE, "Initialising SIM808....");
-            //this->_sim.init();
-            LogInfo.log(LOG_VERBOSE, "Powering ON GPS....");
-            this->_sim.powerOnOffGps(true);
-            bool isPowered = false;
-            this->_sim.getGpsPowerState(&isPowered);
-            LogInfo.log(LOG_VERBOSE, "Completed SIM808....%s",  isPowered ? "Yes" : "No");
-        }
+                               SERIAL_8N1,
+                               this->_rxPin,
+                               this->_txPin);
 
         this->_isConnected = this->read();
     }
@@ -140,9 +124,9 @@ bool GpsInfoClass::connect()
     {
         LogInfo.log(LOG_VERBOSE, F("Creating GPS Reading Task on Core 0"));
         xTaskCreatePinnedToCore(GpsInfoClass::readTask, "ReadGpsTask",
-            10000, NULL, 1,
-            &GpsInfoClass::readTaskHandle,
-            0);
+                                10000, NULL, 1,
+                                &GpsInfoClass::readTaskHandle,
+                                0);
         GpsInfoClass::taskCreated = true;
         this->_isConnected = true;
         GpsInfo.resumeTask();
@@ -158,59 +142,37 @@ bool GpsInfoClass::read()
         int count = 0;
         uint64_t now = millis();
         this->_isValid = false;
-        char position[POSITION_SIZE];
         while (true)
         {
-            if (this->_isSim808)
+
+            TinyGPSPlus gps = TinyGPSPlus();
+            while (this->_gpsSerial.available() > 0)
             {
-                SIM808GpsStatus status = this->_sim.getGpsStatus(position, POSITION_SIZE);
-                if ((millis() - now) > 5000)
-                {
-                    LogInfo.log(LOG_WARNING, F("Have not received valid GPS data in the last 5 seconds"));
-                    LogInfo.log(LOG_VERBOSE, "Count read is %i", count);
-                    break;
-                }
-                if (status < SIM808GpsStatus::Fix) {
-                    continue;
-                }
-                this->_sim.getGpsField(position, SIM808GpsField::GnssUsed, &this->_satelites);
-                this->_sim.getGpsField(position, SIM808GpsField::Latitude, &this->_lat);
-                this->_sim.getGpsField(position, SIM808GpsField::Longitude, &this->_long);
-                this->_sim.getGpsField(position, SIM808GpsField::Course, &this->_course);
-                this->_sim.getGpsField(position, SIM808GpsField::Speed, &this->_speed);
-                this->_sim.getGpsField(position, SIM808GpsField::Altitude, &this->_altitude);
+                count = gps.encode(this->_gpsSerial.read());
+            }
+            if ((millis() - now) > 5000)
+            {
+                LogInfo.log(LOG_WARNING, F("Have not received valid GPS data in the last 5 seconds"));
+                LogInfo.log(LOG_VERBOSE, "Count read is %i", count);
                 break;
             }
-            else
+            if (gps.location.isValid() && gps.location.isUpdated())
             {
-                TinyGPSPlus gps = TinyGPSPlus();
-                while (this->_gpsSerial.available() > 0)
-                {
-                    count = gps.encode(this->_gpsSerial.read());
-                }
-                if ((millis() - now) > 5000)
-                {
-                    LogInfo.log(LOG_WARNING, F("Have not received valid GPS data in the last 5 seconds"));
-                    LogInfo.log(LOG_VERBOSE, "Count read is %i", count);
-                    break;
-                }
-                if (gps.location.isValid() && gps.location.isUpdated())
-                {
-                    this->_last_read = NTPInfo.getEpoch();
-                    break;
-                }
-                if (gps.location.isValid())
-                {
-                    this->_long = gps.location.lng();
-                    this->_lat = gps.location.lat();
-                    this->_altitude = gps.altitude.meters();
-                    this->_course = gps.course.value();
-                    this->_speed = gps.speed.value();
-                    this->_satelites = gps.satellites.value();
-                    this->_isValid = true;
-                    LogInfo.log(LOG_VERBOSE, "GPS = Lat/Lng %s", this->location());
-                }
+                this->_last_read = NTPInfo.getEpoch();
+                break;
             }
+            if (gps.location.isValid())
+            {
+                this->_long = gps.location.lng();
+                this->_lat = gps.location.lat();
+                this->_altitude = gps.altitude.meters();
+                this->_course = gps.course.value();
+                this->_speed = gps.speed.value();
+                this->_satelites = gps.satellites.value();
+                this->_isValid = true;
+                LogInfo.log(LOG_VERBOSE, "GPS = Lat/Lng %s", this->location());
+            }
+
             vTaskDelay(50);
         }
     }
@@ -222,8 +184,8 @@ const char *GpsInfoClass::location()
     if (this->_isConnected && this->_isValid)
     {
         snprintf(this->_location, 50, "Lat/Lng: %8.5f,%8.5f",
-            this->_lat,
-            this->_long);
+                 this->_lat,
+                 this->_long);
     }
     else
     {

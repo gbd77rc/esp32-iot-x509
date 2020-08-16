@@ -3,9 +3,7 @@
 
 #define ARDUINOJSON_USE_LONG_LONG 1
 #include <ArduinoJson.h>
-#include <SIM808.h>
 #include <TinyGPS++.h>
-//#include <SoftwareSerial.h>
 #include <HardwareSerial.h>
 #include "Config.h"
 
@@ -13,7 +11,7 @@
 class GpsInfoClass : public BaseConfigInfoClass
 {
 public:
-    GpsInfoClass() : BaseConfigInfoClass("gpsInfo"), _gpsSerial(2), _sim(13) {}
+    GpsInfoClass() : BaseConfigInfoClass("gpsInfo"), _gpsSerial(2) {}
 
     static void readTask(void *parameters);
     static uint16_t resumeTask();
@@ -56,7 +54,6 @@ private:
     bool _isEnabled;
     //SoftwareSerial _gpsSerial;
     HardwareSerial _gpsSerial;
-    SIM808 _sim;
 };
 
 extern GpsInfoClass GpsInfo;

@@ -26,7 +26,7 @@ public:
     void save(JsonObject ob) override;
     const bool connect() override;
     bool taskToRun() override;   
-
+    const char* toString() override;
     const char* getSymbol();
 
 private:

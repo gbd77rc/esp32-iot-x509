@@ -63,7 +63,7 @@ void EnvSensorClass::toJson(JsonObject ob)
     json["temperature"] = this->_temperature;
     json["humidity"] = this->_humidity;
     json["read_count"] = _count;
-    json["epoch"] = this->_epoch_time;
+    json["timestamp"] = this->_epoch_time;
 }
 
 /**
@@ -125,6 +125,20 @@ const char *EnvSensorClass::getSymbol()
         return "°K";
     };
     return "UNK";
+}
+
+/**
+ * get display friendly info
+ * 
+ * @return The buffer pointer
+ */
+const char* EnvSensorClass::toString()
+{
+    snprintf(this->_toString, sizeof(this->_toString), "%0.2f%s (%0.2f%%)",
+            this->_temperature,
+            this->getSymbol(),
+            this->_humidity);
+    return this->_toString;
 }
 
 EnvSensorClass EnvSensor;

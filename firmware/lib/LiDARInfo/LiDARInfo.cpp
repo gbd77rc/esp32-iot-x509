@@ -153,4 +153,16 @@ uint16_t LiDARInfoClass::getDistance()
     return 0;
 }
 
+/**
+ * get display friendly info
+ * 
+ * @return The buffer pointer
+ */
+const char* LiDARInfoClass::toString()
+{
+    snprintf(this->_toString, sizeof(this->_toString), "%icm",
+            this->_data.distance);
+    return this->_toString;
+}
+
 LiDARInfoClass LiDARInfo;

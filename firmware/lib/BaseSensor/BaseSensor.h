@@ -83,6 +83,13 @@ public:
     virtual bool taskToRun() = 0;
 
     /**
+     * Virtual get a reading string for the sensor data, this will be used for the display
+     * 
+     * @return string buffer for the data
+     */
+    virtual const char* toString() = 0;    
+
+    /**
      * To kick off the task
      */
     void tick()
@@ -153,6 +160,7 @@ public:
 
 protected:
     char _name[10];
+    char _toString[256];
     TaskHandle_t _taskHandle;
     SemaphoreHandle_t _semaphoreFlag;
     bool _connected;

@@ -30,7 +30,6 @@ The `toJson` method will fill a json element with the current read values, e.g.
 
 The use `EnvSensor`, do the following.
 
-
     SemaphoreHandle_t xSemaphore = xSemaphoreCreateMutex();
     EnvSensor.begin(xSemaphore);
     Configuration.begin("/config.json");

@@ -26,7 +26,7 @@ public:
     void save(JsonObject ob) override; 
     const bool connect() override;    
     uint16_t getDistance();
-
+    const char* toString() override;
     bool taskToRun() override;  
 
 private:
