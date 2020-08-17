@@ -27,6 +27,7 @@ public:
     const bool connect() override;
     bool taskToRun() override;   
     const char* toString() override;
+    void changeEnabled(bool flag) override;
     const char* getSymbol();
 
 private:
@@ -35,7 +36,6 @@ private:
     float _temperature;
     uint8_t _dataPin;
     SimpleDHT22 _sensor;
-    long _epoch_time;
 };
 
 extern EnvSensorClass EnvSensor;

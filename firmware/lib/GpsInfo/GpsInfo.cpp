@@ -1,88 +1,82 @@
 #include "GpsInfo.h"
 #include "LogInfo.h"
 #include "NTPInfo.h"
-#include "LedInfo.h"
 
-RTC_DATA_ATTR int _gps_count;
-const long interval = 5000;
-int16_t POSITION_SIZE = 128;
-TaskHandle_t GpsInfoClass::readTaskHandle;
-bool GpsInfoClass::taskCreated;
-long GpsInfoClass::lastCheck;
-SemaphoreHandle_t GpsInfoClass::semaphoreFlag;
+RTC_DATA_ATTR int _gpsCount;
 
-void GpsInfoClass::readTask(void *parameters)
+
+/**
+ * overridden begin method to initialise the gp sensor and assign the semaphore flag
+ * 
+ * @param flag The semaphore flag to use
+ */
+void GpsInfoClass::begin(SemaphoreHandle_t flag)
 {
-    for (;;)
-    {
-        vTaskSuspend(GpsInfoClass::readTaskHandle);
-        if (xSemaphoreTake(GpsInfoClass::semaphoreFlag, portMAX_DELAY))
-        {
-            LogInfo.log(LOG_VERBOSE, "Resuming Read GPS Task...");
-            if (GpsInfo.isConnected())
-            {
-                LogInfo.log(LOG_VERBOSE, "GPS Valid Data: %s", GpsInfo.read() ? "Yes" : "No");
-            }
-            GpsInfoClass::lastCheck = millis();
-            xSemaphoreGive(GpsInfoClass::semaphoreFlag);
-        }
-    }
-}
-
-uint16_t GpsInfoClass::resumeTask()
-{
-    if (GpsInfo.isConnected() && (millis() - GpsInfoClass::lastCheck) > interval)
-    {
-        //GpsInfoClass::lastCheck = millis();
-        vTaskResume(GpsInfoClass::readTaskHandle);
-    }
-    return 10000;
-}
-
-void GpsInfoClass::begin()
-{
+    this->_semaphoreFlag = flag;
     // Check if we are waking up or we have started because of manual reset or power on
     // if (WakeUp.isPoweredOn())
     // {
-    _gps_count = 0;
+    //     _gpsCount = 0;
     // }
-    this->_isEnabled = false;
 }
 
+/**
+ * overridden load JSON element into the GpsSensor instance
+ * 
+ * @param json The ArduinoJson object that this element will be loaded from
+ */
 void GpsInfoClass::load(JsonObjectConst obj)
 {
-    this->_isEnabled = obj.containsKey("enabled") ? obj["enabled"].as<bool>() : true;
+    this->_enabled = obj.containsKey("enabled") ? obj["enabled"].as<bool>() : true;
     this->_baud = obj.containsKey("baud") ? obj["baud"].as<uint32_t>() : 9600;
-    this->_rxPin = obj.containsKey("rx") ? obj["rx"].as<uint16_t>() : 17;
-    this->_txPin = obj.containsKey("tx") ? obj["tx"].as<uint16_t>() : 16;
+    this->_rxPin = obj.containsKey("rx") ? obj["rx"].as<uint16_t>() : 22;
+    this->_txPin = obj.containsKey("tx") ? obj["tx"].as<uint16_t>() : 23;
     LogInfo.log(LOG_VERBOSE, "RX: %i TX: %i Baud: %i Enabled: %s",
                 this->_rxPin, this->_txPin,
-                this->_baud, this->_isEnabled ? "Yes" : "No");
+                this->_baud, this->getIsEnabled() ? "Yes" : "No");
+    this->_gpsSerial.begin(this->_baud,
+                           SERIAL_8N1,
+                           this->_rxPin,
+                           this->_txPin);
 }
 
+/**
+ * overridden save JSON element from the GpsSensor instance
+ * 
+ * @param json The ArduinoJson object that this element will be loaded from
+ */
 void GpsInfoClass::save(JsonObject obj)
 {
     auto json = obj.createNestedObject(this->_sectionName);
-    //json["level"] = (int)this->_reportingLevel;
-    json["enabled"] = this->_isEnabled;
+    json["enabled"] = this->getIsEnabled();
     json["baud"] = this->_baud;
     json["rx"] = this->_rxPin;
     json["tx"] = this->_txPin;
 }
 
+/**
+ * overridden create a JSON element that will show the current GpsSensor telemetry
+ * 
+ * @param json The ArduinoJson object that this element will be added to.
+ */
 void GpsInfoClass::toJson(JsonObject ob)
 {
-    auto json = ob.createNestedObject("GPS");
+    auto json = ob.createNestedObject("GPSSensor");
     auto loc = json.createNestedObject("location");
     loc["longitude"] = this->_long;
     loc["latitude"] = this->_lat;
-    loc["satelites"] = this->_satelites;
+    loc["satellites"] = this->_satelites;
     loc["course"] = this->_course;
     loc["speed"] = this->_speed;
     loc["altitude"] = this->_altitude;
-    loc["timestamp"] = this->_last_read;
+    loc["timestamp"] = this->_epoch_time;
 }
 
+/**
+ * overridden create a JSON element that will show the current GpsSensor telemetry in GeoJson format
+ * 
+ * @param json The ArduinoJson object that this element will be added to.
+ */
 void GpsInfoClass::toGeoJson(JsonObject ob)
 {
     auto json = ob.createNestedObject("GPS");
@@ -98,54 +92,25 @@ void GpsInfoClass::toGeoJson(JsonObject ob)
     coords.add(this->_lat);
     coords.add(this->_altitude);
     auto props = feature.createNestedObject("properties");
-    props["last_epoch"] = this->_last_read;
+    props["last_epoch"] = this->_epoch_time;
 }
 
-bool GpsInfoClass::isConnected()
+/**
+ * overridden task that will be ran every n sample rate
+ * 
+ * @return True if successfully read the GPS sensor
+ */
+bool GpsInfoClass::taskToRun()
 {
-    return this->_isConnected;
-}
-
-bool GpsInfoClass::connect()
-{
-    if (this->_isEnabled)
-    {
-        // SoftwareSerialConfig config = SWSERIAL_8N1;
-        // this->_gpsSerial.begin(this->_baud, config, this->_rxPin, this->_txPin);
-
-        this->_gpsSerial.begin(this->_baud,
-                               SERIAL_8N1,
-                               this->_rxPin,
-                               this->_txPin);
-
-        this->_isConnected = this->read();
-    }
-    if (GpsInfoClass::taskCreated == false)
-    {
-        LogInfo.log(LOG_VERBOSE, F("Creating GPS Reading Task on Core 0"));
-        xTaskCreatePinnedToCore(GpsInfoClass::readTask, "ReadGpsTask",
-                                10000, NULL, 1,
-                                &GpsInfoClass::readTaskHandle,
-                                0);
-        GpsInfoClass::taskCreated = true;
-        this->_isConnected = true;
-        GpsInfo.resumeTask();
-    }
-    LogInfo.log(LOG_VERBOSE, "GPS is connected : %s", this->_isConnected ? "Yes" : "No");
-    return this->_isConnected;
-}
-
-bool GpsInfoClass::read()
-{
-    if (this->_isEnabled)
+    if (this->getIsEnabled())
     {
         int count = 0;
+        int retries = 0;
         uint64_t now = millis();
         this->_isValid = false;
+        TinyGPSPlus gps = TinyGPSPlus();        
         while (true)
         {
-
-            TinyGPSPlus gps = TinyGPSPlus();
             while (this->_gpsSerial.available() > 0)
             {
                 count = gps.encode(this->_gpsSerial.read());
@@ -154,36 +119,77 @@ bool GpsInfoClass::read()
             {
                 LogInfo.log(LOG_WARNING, F("Have not received valid GPS data in the last 5 seconds"));
                 LogInfo.log(LOG_VERBOSE, "Count read is %i", count);
-                break;
-            }
-            if (gps.location.isValid() && gps.location.isUpdated())
-            {
-                this->_last_read = NTPInfo.getEpoch();
-                break;
+                retries++;
+                now = millis();
+                vTaskDelay(100);
+                if (retries > 10)
+                {
+                    LogInfo.log(LOG_WARNING, "Tried at least 10 times to get GPS and Failed");
+                    break;
+                }
             }
             if (gps.location.isValid())
             {
                 this->_long = gps.location.lng();
                 this->_lat = gps.location.lat();
-                this->_altitude = gps.altitude.meters();
                 this->_course = gps.course.value();
-                this->_speed = gps.speed.value();
-                this->_satelites = gps.satellites.value();
+                this->_speed = gps.speed.value();                
+                if (gps.altitude.isUpdated())
+                {
+                    this->_altitude = gps.altitude.meters();
+                }
+                if (gps.satellites.isUpdated())
+                {
+                    this->_satelites = gps.satellites.value();
+                }               
                 this->_isValid = true;
-                LogInfo.log(LOG_VERBOSE, "GPS = Lat/Lng %s", this->location());
+                this->_connected = true;
+                this->_last_read = millis();
+                LogInfo.log(LOG_VERBOSE, "GPS = %s", this->toString());
+                _gpsCount++;
+                break;
             }
-
-            vTaskDelay(50);
+            vTaskDelay(100);
         }
     }
     return this->_isValid;
 }
 
-const char *GpsInfoClass::location()
+/**
+ * overridden connect to the sensor and see it is working or not
+ * 
+ * @return True if successfully connect
+ */
+const bool GpsInfoClass::connect()
 {
-    if (this->_isConnected && this->_isValid)
+    LogInfo.log(LOG_VERBOSE, "Creating %s Task on Core 0", this->getName());
+    if (this->getIsEnabled())
     {
-        snprintf(this->_location, 50, "Lat/Lng: %8.5f,%8.5f",
+        if (this->taskToRun())
+        {
+            xTaskCreatePinnedToCore(GpsInfoClass::task, "ReadGpsTask",
+                                    10000,
+                                    (void *)&this->_instance,
+                                    1,
+                                    &this->_taskHandle,
+                                    0);
+            this->_connected = true;
+        }
+    }
+    LogInfo.log(LOG_VERBOSE, "GPS is connected : %s", this->getIsConnected() ? "Yes" : "No");
+    return this->_connected;
+}
+
+/**
+ * get display friendly info
+ * 
+ * @return The buffer pointer
+ */
+const char *GpsInfoClass::toString()
+{
+    if (this->getIsConnected() && this->_isValid)
+    {
+        snprintf(this->_location, 50, "%0.4f,%0.4f",
                  this->_lat,
                  this->_long);
     }
@@ -194,19 +200,18 @@ const char *GpsInfoClass::location()
     return this->_location;
 }
 
-float GpsInfoClass::getLong()
+/**
+ * override update the enabled flag and update the configuration has changed flag
+ * 
+ * @param flag Is enabled true or false now
+ */
+void GpsInfoClass::changeEnabled(bool flag)
 {
-    return this->_isValid ? this->_long : 0.0;
+    if (flag != this->getIsEnabled())
+    {
+        this->_enabled = flag;
+        this->_changed = true;
+    }
 }
 
-float GpsInfoClass::getLat()
-{
-    return this->_isValid ? this->_lat : 0.0;
-}
-
-uint16_t GpsInfoClass::getSatelites()
-{
-    return this->_isValid ? this->_satelites : 0;
-}
-
-GpsInfoClass GpsInfo;
+GpsInfoClass GpsSensor;

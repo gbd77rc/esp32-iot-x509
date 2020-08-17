@@ -6,42 +6,30 @@
 #include <TinyGPS++.h>
 #include <HardwareSerial.h>
 #include "Config.h"
+#include "BaseSensor.h"
 
 
-class GpsInfoClass : public BaseConfigInfoClass
+class GpsInfoClass : public BaseConfigInfoClass, public BaseSensorClass
 {
 public:
-    GpsInfoClass() : BaseConfigInfoClass("gpsInfo"), _gpsSerial(2) {}
+    GpsInfoClass() : BaseConfigInfoClass("gpsSensor"), BaseSensorClass("gps"), _gpsSerial(2) {}  
 
-    static void readTask(void *parameters);
-    static uint16_t resumeTask();
-    static TaskHandle_t readTaskHandle;
-    static SemaphoreHandle_t semaphoreFlag;
-    static bool taskCreated;
-    static long lastCheck;      
-
-    void begin();
-    bool read();
+    void begin(SemaphoreHandle_t flag) override;
     void toJson(JsonObject ob) override;
-    void toGeoJson(JsonObject ob);
     void load(JsonObjectConst obj) override;
     void save(JsonObject ob) override;
-    bool isConnected();
-    bool connect();
-    float getLong();
-    float getLat();
-    uint16_t getSatelites();
-    const char *location();
+    const bool connect() override;
+    bool taskToRun() override;   
+    const char* toString() override;
+
+    void toGeoJson(JsonObject ob);
+    void changeEnabled(bool flag) override;
 
 private:
-    bool _isConnected;
-    uint32_t _count;
-    long _last_read;
     uint16_t _txPin;
     uint16_t _rxPin;
     uint32_t _baud;
     char _location[65];
-    bool _isSim808;
 
     float _long;
     float _lat;
@@ -50,12 +38,9 @@ private:
     uint16_t _speed;
     float _altitude;
     bool _isValid;
-
-    bool _isEnabled;
-    //SoftwareSerial _gpsSerial;
     HardwareSerial _gpsSerial;
 };
 
-extern GpsInfoClass GpsInfo;
+extern GpsInfoClass GpsSensor;
 
 #endif

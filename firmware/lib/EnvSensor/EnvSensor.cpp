@@ -3,7 +3,7 @@
 #include "NTPInfo.h"
 //#include "WakeUpInfo.h"
 
-RTC_DATA_ATTR int _count;
+RTC_DATA_ATTR int _envCount;
 
 /**
  * overridden begin method to initialise the environment sensor and assign the semaphore flag
@@ -16,7 +16,7 @@ void EnvSensorClass::begin(SemaphoreHandle_t flag)
     // Check if we are waking up or we have started because of manual reset or power on
     // if (WakeUp.isPoweredOn())
     // {
-    //     _count = 0;
+    //     _envCount = 0;
     // }
 
     this->_humidity = 0.0;
@@ -24,7 +24,7 @@ void EnvSensorClass::begin(SemaphoreHandle_t flag)
 }
 
 /**
- * overridden load JSON element into the envInfo instance
+ * overridden load JSON element into the EnvSensor instance
  * 
  * @param json The ArduinoJson object that this element will be loaded from
  */
@@ -39,7 +39,7 @@ void EnvSensorClass::load(JsonObjectConst obj)
 }
 
 /**
- * overridden save JSON element from the envInfo instance
+ * overridden save JSON element from the EnvSensor instance
  * 
  * @param json The ArduinoJson object that this element will be loaded from
  */
@@ -53,7 +53,7 @@ void EnvSensorClass::save(JsonObject obj)
 }
 
 /**
- * overridden create a JSON element that will show the current envInfo telemetry
+ * overridden create a JSON element that will show the current EnvSensor telemetry
  * 
  * @param json The ArduinoJson object that this element will be added to.
  */
@@ -62,7 +62,7 @@ void EnvSensorClass::toJson(JsonObject ob)
     auto json = ob.createNestedObject("EnvSensor");
     json["temperature"] = this->_temperature;
     json["humidity"] = this->_humidity;
-    json["read_count"] = _count;
+    json["read_count"] = _envCount;
     json["timestamp"] = this->_epoch_time;
 }
 
@@ -82,8 +82,8 @@ bool EnvSensorClass::taskToRun()
         return false;
     } 
     this->_last_read = millis();
-    this->_epoch_time =  NTPInfo.getEpoch();
-    _count++;
+    _envCount++;
+    vTaskDelay(100);
     return true;
 }
 
@@ -139,6 +139,20 @@ const char* EnvSensorClass::toString()
             this->getSymbol(),
             this->_humidity);
     return this->_toString;
+}
+
+/**
+ * override update the enabled flag and update the configuration has changed flag
+ * 
+ * @param flag Is enabled true or false now
+ */
+void EnvSensorClass::changeEnabled(bool flag)
+{
+    if (flag != this->getIsEnabled())
+    {
+        this->_enabled = flag;
+        this->_changed = true;
+    }
 }
 
 EnvSensorClass EnvSensor;

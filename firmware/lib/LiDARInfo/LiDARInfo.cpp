@@ -165,4 +165,13 @@ const char* LiDARInfoClass::toString()
     return this->_toString;
 }
 
+void LiDARInfoClass::changeEnabled(bool flag)
+{
+    if (flag != this->getIsEnabled())
+    {
+        this->_enabled = flag;
+        this->_changed = true;
+    }
+}
+
 LiDARInfoClass LiDARInfo;

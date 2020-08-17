@@ -2,6 +2,7 @@
 #define BASESENSORS_H
 
 #include "LogInfo.h"
+#include "NTPInfo.h"
 
 class BaseSensorClass;
 
@@ -47,7 +48,10 @@ public:
                     LogInfo.log(LOG_VERBOSE, "Resuming %s Task To Run ", pSensor->instance->getName());
                     if (pSensor->instance->getIsConnected())
                     {
-                        pSensor->instance->taskToRun();
+                        if (pSensor->instance->taskToRun())
+                        {
+                            pSensor->instance->setEpoch();
+                        }
                     }
                     xSemaphoreGive(pSensor->instance->getSemaphore());
                 }
@@ -88,6 +92,13 @@ public:
      * @return string buffer for the data
      */
     virtual const char* toString() = 0;    
+
+    /**
+     * Virtual update the enabled flag and make the derived class update the configuration has changed flag
+     * 
+     * @param flag Is enabled true or false now
+     */
+    virtual void changeEnabled(bool flag) = 0;    
 
     /**
      * To kick off the task
@@ -158,6 +169,16 @@ public:
         return this->_semaphoreFlag;
     }
 
+    /**
+     * Update the timestamp to the current epoch time.
+     * 
+     * @return The semaphore flag
+     */
+    void setEpoch()
+    {
+        this->_epoch_time = NTPInfo.getEpoch();
+    }
+
 protected:
     char _name[10];
     char _toString[256];
@@ -167,6 +188,7 @@ protected:
     bool _enabled;
     uint16_t _sampleRate;
     uint64_t _last_read;    
+    long _epoch_time;    
     SensorInstance _instance;
 };
 

@@ -10,10 +10,10 @@
     },
     "gpsSensor": {
         "enabled": true,
-        "tx": 23,
-        "rx": 22,
+        "tx": 22,
+        "rx": 23,
         "baud": 9600,
-        "sim808": false
+        "sampleRate": 5000
     },
     "lidarSensor": {
         "enabled": true,

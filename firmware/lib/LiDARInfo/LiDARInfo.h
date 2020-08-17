@@ -28,6 +28,7 @@ public:
     uint16_t getDistance();
     const char* toString() override;
     bool taskToRun() override;  
+    void changeEnabled(bool flag) override;
 
 private:
     bool _isEnabled;
