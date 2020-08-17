@@ -8,7 +8,6 @@ Configuration of the instance is done via the `begin` method.
 
 The reading of the GPS is via UART (TX,RX) serial communication.
 
-
 The `toJson` method will fill a json element with the current read values, e.g.
 
     "GPS": {
