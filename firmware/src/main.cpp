@@ -103,7 +103,8 @@ void loop()
     delayMicroseconds(10000);
     LiDARInfo.tick();        
     GpsSensor.tick();
-    NTPInfo.tick();
+
+    //NTPInfo.tick();
     delay(5000);
     DynamicJsonDocument payload(800);
     auto root = payload.to<JsonObject>();

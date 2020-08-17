@@ -45,7 +45,6 @@ public:
             {
                 if (xSemaphoreTake(pSensor->instance->getSemaphore(), portMAX_DELAY))
                 {
-                    LogInfo.log(LOG_VERBOSE, "Resuming %s Task To Run ", pSensor->instance->getName());
                     if (pSensor->instance->getIsConnected())
                     {
                         if (pSensor->instance->taskToRun())
@@ -60,7 +59,7 @@ public:
                     LogInfo.log(LOG_VERBOSE, "Could not get flag for %s", pSensor->instance->getName());
                 }
             }
-            vTaskDelay(50);
+            vTaskDelay(100);
             vTaskSuspend(pSensor->instance->getHandle());
         }
     }

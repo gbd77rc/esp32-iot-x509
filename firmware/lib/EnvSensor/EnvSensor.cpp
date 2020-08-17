@@ -73,7 +73,7 @@ void EnvSensorClass::toJson(JsonObject ob)
  */
 bool EnvSensorClass::taskToRun()
 {
-    LogInfo.log(LOG_VERBOSE, F("Reading Temperature"));
+    vTaskDelay(20);
     int err = this->_sensor.read2(&this->_temperature, &this->_humidity, NULL);
     if (err != SimpleDHTErrSuccess)
     {
@@ -82,8 +82,8 @@ bool EnvSensorClass::taskToRun()
         return false;
     } 
     this->_last_read = millis();
+    LogInfo.log(LOG_VERBOSE, "Temp = %s", this->toString());
     _envCount++;
-    vTaskDelay(100);
     return true;
 }
 

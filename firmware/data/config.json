@@ -26,7 +26,7 @@
         "enabled": true,
         "data": 14,
         "scale": 1,
-        "sampleRate": 10000
+        "sampleRate": 20000
     },    
     "device": {
         "prefix": "OT",
