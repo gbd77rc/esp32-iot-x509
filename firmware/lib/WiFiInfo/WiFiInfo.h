@@ -11,8 +11,9 @@ class WiFiInfoClass
 public:
     void begin();
     void toJson(JsonObject obj);    
-    const char* ssid();
-    boolean connect(u8g2_uint_t x, u8g2_uint_t y);
+    const char* getSSID();
+    bool connect(u8g2_uint_t x, u8g2_uint_t y);
+    const bool getIsConnected();
 
 private:
     void wpsInitConfig();
@@ -20,6 +21,8 @@ private:
     static String numbersToString(uint8_t a[]);
     unsigned long previousMillisWiFi;
     const long intervalWiFi = 6000;
+    bool _connected;
+    char _ssid[32];
 };
 
 extern WiFiInfoClass WiFiInfo;

@@ -3,17 +3,32 @@
 #include "WiFiInfo.h"
 #include "LogInfo.h"
 #include "DeviceInfo.h"
+#include "LedInfo.h"
 
 static esp_wps_config_t config;
 
+
+/**
+ * Begin the initialization of the WiFi configuration
+ */
 void WiFiInfoClass::begin()
 {
     WiFi.begin();
 }
 
-boolean WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
+/**
+ * Connect to the WiFi and display information at the screen coord passed in
+ * 
+ * It will connect using existing SSID detected or switch into WPA mode
+ * 
+ * @param x The horizontal position on the OLED screen
+ * @param y The vertical position on the OLED screen
+ * @return True if connected or not 
+ */
+bool WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
 {
     LogInfo.log(LOG_VERBOSE, F("Initialising WiFi...."));
+
     while (WiFi.status() != WL_CONNECTED) {
         if (this->previousMillisWiFi < this->intervalWiFi)
         {
@@ -37,9 +52,11 @@ boolean WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
             {
                 if (WiFi.status() == WL_CONNECTED)
                 {
-                    LogInfo.log(LOG_INFO, "Connected to        : %s", WiFi.SSID().c_str());
+                    strcpy(this->_ssid, WiFi.SSID().c_str());
+                    LogInfo.log(LOG_INFO, "Connected to        : %s", this->getSSID());
                     LogInfo.log(LOG_INFO, "Got IP              : %s", WiFi.localIP().toString().c_str());
-                    OledDisplay.displayLine(x, y, "WiFi: %s ", WiFi.SSID().c_str());
+                    OledDisplay.displayLine(x, y, "WiFi: %s ", this->getSSID());
+                    this->_connected = true;
                     break;
                 }
                 if (millis() - this->previousMillisWiFi >= 1000)
@@ -53,33 +70,64 @@ boolean WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
     }
     else
     {
+        strcpy(this->_ssid, WiFi.SSID().c_str());
         LogInfo.log(LOG_INFO, "Connected to        : %s", WiFi.SSID().c_str());
         LogInfo.log(LOG_INFO, "Got IP              : %s", WiFi.localIP().toString().c_str());
-        OledDisplay.displayLine(x, y, "WiFi: %s ", WiFi.SSID().c_str());
+        OledDisplay.displayLine(x, y, "WiFi: %s ", this->getSSID());
+        this->_connected = true;
     }
-    return true;
+    return this->getIsConnected();
 }
 
+/**
+ * Is the WiFi connected flag
+ * 
+ * @return True if connected
+ */
+const bool WiFiInfoClass::getIsConnected()
+{
+    return this->_connected;
+}
+
+/**
+ * create a JSON element that will show the current WiFi info
+ * 
+ * @param json The ArduinoJson object that this element will be added to.
+ */
 void WiFiInfoClass::toJson(JsonObject ob)
 {
     auto json = ob.createNestedObject("WiFi");
-    json["ssid"] = this->ssid();
+    json["ssid"] = this->getSSID();
 }
 
-const char* WiFiInfoClass::ssid()
+/**
+ * Get the current SSID connect to or trying to connect to
+ * 
+ * @return The SSID name
+ */
+const char* WiFiInfoClass::getSSID()
 {
-    return WiFi.SSID().c_str();
+    return this->_ssid;
 }
 
+/**
+ * Initialize the WPS configuration
+ */
 void WiFiInfoClass::wpsInitConfig() {
     config.crypto_funcs = &g_wifi_default_wps_crypto_funcs;
     config.wps_type = WPS_TYPE_PBC;
     strcpy_P(config.factory_info.manufacturer, PSTR("LUXOFT"));
-    strcpy_P(config.factory_info.model_number, PSTR("OT-1000-ESP32"));
+    strcpy_P(config.factory_info.model_number, PSTR(DeviceInfo.getDeviceId()));
     strcpy_P(config.factory_info.model_name, PSTR("OT-1000-IOT"));
     strcpy(config.factory_info.device_name, DeviceInfo.getDeviceId());
 }
 
+/**
+ * Handle the WiFi events generated when in WPS mode
+ * 
+ * @param event The event been raised
+ * @param info The information related to the event
+ */
 void WiFiInfoClass::WiFiEvent(WiFiEvent_t event, system_event_info_t info) {
     switch (event) {
     case SYSTEM_EVENT_STA_START:
@@ -119,6 +167,11 @@ void WiFiInfoClass::WiFiEvent(WiFiEvent_t event, system_event_info_t info) {
     }
 }
 
+/**
+ * Convert the number array to a string
+ * 
+ * @return The WPS pin
+ */
 String WiFiInfoClass::numbersToString(uint8_t a[]) {
     char wps_pin[9];
     for (int i = 0; i < 8; i++) {
