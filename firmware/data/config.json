@@ -14,13 +14,6 @@
         "rx": 23,
         "baud": 9600,
         "sampleRate": 5000
-    },
-    "lidarSensor": {
-        "enabled": true,
-        "tx": 4,
-        "rx": 17,
-        "baud": 115200,
-        "sampleRate": 1000
     },    
     "envSensor": {
         "enabled": true,

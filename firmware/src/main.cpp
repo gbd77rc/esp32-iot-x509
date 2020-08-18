@@ -7,7 +7,6 @@
 #include "DeviceInfo.h"
 #include "WiFiInfo.h"
 #include "NTPInfo.h"
-#include "LiDARInfo.h"
 #include "GpsInfo.h"
 #include "LedInfo.h"
 #include "EnvSensor.h"
@@ -26,7 +25,6 @@ void setup()
     DeviceInfo.begin();
     // WiFiInfo.begin();
     EnvSensor.begin(xSemaphore);
-    LiDARInfo.begin(xSemaphore);
     GpsSensor.begin(xSemaphore);
     LedInfo.begin();
 
@@ -40,7 +38,6 @@ void setup()
     Configuration.add(&LedInfo);
     Configuration.add(&DeviceInfo);
     Configuration.add(&EnvSensor);
-    Configuration.add(&LiDARInfo);
     Configuration.add(&GpsSensor);
     Configuration.load();
     LedInfo.switchOn(LED_POWER);
@@ -49,7 +46,6 @@ void setup()
     OledDisplay.displayLine(0,20,"Loc: %s", DeviceInfo.getLocation());     
     LogInfo.log(LOG_VERBOSE,"Connecting to sensors");
     EnvSensor.connect();
-    LiDARInfo.connect();
     LedInfo.blinkOn(LED_WIFI);
 
     GpsSensor.connect();
@@ -62,34 +58,15 @@ void setup()
     // OledDisplay.displayLine(0,50,F("123456789012345678901234567890"));
     // OledDisplay.displayLine(0,60,F("123456789012345678901234567890"));
     delay(2000);
-    // OledDisplay.displayLine(0,10,F("Dev : Blink Lights"));
-    // OledDisplay.displayLine(0,20,"ID  : %s", DeviceInfo.deviceId());
-    // OledDisplay.displayLine(0,30,"Loc : %s", DeviceInfo.location());
-    // OledDisplay.displayLine(0,40,"WiFi: %s", "connecting....");
-    // WiFiInfo.connect(0,40);
-    // NTPInfo.begin();
-    // LiDARInfo.connect();
-    // GpsInfo.connect();
-    // OledDisplay.displayLine(0,60,F("Initialize Completed....."));    
-    // delay(1000);
  
     OledDisplay.displayLine(0,30,"Env: %s", EnvSensor.toString());  
     OledDisplay.displayLine(0,40,"Tim: %s", NTPInfo.getFormattedTime()); 
     OledDisplay.displayLine(0,50,"GPS: %s", GpsSensor.toString());      
-    // OledDisplay.displayLine(0,30,F("Time: "));
-    // OledDisplay.displayLine(0,40,F("Dist: "));
-    // OledDisplay.displayLine(0,50,F("GPS : Lat: "));     
-    // OledDisplay.displayLine(0,60,F("      Lng: "));     
 }
 
 void loop()
 {
-    // LiDARInfo.resumeTask();
-    // GpsInfo.resumeTask();
     OledDisplay.displayLine(30,40,"%s", NTPInfo.getFormattedTime());
-    // OledDisplay.displayLine(36,40,"%icm", LiDARInfo.getDistance());
-    // OledDisplay.displayLine(64,50,"%09.5f", GpsInfo.getLat());
-    // OledDisplay.displayLine(64,60,"%09.5f", GpsInfo.getLong());
     if (millis() > blinkUntil)
     {
         LedInfo.setBrightness(10);
@@ -99,9 +76,7 @@ void loop()
     {
         LedInfo.blinkOff(LED_WIFI);
     }    
-    EnvSensor.tick();
-    delayMicroseconds(10000);
-    LiDARInfo.tick();        
+    EnvSensor.tick();    
     GpsSensor.tick();
 
     //NTPInfo.tick();

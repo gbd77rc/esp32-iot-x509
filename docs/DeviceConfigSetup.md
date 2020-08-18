@@ -21,12 +21,6 @@ The following information describes the configuration file layout and the sensor
             "baud": 9600,
             "sim808": false
         },
-        "lidarSensor": {
-            "enabled": true,
-            "tx": 4,
-            "rx": 17,
-            "baud": 115200
-        },
         "envSensor": {
             "enabled": true,
             "data": 14,
@@ -106,23 +100,6 @@ The configuration is for the pin numbers used to communicate with the GPS sensor
 The `baud` rate is how fast the serial communication can happen in bits per seconds.  Most GPS's only transmit at `9600` baud by default.  Some of them you change this, the NEO-6M can be changed, but I have left it at the default.  Not setting able via the cloud.
 
 The `sim808` is another type of GPS, not used in this project.  It relies on GSM/GPRS signals and SIM card.  Not setting able via the cloud.
-
-The `enabled` flag can set via the cloud Shadow/Device Twin setting.  It will automatically switch the sensor on or off when set.  The pin values, once set should never need changing.
-
-## LiDAR Information Section
-
-    "lidarInfo": {
-        "enabled": true,
-        "tx": 4,
-        "rx": 17,
-        "baud": 115200
-    }
-
-The sensor will retrieve the distance between it len and an object in front.  The distance is in CM, with a minimum of 1 cm to a max of 1200cm.  Any value outside this range is an error for this sensor.
-
-The configuration is for the pin numbers used to communicate with the LiDAR sensor.  The `RX` and `TX` are the pins on the ESP32 device side, not the sensor side.  As with all [UART Protocol](https://www.circuitbasics.com/basics-uart-communication/#:~:text=UART%20stands%20for%20Universal%20Asynchronous,transmit%20and%20receive%20serial%20data.) devices the `RX` and `TX` get crossed over. See the documentation related to UART.
-
-The `baud` rate is how fast the serial communication can happen in bits per seconds.  I am using the default value for this sensor.  Not setting able via the cloud.
 
 The `enabled` flag can set via the cloud Shadow/Device Twin setting.  It will automatically switch the sensor on or off when set.  The pin values, once set should never need changing.
 

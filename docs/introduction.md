@@ -29,7 +29,6 @@ Each of these blogs maybe broken into smaller ones, depending on the size of eac
 We are a manufacturer of the devices which are based on ESP32 chip for this series.  The device will contain the following features, so we have a list of telemetry data points.
 
 * Temperature/Humidity Detecting using DHT-22 sensor
-* LiDAR distance sensor
 * GPS for outdoor positioning
 * WiFi signal strength detection for indoor positioning
 

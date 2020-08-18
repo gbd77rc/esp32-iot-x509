@@ -1,4 +1,4 @@
-# DisplayInfo
+# Device Info
 
 This library contain the device specific properties.  It will be a single instance class, as we create it automatically after defining it.  The instance name `DeviceInfo`.
 

@@ -1,4 +1,4 @@
-# LogInfo
+# Display
 
 This library write the formatted messages to the standard to the embedded OLED screen.  It will be a single instance class, as we create it automatically after defining it.  The instance name `OledDisplay`.
 

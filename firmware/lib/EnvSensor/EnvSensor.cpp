@@ -35,7 +35,8 @@ void EnvSensorClass::load(JsonObjectConst obj)
     this->_enabled = obj.containsKey("enabled") ? obj["enabled"].as<bool>() : false;
     this->_sampleRate = obj.containsKey("sampleRate") ? obj["sampleRate"].as<int>() : 2500;
     this->_sensor = SimpleDHT22(this->_dataPin);
-    LogInfo.log(LOG_VERBOSE, "Env Data Pin is %i and is enabled %s", this->_dataPin, this->getIsEnabled() ? "Yes" : "No");
+    LogInfo.log(LOG_VERBOSE, "Env Data: %i Enabled: %s",
+                this->_dataPin, this->getIsEnabled() ? "Yes" : "No");    
 }
 
 /**
@@ -74,17 +75,21 @@ void EnvSensorClass::toJson(JsonObject ob)
 bool EnvSensorClass::taskToRun()
 {
     vTaskDelay(20);
-    int err = this->_sensor.read2(&this->_temperature, &this->_humidity, NULL);
-    if (err != SimpleDHTErrSuccess)
+    if (this->getIsEnabled())
     {
-        LogInfo.log(LOG_WARNING, "Problem reading %s sensor - 0x%x", this->getName(), err);
-        vTaskDelay(2000 / portTICK_PERIOD_MS); // Just incase of timing issues with the sensor
-        return false;
-    } 
-    this->_last_read = millis();
-    LogInfo.log(LOG_VERBOSE, "Temp = %s", this->toString());
-    _envCount++;
-    return true;
+        int err = this->_sensor.read2(&this->_temperature, &this->_humidity, NULL);
+        if (err != SimpleDHTErrSuccess)
+        {
+            LogInfo.log(LOG_WARNING, "Problem reading %s sensor - 0x%x", this->getName(), err);
+            vTaskDelay(2000 / portTICK_PERIOD_MS); // Just incase of timing issues with the sensor
+            return false;
+        } 
+        this->_last_read = millis();
+        LogInfo.log(LOG_VERBOSE, "Temp = %s", this->toString());
+        _envCount++;
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -94,9 +99,9 @@ bool EnvSensorClass::taskToRun()
  */
 const bool EnvSensorClass::connect()
 {
-    LogInfo.log(LOG_VERBOSE, "Creating %s Task on Core 0", this->getName());
     if (this->taskToRun())
     {
+        LogInfo.log(LOG_VERBOSE, "Creating %s Task on Core 0", this->getName());
         xTaskCreatePinnedToCore(EnvSensorClass::task, "ReadEnvTask",
                                 10000,
                                 (void *)&this->_instance,
@@ -105,6 +110,7 @@ const bool EnvSensorClass::connect()
                                 0);
         this->_connected = true;
     }
+    LogInfo.log(LOG_VERBOSE, "Env is connected : %s", this->getIsConnected() ? "Yes" : "No");    
     return this->_connected;
 }
 

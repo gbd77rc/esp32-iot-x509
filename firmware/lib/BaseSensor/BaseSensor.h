@@ -114,7 +114,7 @@ public:
             }
         } else 
         {
-            LogInfo.log(LOG_VERBOSE, "Sample Rate Not Reached (%ims)", this->_sampleRate);
+            LogInfo.log(LOG_VERBOSE, "%s Sample Rate Not Reached (%ims)", this->getName(), this->_sampleRate);
         }
     }
 

@@ -4,7 +4,6 @@
 
 RTC_DATA_ATTR int _gpsCount;
 
-
 /**
  * overridden begin method to initialise the gp sensor and assign the semaphore flag
  * 
@@ -31,7 +30,8 @@ void GpsInfoClass::load(JsonObjectConst obj)
     this->_baud = obj.containsKey("baud") ? obj["baud"].as<uint32_t>() : 9600;
     this->_rxPin = obj.containsKey("rx") ? obj["rx"].as<uint16_t>() : 22;
     this->_txPin = obj.containsKey("tx") ? obj["tx"].as<uint16_t>() : 23;
-    LogInfo.log(LOG_VERBOSE, "RX: %i TX: %i Baud: %i Enabled: %s",
+    this->_sampleRate = obj.containsKey("sampleRate") ? obj["sampleRate"].as<int>() : 1000;
+    LogInfo.log(LOG_VERBOSE, "GPS RX: %i TX: %i Baud: %i Enabled: %s",
                 this->_rxPin, this->_txPin,
                 this->_baud, this->getIsEnabled() ? "Yes" : "No");
     this->_gpsSerial.begin(this->_baud,
@@ -108,7 +108,7 @@ bool GpsInfoClass::taskToRun()
         int retries = 0;
         uint64_t now = millis();
         this->_isValid = false;
-        TinyGPSPlus gps = TinyGPSPlus();        
+        TinyGPSPlus gps = TinyGPSPlus();
         while (true)
         {
             while (this->_gpsSerial.available() > 0)
@@ -134,7 +134,7 @@ bool GpsInfoClass::taskToRun()
                 this->_long = gps.location.lng();
                 this->_lat = gps.location.lat();
                 this->_course = gps.course.value();
-                this->_speed = gps.speed.value();                
+                this->_speed = gps.speed.value();
                 if (gps.altitude.isUpdated())
                 {
                     this->_altitude = gps.altitude.meters();
@@ -142,7 +142,7 @@ bool GpsInfoClass::taskToRun()
                 if (gps.satellites.isUpdated())
                 {
                     this->_satelites = gps.satellites.value();
-                }               
+                }
                 this->_isValid = true;
                 this->_connected = true;
                 this->_last_read = millis();
@@ -163,19 +163,16 @@ bool GpsInfoClass::taskToRun()
  */
 const bool GpsInfoClass::connect()
 {
-    LogInfo.log(LOG_VERBOSE, "Creating %s Task on Core 0", this->getName());
-    if (this->getIsEnabled())
+    if (this->taskToRun())
     {
-        if (this->taskToRun())
-        {
-            xTaskCreatePinnedToCore(GpsInfoClass::task, "ReadGpsTask",
-                                    10000,
-                                    (void *)&this->_instance,
-                                    1,
-                                    &this->_taskHandle,
-                                    0);
-            this->_connected = true;
-        }
+        LogInfo.log(LOG_VERBOSE, "Creating %s Task on Core 0", this->getName());
+        xTaskCreatePinnedToCore(GpsInfoClass::task, "ReadGpsTask",
+                                10000,
+                                (void *)&this->_instance,
+                                1,
+                                &this->_taskHandle,
+                                0);
+        this->_connected = true;
     }
     LogInfo.log(LOG_VERBOSE, "GPS is connected : %s", this->getIsConnected() ? "Yes" : "No");
     return this->_connected;
