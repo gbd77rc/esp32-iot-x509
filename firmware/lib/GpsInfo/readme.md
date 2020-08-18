@@ -24,6 +24,8 @@ The `toJson` method will fill a json element with the current read values, e.g.
 
 You notice that the satellites, altitude values are 0.  This is really dependent on the satellite fix and if we have read the NMEA sentences being read.  This is is part of the TinyGPSPlus library.
 
+The `tick` function must be called regularly.
+
 ## Usage
 
 The use `GpsSensor`, do the following.

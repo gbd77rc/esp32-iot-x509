@@ -9,10 +9,12 @@
 #define LEAP_YEAR(Y)     ( (Y>0) && !(Y%4) && ( (Y%100) || !(Y%400) ) )
 #endif
 
+WiFiUDP ntpUDP;
+
 class NTPInfoClass 
 {
     public:
-        NTPInfoClass();
+        NTPInfoClass():_ntp(ntpUDP, "pool.ntp.org"){}
         void begin();
         String getFormattedDate();
         String getISO8601Formatted();

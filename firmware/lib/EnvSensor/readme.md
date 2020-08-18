@@ -26,6 +26,8 @@ The `toJson` method will fill a json element with the current read values, e.g.
         "epoch": 1597598255
     }
 
+The `tick` function must be called regularly.
+
 ## Usage
 
 The use `EnvSensor`, do the following.

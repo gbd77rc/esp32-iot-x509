@@ -1,17 +1,21 @@
 #include "NTPInfo.h"
 
-WiFiUDP ntpUDP;
-
-NTPInfoClass::NTPInfoClass()
-    :_ntp(ntpUDP, "pool.ntp.org") // Default NTP site
-    {}
-
+/**
+ * Begin the initialization of the NTP system
+ */
 void NTPInfoClass::begin()
 {
     this->_ntp.begin();
     this->_ntp.update();
 }
 
+/**
+ * Get the formatted date string
+ * 
+ * Example: 2020-01-01
+ * 
+ * @return Formmatted date string.
+ */
 String NTPInfoClass::getFormattedDate()  // Convert epoch time to date - Surprising not part of NTPClient Package!
 {
     unsigned long rawTime = this->_ntp.getEpochTime() / 86400L;  // in days
@@ -40,22 +44,46 @@ String NTPInfoClass::getFormattedDate()  // Convert epoch time to date - Surpris
     return String(year) + "-" + monthStr + "-" + dayStr;    
 }
 
+/**
+ * Get the formatted iso8601 date/time string
+ * 
+ * Example: 2020-01-01T13:45:09Z
+ * 
+ * @return Formmatted iso8601 date/time string
+ */
 String NTPInfoClass::getISO8601Formatted()   // Convert epoch time to ISO8601 formatted date/time
 {
     String date = this->getFormattedDate();
     return date + String("T") + this->_ntp.getFormattedTime() + "Z";
 }
 
+/**
+ * Get the formatted time string
+ * 
+ * Example: 13:45:09
+ * 
+ * @return Formmatted time string
+ */
 String NTPInfoClass::getFormattedTime()      // Get the formatted time from the generic NTP Client
 {
     return this->_ntp.getFormattedTime();
 }
 
+/**
+ * Get the latest time from the internet
+ */
 void NTPInfoClass::tick()                  // Call the NTP update function to pool the site
 {
     this->_ntp.update();
 }
 
+/**
+ * Get the current Epoch time in seconds from 1970-01-01
+ * 
+ * Example: 1597740349
+ * 
+ * @return Epoch timestamp
+ */
 long NTPInfoClass::getEpoch()                // Get the current epoch time
 {
     long epoch = this->_ntp.getEpochTime();
