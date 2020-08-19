@@ -10,16 +10,12 @@ public:
     void begin();
     void setTimerWakeUp(uint32_t wakeupIn);
     void setSleepTime(uint32_t sleepIn);
-    unsigned long getAliveTime();
-    int getBootCount();
-    uint64_t getBootTime();
-    boolean isManualWakeUp();
-    boolean isPoweredOn();
     uint32_t getWakeupInterval();
     uint32_t getSleepTime();
+    boolean isPoweredOn();
+
     void suspendSleep();
     void resumeSleep();
-    bool canSleep();
     void tick();
 
 private:

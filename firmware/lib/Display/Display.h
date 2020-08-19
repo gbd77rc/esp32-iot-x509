@@ -13,7 +13,7 @@ class DisplayClass
 public:
     void begin();
     void clear();
-    void displayExit(const __FlashStringHelper *ifsh);
+    void displayExit(const __FlashStringHelper *ifsh, uint8_t secondsToReboot = 10);
     void displayLine(u8g2_uint_t x, u8g2_uint_t y, const __FlashStringHelper *ifsh);    
     void displayLine(u8g2_uint_t x, u8g2_uint_t y, const char *format, ...);
 private:

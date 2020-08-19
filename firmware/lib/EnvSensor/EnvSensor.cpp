@@ -1,7 +1,7 @@
 #include "LogInfo.h"
 #include "EnvSensor.h"
 #include "NTPInfo.h"
-//#include "WakeUpInfo.h"
+#include "WakeUpInfo.h"
 
 RTC_DATA_ATTR int _envCount;
 
@@ -13,11 +13,11 @@ RTC_DATA_ATTR int _envCount;
 void EnvSensorClass::begin(SemaphoreHandle_t flag)
 {
     this->_semaphoreFlag = flag;
-    // Check if we are waking up or we have started because of manual reset or power on
-    // if (WakeUp.isPoweredOn())
-    // {
-    //     _envCount = 0;
-    // }
+    //Check if we are waking up or we have started because of manual reset or power on
+    if (WakeUp.isPoweredOn())
+    {
+        _envCount = 0;
+    }
 
     this->_humidity = 0.0;
     this->_temperature = 0.0;

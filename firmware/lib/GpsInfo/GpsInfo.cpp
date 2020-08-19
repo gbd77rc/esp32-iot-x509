@@ -1,6 +1,7 @@
 #include "GpsInfo.h"
 #include "LogInfo.h"
 #include "NTPInfo.h"
+#include "WakeUpInfo.h"
 
 RTC_DATA_ATTR int _gpsCount;
 
@@ -13,10 +14,10 @@ void GpsInfoClass::begin(SemaphoreHandle_t flag)
 {
     this->_semaphoreFlag = flag;
     // Check if we are waking up or we have started because of manual reset or power on
-    // if (WakeUp.isPoweredOn())
-    // {
-    //     _gpsCount = 0;
-    // }
+    if (WakeUp.isPoweredOn())
+    {
+        _gpsCount = 0;
+    }
 }
 
 /**

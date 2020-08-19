@@ -29,7 +29,7 @@ void DisplayClass::clear()
  * 
  * @param ifsh Flash Helper String
  */
-void DisplayClass::displayExit(const __FlashStringHelper *ifsh)
+void DisplayClass::displayExit(const __FlashStringHelper *ifsh, uint8_t secondsToReboot)
 {
     u8g2.clearDisplay();
     u8g2.setFontPosTop();
@@ -39,16 +39,18 @@ void DisplayClass::displayExit(const __FlashStringHelper *ifsh)
     u8g2.setDrawColor(1);
     sprintf(this->_chBuffer, "%s", reinterpret_cast<const char *>(ifsh));
     u8g2.drawStr(64 - (u8g2.getStrWidth(this->_chBuffer) / 2), 0, this->_chBuffer);
-    sprintf(this->_chBuffer, "%s", reinterpret_cast<const char *>(F("Restarting in 10 seconds!")));
+    sprintf(this->_chBuffer, "Restarting in %i seconds", secondsToReboot );
     u8g2.drawStr(64 - (u8g2.getStrWidth(this->_chBuffer) / 2), 15, this->_chBuffer);
     u8g2.sendBuffer();
-    for (uint8_t i = 10; i > 0; i--)
+    LogInfo.log(LOG_WARNING, "%s", this->_chBuffer);
+    for (uint8_t i = secondsToReboot; i > 0; i--)
     {
         delay(1000);
-        sprintf(this->_chBuffer, "Restarting in %i  seconds!", i);
+        sprintf(this->_chBuffer, "Restarting in %i seconds!", i);
         u8g2.drawStr(64 - (u8g2.getStrWidth(this->_chBuffer) / 2), 15, this->_chBuffer);
         u8g2.sendBuffer();
     }
+    LogInfo.log(LOG_VERBOSE, F("Restarting NOW!"));
     ESP.restart();
 }
 

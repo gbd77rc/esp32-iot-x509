@@ -4,6 +4,7 @@
 #include "LogInfo.h"
 #include "DeviceInfo.h"
 #include "LedInfo.h"
+#include "NTPInfo.h"
 
 static esp_wps_config_t config;
 
@@ -59,7 +60,8 @@ bool WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
                     this->_connected = true;
                     LedInfo.blinkOff(LED_WIFI);
                     vTaskDelay(200);
-                    LedInfo.switchOn(LED_WIFI);                    
+                    LedInfo.switchOn(LED_WIFI);      
+                    NTPInfo.tick();              
                     break;
                 }
                 if (millis() - this->previousMillisWiFi >= 1000)
@@ -81,6 +83,7 @@ bool WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
         LedInfo.blinkOff(LED_WIFI);
         vTaskDelay(200);
         LedInfo.switchOn(LED_WIFI);
+        NTPInfo.tick();
     }
     return this->getIsConnected();
 }

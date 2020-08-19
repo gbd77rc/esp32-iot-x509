@@ -4,6 +4,9 @@
 RTC_DATA_ATTR int _bootCount = 0;
 RTC_DATA_ATTR unsigned long _bootTime = 0;
 
+/**
+ * Begin the initialization of the wakeup and sleep system
+ */
 void WakeUpInfoClass::begin()
 {
     this->suspendSleep();
@@ -49,6 +52,11 @@ void WakeUpInfoClass::begin()
     this->resumeSleep();
 }
 
+/**
+ * Set how long to wait before waking up from sleep in seconds
+ * 
+ * @param wakeupIN How many seconds to wait
+ */
 void WakeUpInfoClass::setTimerWakeUp(uint32_t wakeupIn)
 {
     this->_wakeupIn = wakeupIn;
@@ -56,28 +64,48 @@ void WakeUpInfoClass::setTimerWakeUp(uint32_t wakeupIn)
     LogInfo.log(LOG_VERBOSE, "Setup ESP32 to wake up after %i Seconds", wakeupIn);
 }
 
+/**
+ * Get how long to wait before waking up from sleep in seconds
+ * 
+ * @return How many seconds to wait
+ */
 uint32_t WakeUpInfoClass::getWakeupInterval()
 {
     return this->_wakeupIn;
 }
 
+/**
+ * Set how long to wait before going to sleep in seconds
+ * 
+ * @param sleepIn How many seconds to wait
+ */
 void WakeUpInfoClass::setSleepTime(uint32_t sleepIn)
 {
     this->_sleepIn = sleepIn;
     LogInfo.log(LOG_VERBOSE, "Setup ESP32 to sleep in %i Seconds", sleepIn);
 }
 
+/**
+ * Get how long to wait before sleeping in seconds
+ * 
+ * @return How many seconds to wait
+ */
 uint32_t WakeUpInfoClass::getSleepTime()
 {
     return this->_sleepIn;
 }
 
+/**
+ * Suspend can sleep test, maybe not correct to sleep at that point in time.
+ */
 void WakeUpInfoClass::suspendSleep()
 {
-    LogInfo.log(LOG_INFO, F("Suspending Sleep..."));
     this->_flag++;
 }
 
+/**
+ * Resume can sleep test
+ */
 void WakeUpInfoClass::resumeSleep()
 {
     this->_flag--;
@@ -86,63 +114,41 @@ void WakeUpInfoClass::resumeSleep()
     {
         this->_flag = 0;
     }
-
-    if (this->_flag == 0)
-    {
-        LogInfo.log(LOG_INFO, F("Resuming Sleep..."));
-    }
 }
 
-bool WakeUpInfoClass::canSleep()
-{
-    return this->_flag == 0;
-}
-
-unsigned long WakeUpInfoClass::getAliveTime()
-{
-    return _bootTime;
-}
-
-int WakeUpInfoClass::getBootCount()
-{
-    return _bootCount;
-}
-
-boolean WakeUpInfoClass::isManualWakeUp()
-{
-    return this->_manualWakeup;
-}
-
+/**
+ * Did we wakeup because of the power/reset button
+ * 
+ * @return True if wake up because of power/reset button
+ */
 boolean WakeUpInfoClass::isPoweredOn()
 {
     return this->_isPowerReset;
 }
 
+/**
+ * Check if it is time to go to sleep or not
+ */
 void WakeUpInfoClass::tick()
 {
-    if (this->canSleep())
+    if (this->_flag == 0)
     {
         if (((millis() - this->_last_check) / ms_TO_S_FACTOR) >= this->getSleepTime())
         {
-            if (WakeUp.canSleep())
+            this->_last_check = millis();
+            if (Configuration.shouldSave())
             {
-                this->_last_check = millis();
-                if (Configuration.shouldSave())
-                {
-                    Configuration.save();
-                }
+                Configuration.save();
+            }
+            if (this->_flag == 0)
+            {
                 LogInfo.log(LOG_INFO, F("Going to sleep now"));
                 _bootTime += millis();
                 LogInfo.log(LOG_VERBOSE, "Been alive for %lu seconds", _bootTime / 1000);
                 esp_deep_sleep_start();
             }
-        } 
+        }
     }
-}
-
-uint64_t WakeUpInfoClass::getBootTime()
-{
-    return _bootTime + millis();
 }
 
 WakeUpInfoClass WakeUp;

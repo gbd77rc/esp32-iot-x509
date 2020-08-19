@@ -19,7 +19,7 @@ void setup()
 {
     Serial.begin(115200);
     xSemaphore = xSemaphoreCreateMutex();
-    
+
     LogInfo.begin();
     OledDisplay.begin();
     DeviceInfo.begin();
@@ -53,9 +53,14 @@ void setup()
 
     if (WiFiInfo.getIsConnected())
     {
-        OledDisplay.displayLine(0, 40, "Tim: %s", NTPInfo.getFormattedTime());        
+        OledDisplay.displayLine(0, 40, "Tim: %s", NTPInfo.getFormattedTime());
         OledDisplay.displayLine(0, 50, "Env: %s", EnvSensor.toString());
         OledDisplay.displayLine(0, 60, "GPS: %s", GpsSensor.toString());
+        LogInfo.log(LOG_VERBOSE, "Startup Completed at %s", NTPInfo.getISO8601Formatted().c_str());
+    }
+    else
+    {
+        OledDisplay.displayExit(F("Not Connected to WiFi so rebooting as it pointless continuing!"), 30);
     }
 }
 
@@ -64,7 +69,7 @@ void loop()
     if (WiFiInfo.getIsConnected())
     {
         OledDisplay.displayLine(30, 50, "%s", NTPInfo.getFormattedTime());
-        EnvSensor.tick(); 
+        EnvSensor.tick();
         GpsSensor.tick();
         NTPInfo.tick();
         // DynamicJsonDocument payload(800);
