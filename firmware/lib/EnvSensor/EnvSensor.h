@@ -18,7 +18,7 @@ typedef enum
 class EnvSensorClass : public BaseConfigInfoClass, public BaseSensorClass
 {
 public:
-    EnvSensorClass() : BaseConfigInfoClass("envSensor"), BaseSensorClass("env") {}
+    EnvSensorClass() : BaseConfigInfoClass("envSensor"), BaseSensorClass("env", true) {}
 
     void begin(SemaphoreHandle_t flag) override;
     void toJson(JsonObject ob) override;

@@ -128,6 +128,7 @@ The `sampleRate` is how often should it be read.  There is a minimum sample rate
     "device": {
         "prefix": "OT",
         "wakeup": 1200,
+        "sleep": 30,
         "location": "<UNKNOWN>"
     }
 
@@ -135,7 +136,9 @@ This is the ESP32 device related information.
 
 The `prefix` is used in front of the CPU ID, to give it a more identifiable ID. Its short here so that it will fit on the OLED display, but can be any length.  Not settable via the cloud, as it will make up the device ID which is `common name` in the x509 certificate on the device.  The cloud provides check that the CN is the same as the device ID when connecting.
 
-The `wakeup` is used for how often the device should resume from deep sleep.  Set it to zero to never go to sleep.  This can be settable via the cloud.  It may take time to set tho, as it has to wake up first before accepting the new value.
+The `wakeup` is used for how often the device should resume from deep sleep.  This can be settable via the cloud.  It may take time to set tho, as it has to wake up first before accepting the new value.
+
+The `sleep` is used for how long to wake before going to sleep.  Set it to zero to never go to sleep.  This can be settable via the cloud.  It may take time to set tho, as it has to wake up first before accepting the new value.
 
 The `location` is the used for where the device is.  Normally which room it is located in, i.e. Home Office.
 

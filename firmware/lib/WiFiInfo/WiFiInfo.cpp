@@ -28,7 +28,7 @@ void WiFiInfoClass::begin()
 bool WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
 {
     LogInfo.log(LOG_VERBOSE, F("Initialising WiFi...."));
-
+    LedInfo.blinkOn(LED_WIFI);
     while (WiFi.status() != WL_CONNECTED) {
         if (this->previousMillisWiFi < this->intervalWiFi)
         {
@@ -39,7 +39,7 @@ bool WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
     }
 
     if (WiFi.status() != WL_CONNECTED) {
-        OledDisplay.displayLine(x, y, "WiFi: %s", "STA Mode WPA");
+        OledDisplay.displayLine(x, y, "WiFi: %s", "waiting for WPA");
         LogInfo.log(LOG_VERBOSE, F("Not Connected so switching to STA Mode...."));
         WiFi.onEvent(WiFiInfoClass::WiFiEvent);
         WiFi.mode(WIFI_MODE_STA);
@@ -57,6 +57,9 @@ bool WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
                     LogInfo.log(LOG_INFO, "Got IP              : %s", WiFi.localIP().toString().c_str());
                     OledDisplay.displayLine(x, y, "WiFi: %s ", this->getSSID());
                     this->_connected = true;
+                    LedInfo.blinkOff(LED_WIFI);
+                    vTaskDelay(200);
+                    LedInfo.switchOn(LED_WIFI);                    
                     break;
                 }
                 if (millis() - this->previousMillisWiFi >= 1000)
@@ -75,6 +78,9 @@ bool WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
         LogInfo.log(LOG_INFO, "Got IP              : %s", WiFi.localIP().toString().c_str());
         OledDisplay.displayLine(x, y, "WiFi: %s ", this->getSSID());
         this->_connected = true;
+        LedInfo.blinkOff(LED_WIFI);
+        vTaskDelay(200);
+        LedInfo.switchOn(LED_WIFI);
     }
     return this->getIsConnected();
 }
@@ -146,6 +152,9 @@ void WiFiInfoClass::WiFiEvent(WiFiEvent_t event, system_event_info_t info) {
         esp_wifi_wps_disable();
         delay(10);
         WiFi.begin();
+        LedInfo.blinkOff(LED_WIFI);
+        vTaskDelay(200);
+        LedInfo.switchOn(LED_WIFI);
         break;
     case SYSTEM_EVENT_STA_WPS_ER_FAILED:
         LogInfo.log(LOG_WARNING, F("WPS Failed, retrying"));

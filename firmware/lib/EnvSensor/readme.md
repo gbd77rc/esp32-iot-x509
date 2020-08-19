@@ -28,6 +28,9 @@ The `toJson` method will fill a json element with the current read values, e.g.
 
 The `tick` function must be called regularly.
 
+
+One of the issues with the DHT-22 sensor library is that we have to use delayMicroseconds when reading the sensor.   This in turn can cause a watchdog exception when run within a task.  Therefore we force this sensor not to run within the task.  See the `getSingleThreadFlag` function and the related flags.  
+
 ## Usage
 
 The use `EnvSensor`, do the following.

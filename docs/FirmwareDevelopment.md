@@ -104,6 +104,10 @@ This library will handle environment sensor reading.  It will wrap the [SimpleDH
 
 This library will handle GPS sensor reading.  It will wrap the [TinyGPSPlus](https://github.com/mikalhart/TinyGPSPlus) library.  It will make sure the reading of the sensor is done on core 0.
 
+### WiFi Information
+
+This library will control how the ESP32 will connect to the internet.  See [Device Firmware Process](./DeviceFirmwareProcess.md) to view how the WPS mode is engaged.
+
 ### NTP Information
 
 This library will handle the date/time from the internet.  Basically the ESP32 does not have an onboard clock/battery for the time/date.  It does record the processor tick count since powering on.  It will wrap the [NTP Client](https://github.com/arduino-libraries/NTPClient?utm_source=platformio&utm_medium=piohome) library.  It adds in the extra functions for formatting date/time that the standard library does not support.

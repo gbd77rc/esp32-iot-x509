@@ -1,6 +1,7 @@
 #include "Config.h"
 #include "Utilities.h"
 #include "LogInfo.h"
+#include "WakeUpInfo.h"
 
 /**
  * During destruction may sure the internal array is deleted.
@@ -76,6 +77,7 @@ bool ConfigClass::load()
  */
 bool ConfigClass::save()
 {
+    WakeUp.suspendSleep();
     DynamicJsonDocument doc(this->_maxDocSize + 100);
     auto json = doc.to<JsonObject>();
     if (this->_total > 0)
@@ -88,6 +90,7 @@ bool ConfigClass::save()
         File file = Utilities::openFile(this->_fileName, false);
         if (!file)
         {
+            WakeUp.resumeSleep();
             return false;
         }
         size_t saved = serializeJson(doc, file);
@@ -96,9 +99,10 @@ bool ConfigClass::save()
         {
             this->_configs[i]->hasSaved();
         }
-
+        WakeUp.resumeSleep();
         return saved > 0;
     }
+    WakeUp.resumeSleep();
     return false;
 }
 

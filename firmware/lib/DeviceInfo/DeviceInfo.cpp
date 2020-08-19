@@ -1,5 +1,15 @@
 #include "DeviceInfo.h"
 #include "LogInfo.h"
+#include "WakeUpInfo.h"
+
+
+/**
+ * Initialise the device and wakeup
+ */
+void DeviceInfoClass::begin()
+{
+    WakeUp.begin();
+}
 
 /**
  * overridden load JSON element into the device instance
@@ -13,11 +23,12 @@ void DeviceInfoClass::load(JsonObjectConst obj)
     strcat(this->_device_id, "-");
     strcat(this->_device_id, LogInfo.getUniqueId());
     strcpy(this->_location, obj.containsKey("location") ? obj["location"].as<const char*>() : "");
-    // uint32_t wakeup = obj["wakeup"].as<int>();
-    // if (wakeup > 0)
-    // {
-    //     WakeUp.setTimerWakeUp(wakeup);
-    // }
+    uint32_t wakeup = obj["wakeup"].as<int>();
+    WakeUp.setSleepTime(obj.containsKey("sleep") ? obj["sleep"].as<int>() : 30);   
+    if (wakeup > 0)
+    {
+        WakeUp.setTimerWakeUp(wakeup);
+    }
     LogInfo.log(LOG_INFO, "Device Id           : %s", this->getDeviceId());
     LogInfo.log(LOG_INFO, "Location            : %s", this->getLocation());
 }
@@ -31,7 +42,8 @@ void DeviceInfoClass::save(JsonObject obj)
 {
     auto json = obj.createNestedObject(this->_sectionName);
     json["prefix"] = this->_prefix;
-    // json["wakeup"] = WakeUp.getWakeupInterval();
+    json["wakeup"] = WakeUp.getWakeupInterval();
+    json["sleep"] = WakeUp.getSleepTime();
     json["location"] = this->_location;
 }
 

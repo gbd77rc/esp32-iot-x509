@@ -19,7 +19,7 @@ void setup()
 {
     Serial.begin(115200);
     xSemaphore = xSemaphoreCreateMutex();
-
+    
     LogInfo.begin();
     OledDisplay.begin();
     DeviceInfo.begin();
@@ -64,7 +64,7 @@ void loop()
     if (WiFiInfo.getIsConnected())
     {
         OledDisplay.displayLine(30, 50, "%s", NTPInfo.getFormattedTime());
-        EnvSensor.tick();
+        EnvSensor.tick(); 
         GpsSensor.tick();
         NTPInfo.tick();
         // DynamicJsonDocument payload(800);
@@ -73,8 +73,9 @@ void loop()
         // EnvSensor.toJson(root);
         // GpsSensor.toJson(root);
         // LogInfo.log(LOG_VERBOSE, F("Current State"), root);
+        WakeUp.tick();
         OledDisplay.displayLine(30, 40, "%s", EnvSensor.toString());
         OledDisplay.displayLine(30, 60, "%s", GpsSensor.toString());
-        delay(500);
+        delay(1000);
     }
 }

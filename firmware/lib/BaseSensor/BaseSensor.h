@@ -3,6 +3,7 @@
 
 #include "LogInfo.h"
 #include "NTPInfo.h"
+#include "WakeUpInfo.h"
 
 class BaseSensorClass;
 
@@ -20,11 +21,12 @@ public:
      * 
      * @param sectionName The sensor short name so we can identify the instance in logs
      */
-    BaseSensorClass(const char *sensorName)
+    BaseSensorClass(const char *sensorName, bool singleThread = false)
     {
         strcpy(this->_name, sensorName);
         _instance.instance = this;
         _instance.id = 1;
+        this->_singleThreadOnly = singleThread;
     }
 
     /**
@@ -36,11 +38,12 @@ public:
     static void task(void *parameters)
     {
         auto pSensor = (struct sensorInstanceStruct *)parameters;
-        LogInfo.log(LOG_VERBOSE, "Initializing %s Task and is enabled %s", pSensor->instance->getName(), 
-            pSensor->instance->getIsEnabled() ? "Yes" : "No");
+        LogInfo.log(LOG_VERBOSE, "Initializing %s Task and is enabled %s", pSensor->instance->getName(),
+                    pSensor->instance->getIsEnabled() ? "Yes" : "No");
         vTaskSuspend(pSensor->instance->getHandle());
         for (;;)
         {
+            WakeUp.suspendSleep();
             if (pSensor->instance->getIsEnabled())
             {
                 if (xSemaphoreTake(pSensor->instance->getSemaphore(), portMAX_DELAY))
@@ -60,6 +63,7 @@ public:
                 }
             }
             vTaskDelay(100);
+            WakeUp.resumeSleep();
             vTaskSuspend(pSensor->instance->getHandle());
         }
     }
@@ -90,14 +94,14 @@ public:
      * 
      * @return string buffer for the data
      */
-    virtual const char* toString() = 0;    
+    virtual const char *toString() = 0;
 
     /**
      * Virtual update the enabled flag and make the derived class update the configuration has changed flag
      * 
      * @param flag Is enabled true or false now
      */
-    virtual void changeEnabled(bool flag) = 0;    
+    virtual void changeEnabled(bool flag) = 0;
 
     /**
      * To kick off the task
@@ -106,15 +110,19 @@ public:
     {
         if ((millis() - this->_last_read) > this->_sampleRate)
         {
-            if (this->getIsConnected() && this->getHandle() != NULL)
+            if (this->getIsConnected())
             {
-                LogInfo.log(LOG_VERBOSE, "Tick for %s Sensor",
-                            this->getName());
-                vTaskResume(this->getHandle());
+                if (this->getSingleThreadFlag())
+                {
+                    WakeUp.suspendSleep();
+                    this->taskToRun();
+                    WakeUp.resumeSleep();
+                }
+                else if (this->getHandle() != NULL)
+                {
+                    vTaskResume(this->getHandle());
+                }
             }
-        } else 
-        {
-            LogInfo.log(LOG_VERBOSE, "%s Sample Rate Not Reached (%ims)", this->getName(), this->_sampleRate);
         }
     }
 
@@ -178,6 +186,16 @@ public:
         this->_epoch_time = NTPInfo.getEpoch();
     }
 
+    /**
+     * Get if Single Thread Mode Flag, sometime sensorsneed delaymicroseconds and this blocks and the watch dog triggers.
+     * 
+     * @return The single thread mode flag
+     */
+    const bool getSingleThreadFlag()
+    {
+        return this->_singleThreadOnly;
+    }
+
 protected:
     char _name[10];
     char _toString[256];
@@ -186,8 +204,9 @@ protected:
     bool _connected;
     bool _enabled;
     uint16_t _sampleRate;
-    uint64_t _last_read;    
-    long _epoch_time;    
+    uint64_t _last_read;
+    long _epoch_time;
+    bool _singleThreadOnly;
     SensorInstance _instance;
 };
 

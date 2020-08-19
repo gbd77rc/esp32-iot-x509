@@ -128,6 +128,7 @@ void LedInfoClass::switchOn(LedType type)
 {
     if (this->_brightness > 0)
     {
+        LogInfo.log(LOG_VERBOSE, "Switching on %s", this->_led[type].typeName);
         analogWrite(this->_led[type].pin, this->_led[type].brightness);
         this->_led[type].isOn = true;
     }
@@ -142,6 +143,7 @@ void LedInfoClass::switchOff(LedType type)
 {
     if (this->_brightness > 0)
     {
+        LogInfo.log(LOG_VERBOSE, "Switching off %s", this->_led[type].typeName);
         analogWrite(this->_led[type].pin, 0);
         this->_led[type].isOn = false;
     }

@@ -3,7 +3,7 @@
         "level": "ALL"
     },
     "ledInfo": {
-        "enabled": true,
+        "brightness": 75,
         "cloud": 25,
         "wifi": 26,
         "power": 27
@@ -24,6 +24,7 @@
     "device": {
         "prefix": "OT",
         "wakeup": 1200,
+        "sleep": 30,
         "location": "<UNKNOWN>"
     },
     "azure": {

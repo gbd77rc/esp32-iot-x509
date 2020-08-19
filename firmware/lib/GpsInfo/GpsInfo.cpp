@@ -115,7 +115,7 @@ bool GpsInfoClass::taskToRun()
             {
                 count = gps.encode(this->_gpsSerial.read());
             }
-            vTaskDelay(20);
+            vTaskDelay(30);
             if ((millis() - now) > 5000)
             {
                 LogInfo.log(LOG_WARNING, F("Have not received valid GPS data in the last 5 seconds"));
@@ -145,13 +145,13 @@ bool GpsInfoClass::taskToRun()
                 }
                 this->_isValid = true;
                 this->_connected = true;
-                this->_last_read = millis();
                 LogInfo.log(LOG_VERBOSE, "GPS = %s", this->toString());
                 _gpsCount++;
                 vTaskDelay(100);
                 break;
             }
         }
+        this->_last_read = millis();
     }
     return this->_isValid;
 }
