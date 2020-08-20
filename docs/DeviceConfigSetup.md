@@ -19,17 +19,18 @@ The following information describes the configuration file layout and the sensor
             "tx": 23,
             "rx": 22,
             "baud": 9600,
-            "sim808": false
+            "sampleRate": 1000
         },
         "envSensor": {
             "enabled": true,
             "data": 14,
             "scale": 1,
-            "sampleRate": 10000
+            "sampleRate": 20000
         },
         "device": {
             "prefix": "OT",
             "wakeup": 1200,
+            "sleep": 30,
             "location": "<UNKNOWN>"
         },
         "certs":{
@@ -37,7 +38,7 @@ The following information describes the configuration file layout and the sensor
             "key": "/cloud/key.pem"
         },
         "iotHub":{
-            "endpoint": ""
+            "endpoint": "",
             "name": "",
             "port": 8883,
             "sendTelemetry": true,

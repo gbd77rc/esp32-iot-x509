@@ -81,14 +81,14 @@ class ConfigClass
 {
     public: 
         ~ConfigClass();
-        void begin(const char* filename, uint8_t defaultSize = 5, uint16_t maxDocSize = 2048);
+        void begin(const char* filename, uint8_t defaultSize = 7, uint16_t maxDocSize = 2048);
         void add(BaseConfigInfoClass* config);
         bool load();
         bool save();
         bool shouldSave();
 
     private:
-        BaseConfigInfoClass** _configs;  // Dynamically Allocated array of configs (should not be more then 10 hopefully)
+        BaseConfigInfoClass** _configs;  // Dynamically Allocated array of configs (should not be more then 7 hopefully)
         uint8_t _total; // How many configs have been added.
         const char* _fileName;
         uint16_t _maxDocSize;

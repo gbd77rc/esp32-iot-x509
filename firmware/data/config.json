@@ -14,27 +14,37 @@
         "rx": 23,
         "baud": 9600,
         "sampleRate": 5000
-    },    
+    },
     "envSensor": {
         "enabled": true,
         "data": 14,
         "scale": 1,
         "sampleRate": 20000
-    },    
+    },
     "device": {
         "prefix": "OT",
         "wakeup": 1200,
-        "sleep": 30,
+        "sleep": 60,
         "location": "<UNKNOWN>"
     },
-    "azure": {
-        "hub_name": "",
-        "canSend": true,
-        "port": 8883,
-        "hub_connection": "",
-        "certificate": "/azure/cert.pem",
-        "key": "/azure/key.pem",
-        "ca": "/azure/portal-azure-com.pem",
-        "telemetry": true
+    "cloud": {
+        "connect": "azure",
+        "certs": {
+            "certificate": "/cloud/cert.pem",
+            "key": "/cloud/key.pem"
+        },
+        "iotHub": {
+            "endpoint": "",
+            "name": "",
+            "port": 8883,
+            "sendTelemetry": true,
+            "intervalSeconds": 45
+        },
+        "azure": {
+            "ca": "/cloud/portal-azure-com.pem"
+        },
+        "aws": {
+            "ca": "/cloud/console-aws-com.pem"
+        }
     }
 }

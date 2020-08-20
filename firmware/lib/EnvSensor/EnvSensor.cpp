@@ -87,7 +87,7 @@ bool EnvSensorClass::taskToRun()
                 return false;
             }
         }
-        LogInfo.log(LOG_VERBOSE, "Temp = %s", this->toString());
+        LogInfo.log(LOG_VERBOSE, "Temp = %s @ %s", this->toString(), NTPInfo.getISO8601Formatted().c_str());
         _envCount++;
         return true;
     }

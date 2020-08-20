@@ -10,6 +10,7 @@
 #include "GpsInfo.h"
 #include "LedInfo.h"
 #include "EnvSensor.h"
+#include "CloudInfo.h"
 
 SemaphoreHandle_t xSemaphore;
 
@@ -27,6 +28,7 @@ void setup()
     EnvSensor.begin(xSemaphore);
     GpsSensor.begin(xSemaphore);
     LedInfo.begin();
+    CloudInfo.begin();
 
     if (!SPIFFS.begin(true))
     {
@@ -39,6 +41,7 @@ void setup()
     Configuration.add(&DeviceInfo);
     Configuration.add(&EnvSensor);
     Configuration.add(&GpsSensor);
+    Configuration.add(&CloudInfo);
     Configuration.load();
     LedInfo.switchOn(LED_POWER);
     OledDisplay.clear();

@@ -111,3 +111,9 @@ This library will control how the ESP32 will connect to the internet.  See [Devi
 ### NTP Information
 
 This library will handle the date/time from the internet.  Basically the ESP32 does not have an onboard clock/battery for the time/date.  It does record the processor tick count since powering on.  It will wrap the [NTP Client](https://github.com/arduino-libraries/NTPClient?utm_source=platformio&utm_medium=piohome) library.  It adds in the extra functions for formatting date/time that the standard library does not support.
+
+### WakeUp Information
+
+This library will handle when to sleep and when to wake up.  It wraps the [ESP Sleep Modes](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/sleep_modes.html).  We will go into deep sleep mode.  
+
+> One issue is that the ESP 32 WiFi development board will shutdown the 3.3v line, but the 5v line is still live!  This means that the GPS sensor will keep running. I am still working on how to switch this line off when the ESP32 sleeps.

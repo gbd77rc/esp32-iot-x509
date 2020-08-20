@@ -146,7 +146,7 @@ bool GpsInfoClass::taskToRun()
                 }
                 this->_isValid = true;
                 this->_connected = true;
-                LogInfo.log(LOG_VERBOSE, "GPS = %s", this->toString());
+                LogInfo.log(LOG_VERBOSE, "GPS = %s @ %s", this->toString(), NTPInfo.getISO8601Formatted().c_str());
                 _gpsCount++;
                 vTaskDelay(100);
                 break;
