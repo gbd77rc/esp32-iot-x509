@@ -11,11 +11,13 @@ class CloudInfoClass : public BaseConfigInfoClass
 public:
     CloudInfoClass();
 
-    void begin();
+    void begin(SemaphoreHandle_t flag);
     bool connect();
     void load(JsonObjectConst obj) override;
     void save(JsonObject ob) override;
     void toJson(JsonObject ob) override;
+    void tick();
+    BaseCloudProvider* getProvider();
 
 private:
     static const char* getStringFromProviderType(CloudProviderType type);

@@ -18,8 +18,10 @@ CloudInfoClass::CloudInfoClass() : BaseConfigInfoClass("cloud")
 /**
  * Begin the initialization of the cloud
  */
-void CloudInfoClass::begin()
+void CloudInfoClass::begin(SemaphoreHandle_t flag)
 {
+    this->_provider = NULL;    
+    this->_config.semaphore = flag;
 }
 
 /**
@@ -44,6 +46,7 @@ void CloudInfoClass::load(JsonObjectConst obj)
         strcpy(this->_config.hubName, obj["iotHub"].containsKey("name") ? obj["iotHub"]["name"].as<const char *>() : "");
         this->_config.port = obj["iotHub"].containsKey("port") ? obj["iotHub"]["port"].as<int>() : 8883;
         this->_config.sendTelemetry = obj["iotHub"].containsKey("sendTelemetry") ? obj["iotHub"]["sendTelemetry"].as<bool>() : false;
+        this->_config.sendDeviceTwin = obj["iotHub"].containsKey("sendDeviceTwin") ? obj["iotHub"]["sendDeviceTwin"].as<bool>() : false;
         this->_config.sendInterval = obj["iotHub"].containsKey("intervalSeconds") ? obj["iotHub"]["intervalSeconds"].as<int>() : 60;
     }
     if (obj.containsKey("azure") && this->_config.provider == CPT_AZURE)
@@ -113,6 +116,7 @@ void CloudInfoClass::toJson(JsonObject ob)
     json["cloud"] = CloudInfoClass::getStringFromProviderType(this->_config.provider);
 }
 
+
 bool CloudInfoClass::connect()
 {
     this->_provider->connect(&this->_config);
@@ -168,6 +172,27 @@ void CloudInfoClass::loadCertificate(CERTIFICATE *cert)
             LogInfo.log(LOG_VERBOSE, "Loaded Certificate (%s)", cert->fileName);
         }
     }
+}
+
+/**
+ * Check if there are any messages waiting at the broker for us
+ */
+void CloudInfoClass::tick()
+{
+    if( this->_provider != NULL)
+    {
+        this->_provider->tick();
+    }
+}
+
+/**
+ * Get the cloud provider we are connecting to.
+ * 
+ * @return cloud provider instance to work with;
+ */
+BaseCloudProvider* CloudInfoClass::getProvider()
+{
+    return this->_provider;
 }
 
 CloudInfoClass CloudInfo;

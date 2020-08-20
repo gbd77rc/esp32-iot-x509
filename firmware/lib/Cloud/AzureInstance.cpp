@@ -1,6 +1,7 @@
 #include "AzureInstance.h"
 #include "LogInfo.h"
 #include "NTPInfo.h"
+#include "WakeUpInfo.h"
 
 RTC_DATA_ATTR int _Azure_count;
 
@@ -9,6 +10,34 @@ RTC_DATA_ATTR int _Azure_count;
 */
 void AzureInstanceClass::mqttCallback(char *topic, byte *payload, unsigned int length)
 {
+    WakeUp.suspendSleep();
+    Azure.processReply(topic, payload, length);
+    WakeUp.resumeSleep();
+}
+
+/**
+ * Azure Instance Constructor
+ */
+AzureInstanceClass::AzureInstanceClass() : BaseCloudProvider(CPT_AZURE)
+{
+    strcpy(this->_topics[0].topic, "$iothub/twin/PATCH/properties/desired/#");
+    this->_topics[0].type = TT_SUBSCRIBE;
+    strcpy(this->_topics[1].topic, "$iothub/twin/res/#");
+    this->_topics[1].type = TT_SUBSCRIBE;
+    strcpy(this->_topics[2].topic, "devices/");
+    strcat(this->_topics[2].topic, DeviceInfo.getDeviceId());
+    strcat(this->_topics[2].topic, "/messages/events/");
+    this->_topics[2].type = TT_SUBSCRIBE;
+    strcpy(this->_topics[3].topic, "devices/");
+    strcat(this->_topics[3].topic, DeviceInfo.getDeviceId());
+    strcat(this->_topics[3].topic, "/messages/events/");
+    this->_topics[3].type = TT_TELEMETRY;
+    strcpy(this->_topics[4].topic, "$iothub/twin/PATCH/properties/reported/?$rid=");
+    this->_topics[4].type = TT_DEVICETWIN;
+    this->_topics[4].appendUniqueId = true;
+    strcpy(this->_topics[5].topic, "$iothub/twin/GET/?$rid=");
+    this->_topics[5].type = TT_SYNCDEVICETWIN;
+    this->_topics[5].appendUniqueId = true;
 }
 
 /**
@@ -20,65 +49,13 @@ bool AzureInstanceClass::connect(const IoTConfig *config)
 {
     if (this->_tryConnecting == false)
     {
+        this->_tryConnecting = true;
         this->_config = config;
         this->initialiseConnection(AzureInstanceClass::mqttCallback);
- 
-        this->_tryConnecting = true;
-
-        uint8_t retries = 0;
-        LogInfo.log(LOG_VERBOSE, "Connecting to IoT Hub (%s):(%i) - (%s)",
-                    this->_config->hubName,
-                    this->_config->port,
-                    DeviceInfo.getDeviceId());
-        char userName[256];
-        buildUserName(userName);
-        while (!this->_mqttClient.connected() && retries < RECONNECT_RETRIES)
+        if (this->mqttConnection())
         {
-            if (this->_mqttClient.connect(DeviceInfo.getDeviceId(), userName, NULL))
-            {
-                char topic[64];
-                strcpy(topic, (String(this->_twinDelta) + "/desired/#").c_str());
-                LogInfo.log(LOG_VERBOSE, "Connected Successfully to [%s]", this->_config->hubName);
-                bool subbed = this->_mqttClient.subscribe(topic, QOS_LEVEL);
-                LogInfo.log(LOG_VERBOSE, "Device Twin Subscribed: %s (%s)",
-                            subbed ? "Yes" : "No", topic);
-                subbed = this->_mqttClient.subscribe(this->_twinResponse, QOS_LEVEL);
-                LogInfo.log(LOG_VERBOSE, "Twin Response Topic Subscribed: %s (%s)",
-                            subbed ? "True" : "False", this->_twinResponse);
-                subbed = this->_mqttClient.subscribe(this->_deviceEvents, QOS_LEVEL);
-                LogInfo.log(LOG_VERBOSE, "Device Events Topic Subscribed: %s (%s)",
-                            subbed ? "True" : "False", this->_deviceEvents);
-            }
-            else
-            {
-                LogInfo.log(LOG_WARNING, "MQTT Connections State: %i", this->_mqttClient.state());
-                delay(100);
-                retries++;
-            }
+            this->getCurrentStatus();
         }
-        this->_tryConnecting = false;
-        if (!this->_mqttClient.connected())
-        {
-            LogInfo.log(LOG_WARNING, F("Timed out!"));
-            return false;
-        }
-        this->_connected = true;
-        this->getCurrentStatus();
-        // if (AzureInfoClass::taskCreated == false && this->_connected)
-        // {
-        //     Logging.log(LOG_VERBOSE, F("Creating Azure Tasks on Core 0"));
-        //     xTaskCreatePinnedToCore(AzureInfoClass::sendDeviceTask, "SendIOTTask",
-        //                             10000, NULL, 3,
-        //                             &AzureInfoClass::sendDeviceTaskHandle,
-        //                             0);
-        //     xTaskCreatePinnedToCore(AzureInfoClass::checkTask, "CheckForMessages",
-        //                             10000, NULL, 2,
-        //                             &AzureInfoClass::checkTaskHandle, 0);
-        //     xTaskCreatePinnedToCore(AzureInfoClass::sendTelemetryTask, "SendTelemetry",
-        //                             10000, NULL, 3,
-        //                             &AzureInfoClass::sendTelemetryTaskHandle, 0);
-        //     AzureInfoClass::taskCreated = true;
-        // }
     }
     return this->getIsConnected();
 }
@@ -87,7 +64,7 @@ bool AzureInstanceClass::connect(const IoTConfig *config)
  * Get the current twin status of the device
  * 
  * @return The current status of the device twin
- */ 
+ */
 bool AzureInstanceClass::getCurrentStatus()
 {
     bool sent = false;
@@ -113,6 +90,81 @@ void AzureInstanceClass::buildUserName(char *userName)
     strcat(userName, "/");
     strcat(userName, DeviceInfo.getDeviceId());
     strcat(userName, "/?api-version=2018-06-30");
+}
+
+/**
+ * Check the reply received from the MQTT broker
+ * 
+ * @param topic The topic the message was received from 
+ * @param payload The body of the message, generally in JSON format
+ * @param length The size of the payload
+ */
+void AzureInstanceClass::processReply(char *topic, byte *payload, unsigned int length)
+{
+    LogInfo.log(LOG_VERBOSE, "Received Azure Reply from [%s][%u]", topic, length);
+    DynamicJsonDocument doc(length * 2);
+    bool hasBody = false;
+    if (length > 0)
+    {
+        DeserializationError err = deserializeJson(doc, (char *)payload);
+        if (err)
+        {
+            LogInfo.log(LOG_ERROR, "Invalid payload: %i!!!!", err.code());
+            return;
+        }
+        LogInfo.log(LOG_VERBOSE, F("MQTT Update Message"), doc.as<JsonObject>());
+        hasBody = true;
+    }
+    // check for 204 on twin update
+    char reply[64];
+    strcpy(reply, "$iothub/twin/res/204/?$rid=");
+    strcat(reply, String(_Azure_count).c_str());
+    if (strstr(topic, reply) != NULL)
+    {
+        LogInfo.log(LOG_VERBOSE, "OK Reply from hub ");
+    }
+    strcpy(reply, "$iothub/twin/res/200/?$rid=");
+    strcat(reply, String(_Azure_count).c_str());
+    if (strstr(topic, reply) != NULL && hasBody)
+    {
+        this->processDesiredStatus(doc.as<JsonObject>());
+    }
+    //$iothub/twin/PATCH/properties/desired/?$version=9
+    strcpy(reply, "$iothub/twin/PATCH/properties/desired/?$version=");
+    if (strstr(topic, reply) != NULL && hasBody)
+    {
+        this->processDesiredStatus(doc.as<JsonObject>());
+    }
+
+    LogInfo.log(LOG_VERBOSE, "Finished Updating - Body: %s",
+                hasBody ? "Yes" : "No");
+}
+
+/**
+ * Process the desired properties and set the configuration elements
+ * 
+ * @param doc The doc object that contains the desired element.
+ */
+void AzureInstanceClass::processDesiredStatus(JsonObject doc)
+{
+    JsonObject element;
+    if (doc.containsKey("desired"))
+    {
+        element = doc["desire"].as<JsonObject>();
+    }
+    else 
+    {
+        element = doc;
+    }
+
+    if (element.containsKey("location"))
+    {
+        LogInfo.log(LOG_VERBOSE, F("Found Location Change"));
+        if (DeviceInfo.setLocation(element["location"].as<char *>()))
+        {
+            this->updateProperty("location", element["location"]);
+        }
+    }    
 }
 
 AzureInstanceClass Azure;

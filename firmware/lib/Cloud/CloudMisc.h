@@ -32,8 +32,25 @@ typedef struct IoTConfig
     char hubName[64];
     uint32_t port;
     bool sendTelemetry;
+    bool sendDeviceTwin;
     uint16_t sendInterval;
     CERTIFICATE certificates[CERT_COUNT];
+    SemaphoreHandle_t semaphore;    
 } IOTCONFIG;
+
+typedef enum{
+    TT_UNKNOWN,
+    TT_SUBSCRIBE,
+    TT_DEVICETWIN,
+    TT_SYNCDEVICETWIN,
+    TT_TELEMETRY
+} TopicType;
+
+typedef struct IoTTopic
+{
+    char topic[64];
+    TopicType type;
+    bool appendUniqueId;
+} IOTTOPIC;
 
 #endif

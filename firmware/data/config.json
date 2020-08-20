@@ -38,6 +38,7 @@
             "name": "",
             "port": 8883,
             "sendTelemetry": true,
+            "sendDeviceTwin": true,
             "intervalSeconds": 45
         },
         "azure": {

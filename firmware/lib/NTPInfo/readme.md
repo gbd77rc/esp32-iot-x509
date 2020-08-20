@@ -1,6 +1,6 @@
 # NTP Information
 
-This library contain the NTP specific properties.  It will be a single instance class, as we create it automatically after defining it.  The instance name `NTPInfo`. 
+This library contain the NTP specific properties.  It will be a single instance class, as we create it automatically after defining it.  The instance name `NTPInfo`.
 
 Each function has been commented.
 

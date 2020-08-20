@@ -8,25 +8,15 @@ class AzureInstanceClass : public BaseCloudProvider
 {
 public:
     static void mqttCallback(char *topic, byte *payload, unsigned int length);
-    /**
-     * Class Constructor
-     */
-    AzureInstanceClass() : BaseCloudProvider(CPT_AZURE)
-    {
-        strcpy(this->_twinDelta, "$iothub/twin/PATCH/properties");
-        strcpy(this->_twinResponse, "$iothub/twin/res/#");
-        strcpy(this->_deviceEvents, "devices/");
-        strcat(this->_deviceEvents, DeviceInfo.getDeviceId());
-        strcat(this->_deviceEvents, "/messages/events/");
-        strcpy(this->_telemetry, "devices/");
-        strcat(this->_telemetry, DeviceInfo.getDeviceId());
-        strcat(this->_telemetry, "/messages/events/");        
-    }
-
+    AzureInstanceClass(); 
     bool connect(const IoTConfig *config) override;
+    void processReply(char *topic, byte *payload, unsigned int length) override;
 
-private:
-    void buildUserName(char *userName);
+protected:
+    void buildUserName(char *userName) override;
+    void processDesiredStatus(JsonObject doc) override;
+
+private:    
     bool getCurrentStatus();
 };
 

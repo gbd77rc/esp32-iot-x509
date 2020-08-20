@@ -28,7 +28,7 @@ void setup()
     EnvSensor.begin(xSemaphore);
     GpsSensor.begin(xSemaphore);
     LedInfo.begin();
-    CloudInfo.begin();
+    CloudInfo.begin(xSemaphore);
 
     if (!SPIFFS.begin(true))
     {
@@ -59,12 +59,30 @@ void setup()
         OledDisplay.displayLine(0, 40, "Tim: %s", NTPInfo.getFormattedTime());
         OledDisplay.displayLine(0, 50, "Env: %s", EnvSensor.toString());
         OledDisplay.displayLine(0, 60, "GPS: %s", GpsSensor.toString());
+        if ( CloudInfo.connect() == false)
+        {
+            OledDisplay.displayExit(F("Not Connected to the cloud so rebooting to try again!"), 20);
+        }
         LogInfo.log(LOG_VERBOSE, "Startup Completed at %s", NTPInfo.getISO8601Formatted().c_str());
     }
     else
     {
         OledDisplay.displayExit(F("Not Connected to WiFi so rebooting as it pointless continuing!"), 30);
     }
+}
+
+void updateCloud()
+{
+    DynamicJsonDocument payload(800);
+    auto root = payload.to<JsonObject>();
+    LedInfo.toJson(root);
+    EnvSensor.toJson(root);
+    GpsSensor.toJson(root);
+    // Only send if we have valid Epoch (time greater then 2020-01-01)
+    if (NTPInfo.getEpoch() > 1577836800)
+    {
+        CloudInfo.getProvider()->sendData(payload.as<JsonObject>());
+    }    
 }
 
 void loop()
@@ -75,15 +93,11 @@ void loop()
         EnvSensor.tick();
         GpsSensor.tick();
         NTPInfo.tick();
-        // DynamicJsonDocument payload(800);
-        // auto root = payload.to<JsonObject>();
-        // LedInfo.toJson(root);
-        // EnvSensor.toJson(root);
-        // GpsSensor.toJson(root);
-        // LogInfo.log(LOG_VERBOSE, F("Current State"), root);
+        CloudInfo.tick();
+        updateCloud();
         WakeUp.tick();
         OledDisplay.displayLine(30, 40, "%s", EnvSensor.toString());
         OledDisplay.displayLine(30, 60, "%s", GpsSensor.toString());
-        delay(1000);
+        delay(500);
     }
 }
