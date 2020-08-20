@@ -28,7 +28,7 @@
         "location": "<UNKNOWN>"
     },
     "cloud": {
-        "connect": "azure",
+        "provider": "azure",
         "certs": {
             "certificate": "/cloud/cert.pem",
             "key": "/cloud/key.pem"

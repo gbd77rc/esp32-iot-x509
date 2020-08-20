@@ -33,7 +33,7 @@ namespace Utilities
      * @param buffer The buffer to hold the contents of the file
      * @param size The size of the buffer
      * @return The actual size of the file read
-     */    
+     */
     size_t readFile(const char *fileName, char *buffer, size_t size)
     {
         size_t result = 0;
@@ -55,7 +55,7 @@ namespace Utilities
      * 
      * @param fileName The name of the file
      * @return The actual size of the file
-     */ 
+     */
     size_t fileSize(const char *fileName)
     {
         if (SPIFFS.exists(fileName))
@@ -74,9 +74,30 @@ namespace Utilities
      * @param fileName The name of the file
      * @param readOnly The file is readOnly or can be written to
      * @return The File Handle
-     */ 
+     */
     File openFile(const char *filename, bool readOnly)
     {
         return SPIFFS.open(filename, readOnly ? "r" : "w");
+    }
+
+    /**
+     * Compare two string, case or case insensitive
+     * 
+     * @param left The string to be compared against
+     * @param right The string to be compared to
+     * @param ignoreCase Ignoring case or not
+     * @return True if the same.
+     */
+    bool compare(const char *left, const char *right, bool ignoreCase)
+    {
+        for (;; left++, right++)
+        {
+            int res = tolower((unsigned char)*left) - tolower((unsigned char)*right);
+            if (res != 0 || !*left)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 } // namespace Utilities

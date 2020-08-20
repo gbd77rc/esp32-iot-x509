@@ -1,32 +1,18 @@
 #include "CloudInfo.h"
 #include "LogInfo.h"
-
-
-// Internal WiFi Connection
-WiFiClientSecure httpsClient;
+#include "AzureInstance.h"
 
 /**
  * Base Class Constructor
  * 
  * @param cloudType The cloudType name, so we load up the correct config
  */
-CloudInfoClass::CloudInfoClass(): BaseConfigInfoClass("cloud")
+CloudInfoClass::CloudInfoClass() : BaseConfigInfoClass("cloud")
 {
-    this->_mqttClient = PubSubClient(httpsClient);
-    for (uint8_t i = 0; i < CERT_COUNT;i++)
+    for (uint8_t i = 0; i < CERT_COUNT; i++)
     {
         this->_config.certificates[i].type = (CertType)i;
-    }    
-}
-
-/**
- * Get the cloud type name
- *  
- * @return The cloud type name
- */
-char* CloudInfoClass::getCloudInstanceName()
-{
-    return this->_config.cloudInstance;
+    }
 }
 
 /**
@@ -34,7 +20,6 @@ char* CloudInfoClass::getCloudInstanceName()
  */
 void CloudInfoClass::begin()
 {
-
 }
 
 /**
@@ -44,31 +29,44 @@ void CloudInfoClass::begin()
  */
 void CloudInfoClass::load(JsonObjectConst obj)
 {
-    strcpy(this->_config.cloudInstance, obj.containsKey("connect") ? obj["connect"].as<const char*>() : "");
+    this->_config.provider = CloudInfoClass::getProviderTypeFromString(obj.containsKey("provider") ? obj["provider"].as<const char *>() : "");
+
     if (obj.containsKey("certs"))
     {
-        strcpy(this->_config.certificates[CT_CERT].fileName, obj["certs"].containsKey("certificate") ? obj["certs"]["certificate"].as<const char*>() : "");
-        strcpy(this->_config.certificates[CT_KEY].fileName, obj["certs"].containsKey("key") ? obj["certs"]["key"].as<const char*>() : "");
+        strcpy(this->_config.certificates[CT_CERT].fileName, obj["certs"].containsKey("certificate") ? obj["certs"]["certificate"].as<const char *>() : "");
+        strcpy(this->_config.certificates[CT_KEY].fileName, obj["certs"].containsKey("key") ? obj["certs"]["key"].as<const char *>() : "");
+        CloudInfoClass::loadCertificate(&this->_config.certificates[CT_CERT]);
+        CloudInfoClass::loadCertificate(&this->_config.certificates[CT_KEY]);
     }
     if (obj.containsKey("iotHub"))
     {
-        strcpy(this->_config.endPoint, obj["iotHub"].containsKey("endpoint") ? obj["iotHub"]["endpoint"].as<const char*>() : "");
-        strcpy(this->_config.hubName, obj["iotHub"].containsKey("name") ? obj["iotHub"]["name"].as<const char*>() : "");
+        strcpy(this->_config.endPoint, obj["iotHub"].containsKey("endpoint") ? obj["iotHub"]["endpoint"].as<const char *>() : "");
+        strcpy(this->_config.hubName, obj["iotHub"].containsKey("name") ? obj["iotHub"]["name"].as<const char *>() : "");
         this->_config.port = obj["iotHub"].containsKey("port") ? obj["iotHub"]["port"].as<int>() : 8883;
         this->_config.sendTelemetry = obj["iotHub"].containsKey("sendTelemetry") ? obj["iotHub"]["sendTelemetry"].as<bool>() : false;
         this->_config.sendInterval = obj["iotHub"].containsKey("intervalSeconds") ? obj["iotHub"]["intervalSeconds"].as<int>() : 60;
     }
-    if( obj.containsKey("azure"))
+    if (obj.containsKey("azure") && this->_config.provider == CPT_AZURE)
     {
-        strcpy(this->_config.certificates[CT_CA_AZURE].fileName, obj["azure"].containsKey("ca") ? obj["azure"]["ca"].as<const char*>() : "");
+        strcpy(this->_config.certificates[CT_CA].fileName, obj["azure"].containsKey("ca") ? obj["azure"]["ca"].as<const char *>() : "");
     }
-    if( obj.containsKey("aws"))
+    strcpy(this->ca_azure_fileName, obj["azure"].containsKey("ca") ? obj["azure"]["ca"].as<const char *>() : "");
+    if (obj.containsKey("aws") && this->_config.provider == CPT_AWS)
     {
-        strcpy(this->_config.certificates[CT_CA_AWS].fileName, obj["aws"].containsKey("ca") ? obj["aws"]["ca"].as<const char*>() : "");
+        strcpy(this->_config.certificates[CT_CA].fileName, obj["aws"].containsKey("ca") ? obj["aws"]["ca"].as<const char *>() : "");
+        CloudInfoClass::loadCertificate(&this->_config.certificates[CT_CA]);
+    }
+    strcpy(this->ca_aws_fileName, obj["aws"].containsKey("ca") ? obj["aws"]["ca"].as<const char *>() : "");
+
+    CloudInfoClass::loadCertificate(&this->_config.certificates[CT_CA]);
+
+    if (this->_config.provider == CPT_AZURE)
+    {
+        this->_provider = &Azure;
     }
 
-    LogInfo.log(LOG_VERBOSE, "Connect to %s [%s@%s:%i] Telementy %s Internval %i", 
-                this->_config.cloudInstance,
+    LogInfo.log(LOG_VERBOSE, "Connect to %s [%s@%s:%i] Telementy %s Internval %i",
+                CloudInfoClass::getStringFromProviderType(this->_config.provider),
                 this->_config.hubName,
                 this->_config.endPoint,
                 this->_config.port,
@@ -84,7 +82,7 @@ void CloudInfoClass::load(JsonObjectConst obj)
 void CloudInfoClass::save(JsonObject obj)
 {
     auto json = obj.createNestedObject(this->_sectionName);
-    json["connect"] = this->_config.cloudInstance;
+    json["connect"] = CloudInfoClass::getStringFromProviderType(this->_config.provider);
 
     auto certs = json.createNestedObject("certs");
     certs["certficate"] = this->_config.certificates[CT_CERT].fileName;
@@ -98,10 +96,10 @@ void CloudInfoClass::save(JsonObject obj)
     iotHub["intervalSeconds"] = this->_config.sendInterval;
 
     auto azure_ca = json.createNestedObject("azure");
-    azure_ca["ca"] = this->_config.certificates[CT_CA_AZURE].fileName;
+    azure_ca["ca"] = this->ca_azure_fileName;
 
     auto aws_ca = json.createNestedObject("aws");
-    aws_ca["ca"] = this->_config.certificates[CT_CA_AWS].fileName;
+    aws_ca["ca"] = this->ca_aws_fileName;
 }
 
 /**
@@ -112,7 +110,64 @@ void CloudInfoClass::save(JsonObject obj)
 void CloudInfoClass::toJson(JsonObject ob)
 {
     auto json = ob.createNestedObject(this->getSectionName());
-    json["cloud"] = this->_config.cloudInstance;
+    json["cloud"] = CloudInfoClass::getStringFromProviderType(this->_config.provider);
+}
+
+bool CloudInfoClass::connect()
+{
+    this->_provider->connect(&this->_config);
+    return true;
+}
+
+/**
+ * Convert CloudProviderType to string
+ * 
+ * @param type The CloudProviderType
+ */
+const char *CloudInfoClass::getStringFromProviderType(CloudProviderType type)
+{
+    switch (type)
+    {
+    case CPT_AWS:
+        return "aws";
+    case CPT_AZURE:
+        return "azure";
+    default:
+        return "azure";
+    }
+    return "azure";
+}
+
+/**
+ * Convert string to CloudProviderType
+ * 
+ * @param type The string version of CloudProviderType
+ */
+CloudProviderType CloudInfoClass::getProviderTypeFromString(const char* type)
+{
+    if (Utilities::compare(type, "azure"))
+    {
+        return CPT_AZURE;
+    }
+    if (Utilities::compare(type, "aws"))
+    {
+        return CPT_AWS;
+    } 
+    return CPT_AZURE;
+}
+
+void CloudInfoClass::loadCertificate(CERTIFICATE *cert)
+{
+    if (strlen(cert->fileName) > 0)
+    {
+        size_t size = Utilities::fileSize(cert->fileName);
+        if (size > 0)
+        {
+            cert->contents = new char[size];
+            Utilities::readFile(cert->fileName, cert->contents, size);
+            LogInfo.log(LOG_VERBOSE, "Loaded Certificate (%s)", cert->fileName);
+        }
+    }
 }
 
 CloudInfoClass CloudInfo;

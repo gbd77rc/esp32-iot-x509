@@ -10,6 +10,7 @@ namespace Utilities
     size_t readFile(const char *filename, char* buffer, size_t size);
     File openFile(const char* filename, bool readOnly = true);
     size_t fileSize(const char* filename);
+    bool compare(const char* left, const char* right, bool ignoreCase = true);
 }
 
 #endif
