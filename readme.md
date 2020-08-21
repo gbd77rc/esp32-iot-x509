@@ -6,3 +6,18 @@ This repo will contain the full source code, except any cloud related security t
 
 > **Don't ever be temped to include tokens within a git repo, it does not take much to use it and gain access, and if to much rights (IAM, RBAC) been given then you have a big security hole**.
 
+The following links will take the reader to the sections they are interested in.  
+
+* [Device Sensor Setup](./DeviceSensorSetup.md)
+* [Firmware Processing](./DeviceFirmwareProcess.md)
+* [Firmware Development](./FirmwareDevelopment.md)
+* [x509 creation](./DeviceCertification.md)
+* Azure IoT Hub device registration
+* AWS IoT core device registration
+* Application to show the data from the device
+* Development Setup and source control
+* Serverless and Containers
+* CI/CD Pipelines
+* Multi-Tenants
+
+Some of you may just want to know how to get x509 certificates on the device and link it to AWS or Azure or even both.  Well both is just an idea at the moment, still not done the actual work, but the theory is there.
