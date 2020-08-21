@@ -146,3 +146,198 @@ Each cloud provider registers the CA certificate in a different way.
 
 ### Azure IoT Hub
 
+Make sure you have the Azure Cli installed, these are the [installation instructions](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest).  
+
+I am assuming you have already created an Azure Subscription.   To set the subscription in the command use the following,
+
+```shell
+▶ az account set --subscription "<subscription name>" 
+```
+
+There can only be one free IoT Hub in a subscription, so if you already created one, either use the existing IoT Hub or create a new one with S1 tier.  This will be about $25 per month at the time of writing this article.
+
+So with that being said let create an IoT hub in the subscription selected.  The first step is to create a `Resource Group`.  Resource groups are create to isolate all resources to single group.  You can apply subscriptions and RBAC to them to control who has access etc.  Thats the short story, look at the various Azure documentation about them.
+
+Resource groups need a default location where the resource be created.  I live the UK so I am going to use one of those regions.   To list out the location/regions use this command.
+
+```shell
+▶ az account list-locations --query "[?contains(regionalDisplayName, 'UK')].name"
+[
+  "uksouth",
+  "ukwest"
+]
+```
+
+I will be using the `ukwest` location for this article.
+
+```shell
+▶ az group create --name dev-ot-rg --location ukwest
+{
+  "id": "/subscriptions/<subscription id>/resourceGroups/dev-ot-rg",
+  "location": "ukwest",
+  "managedBy": null,
+  "name": "dev-ot-rg",
+  "properties": {
+    "provisioningState": "Succeeded"
+  },
+  "tags": null,
+  "type": "Microsoft.Resources/resourceGroups"
+}
+```
+
+Now we have the group we can create the IoT hub.  The hub name is unique globally, so choose your own.
+
+```shell
+▶ az iot hub create --name dev-ot-iot-hub --resource-group dev-ot-rg --sku S1
+{- Finished ..
+  "etag": "AAAAASlLtPs=",
+  "id": "/subscriptions/<subscription id>/resourceGroups/dev-ot-rg/providers/Microsoft.Devices/IotHubs/dev-ot-iot-hub",
+  "location": "ukwest",
+  "name": "dev-ot-iot-hub",
+  "properties": {
+  	...
+    "eventHubEndpoints": {
+      "events": {
+        "endpoint": "sb://iothub-ns-dev-ot-iot-<uniqueid>.servicebus.windows.net/",
+        "partitionCount": 4,
+        "partitionIds": [
+          "0",
+          "1",
+          "2",
+          "3"
+        ],
+        "path": "dev-ot-iot-hub",
+        "retentionTimeInDays": 1
+      }
+    },
+    "features": "None",
+    "hostName": "dev-ot-iot-hub.azure-devices.net",
+    "ipFilterRules": [],
+    "locations": [
+      {
+        "location": "UK West",
+        "role": "primary"
+      },
+      {
+        "location": "UK South",
+        "role": "secondary"
+      }
+    ],
+		....
+    "state": "Active",
+    ....
+  },
+  "resourcegroup": "dev-ot-rg",
+  "sku": {
+    "capacity": 1,
+    "name": "S1",
+    "tier": "Standard"
+  },
+  "subscriptionid": "<subscription id>",
+  "tags": {},
+  "type": "Microsoft.Devices/IotHubs"
+}
+```
+
+I have removed a lot of the output and just showing the important bits.  The `hostname` may or may not exists as I will be removing it when I finish these articles.
+
+Now we are ready to upload the CA certificate we create earlier.
+
+```shell
+▶ az iot hub certificate create --hub-name dev-ot-iot-hub --name dev-root-ca --path ./dev-root-ca.pem
+{
+  "etag": "AAAAASl0QK4=",
+  "id": "/subscriptions/<subscription id>/resourceGroups/dev-ot-rg/providers/Microsoft.Devices/IotHubs/dev-ot-iot-hub/certificates/dev-root-ca",
+  "name": "dev-root-ca",
+  "properties": {
+    "certificate": null,
+    "created": "2020-08-21T13:48:47+00:00",
+    "expiry": "2021-08-21T10:33:55+00:00",
+    "isVerified": false,
+    "subject": "devices.abc.com",
+    "thumbprint": "224C0C1E48BF483AA2B2D8B3EF891C48393DB5BD",
+    "updated": "2020-08-21T13:48:47+00:00"
+  },
+  "resourceGroup": "dev-ot-rg",
+  "type": "Microsoft.Devices/IotHubs/Certificates"
+}
+```
+
+Now if you look at the `isVerified` property you notice that is currently `false`.  It needs to be `true` before we can use it.  So do that we need to generate a verification code that Azure will recognise.  You will need the `etag` property above to commplete this command.
+
+```shell
+▶ az iot hub certificate generate-verification-code --hub-name dev-ot-iot-hub --name dev-root-ca --etag AAAAASl0QK4=
+{
+  "etag": "AAAAASmFeVU=",
+  "id": "/subscriptions/<subscription id>/resourceGroups/dev-ot-rg/providers/Microsoft.Devices/IotHubs/dev-ot-iot-hub/certificates/dev-root-ca",
+  "name": "dev-root-ca",
+  "properties": {
+    "certificate": "",
+    "created": "2020-08-21T13:48:47+00:00",
+    "expiry": "2021-08-21T10:33:55+00:00",
+    "isVerified": false,
+    "subject": "devices.abc.com",
+    "thumbprint": "224C0C1E48BF483AA2B2D8B3EF891C48393DB5BD",
+    "updated": "2020-08-21T14:00:44+00:00",
+    "verificationCode": "5BA5E596CE80C50C3053D29BB9593C382292BD94C99A7D05"
+  },
+  "resourceGroup": "dev-ot-rg",
+  "type": "Microsoft.Devices/IotHubs/Certificates"
+}
+```
+
+The `vertificationCode` is used as a `CN` for the certifcate we are going to generate.  Make a note of the `etag` as well.
+
+```shell
+▶ openssl req -new -key dev-root-ca.key -out verification.csr    
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) []:GB
+State or Province Name (full name) []:
+Locality Name (eg, city) []:
+Organization Name (eg, company) []:
+Organizational Unit Name (eg, section) []:
+Common Name (eg, fully qualified host name) []:5BA5E596CE80C50C3053D29BB9593C382292BD94C99A7D05
+Email Address []:
+
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:
+```
+
+Now we have `code signing request` lets generate the actual certificate
+
+```shell
+▶ openssl x509 -req -in verification.csr -CA dev-root-ca.pem -CAkey dev-root-ca.key -CAcreateserial -out verification.pem
+Signature ok
+subject=/C=GB/CN=5BA5E596CE80C50C3053D29BB9593C382292BD94C99A7D05
+Getting CA Private Key
+```
+
+The verification certificate is now ready to be upload to Azure.
+
+```shell
+▶ az iot hub certificate verify --etag AAAAASmFeVU= --hub-name dev-ot-iot-hub --path ./verification.pem --name dev-root-ca
+{
+  "etag": "AAAAASnEKIk=",
+  "id": "/subscriptions/<subscription id>/resourceGroups/dev-ot-rg/providers/Microsoft.Devices/IotHubs/dev-ot-iot-hub/certificates/dev-root-ca",
+  "name": "dev-root-ca",
+  "properties": {
+    "certificate": null,
+    "created": "2020-08-21T13:48:47+00:00",
+    "expiry": "2021-08-21T10:33:55+00:00",
+    "isVerified": true,
+    "subject": "devices.abc.com",
+    "thumbprint": "224C0C1E48BF483AA2B2D8B3EF891C48393DB5BD",
+    "updated": "2020-08-21T14:42:06+00:00"
+  },
+  "resourceGroup": "dev-ot-rg",
+  "type": "Microsoft.Devices/IotHubs/Certificates"
+}
+```
+
