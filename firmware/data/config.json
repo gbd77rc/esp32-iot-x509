@@ -30,8 +30,8 @@
     "cloud": {
         "provider": "azure",
         "certs": {
-            "certificate": "/cloud/cert.pem",
-            "key": "/cloud/key.pem"
+            "certificate": "/cloud/device-cert.pem",
+            "key": "/cloud/device.key"
         },
         "iotHub": {
             "endpoint": "",

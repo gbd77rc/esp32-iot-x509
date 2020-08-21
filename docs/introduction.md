@@ -14,11 +14,10 @@ Throughout this journey I will introduce some TLA.  Most of the meanings below I
 
 | Term | Meaning                                                      |
 | ---- | ------------------------------------------------------------ |
-| SOC  | System on a chip - is an integrated circuit (also known as a "**chip**") that integrates all or most components of a computer or other electronic **system** |
-| OTA  | Over The Air - This is process where the firmware on the device can be update/replace via remote communication. |
-| TLA  | Three Letter Acronym - way of making a phrase with three words shorter by only using the first letters of the words: Three letter acronyms are very common in the world of computers! |
-
-
+| CA   | **Certification Authority** - In cryptography, a **CA** is an entity that issues digital **certificates** |
+| OTA  | **Over The Air** - This is process where the firmware on the device can be update/replace via remote communication. |
+| SOC  | **System On a Chip** - is an integrated circuit (also known as a "**chip**") that integrates all or most components of a computer or other electronic **system** |
+| TLA  | **Three Letter Acronym** - way of making a phrase with three words shorter by only using the first letters of the words: Three letter acronyms are very common in the world of computers! |
 
 ## The Device Story
 
