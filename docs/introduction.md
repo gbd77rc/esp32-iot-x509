@@ -1,11 +1,11 @@
 # First Blog - What are we going todo
 
-This introduction blog will outline the use case story, and how we are going to do it.  The following links will take the reader to the sections they are interested in.  Some of you may just want to know how to get x509 certificates on the device and link it to AWS or Azure or even both.  Well the the both is just an idea at the moment, still not done the actual work, but the theory is there.
+This introduction blog will outline the use case story, and how we are going to do it.  The following links will take the reader to the sections they are interested in.  
 
 * [Device Sensor Setup](./DeviceSensorSetup.md)
 * [Firmware Processing](./DeviceFirmwareProcess.md)
 * [Firmware Development](./FirmwareDevelopment.md)
-* x509 creation
+* [x509 creation](./DeviceCertification.md)
 * Azure IoT Hub device registration
 * AWS IoT core device registration
 * Application to show the data from the device
@@ -14,15 +14,24 @@ This introduction blog will outline the use case story, and how we are going to 
 * CI/CD Pipelines
 * Multi-Tenants
 
-There are many short tutorial out in the internet, but nothing to really show a journey on how to get a device securely connected to the cloud and make use of the data in visualization application.  It will cover the development and CI/CD processing in a cloud enabled ecosystem.  I will try to keep the costs of the cloud down to the minimum by using the free tier where I can and be able to undeploy automatically when I can't.
+Some of you may just want to know how to get x509 certificates on the device and link it to AWS or Azure or even both.  Well both is just an idea at the moment, still not done the actual work, but the theory is there.
+
+## So Lets Get On With The Journey
+
+There are many short tutorial out in the internet, but nothing to really show a journey on how to get a device securely connected to the cloud and make use of the data in visualization application.  These blogs will cover end to end journey, from device developement, cloud registration, web application deployment and seeing the visualization at the end.  I will try to keep the costs of the cloud down to the minimum by using the free tier where I can and be able to undeploy automatically when I can't.
 
 Each of these blogs maybe broken into smaller ones, depending on the size of each one.  I will try to limit them to 10 minutes of reading, just to keep it interesting.  This introduction one will be shorter just to wet your appetite.
 
 ## Terminology
 
-| Term | Meaning
-|---|---
-|SOC| System on a chip
+Throughout this journey I will introduce some TLA.  Most of the meanings below I accquired from Wikipedia
+
+| Term | Meaning                                                      |
+| ---- | ------------------------------------------------------------ |
+| SOC  | System on a chip - is an integrated circuit (also known as a "**chip**") that integrates all or most components of a computer or other electronic **system** |
+| TLA  | Three Letter Acronym - way of making a phrase with three words shorter by only using the first letters of the words: Three letter acronyms are very common in the world of computers! |
+
+
 
 ## The Device Story
 
@@ -30,9 +39,11 @@ We are a manufacturer of the devices which are based on ESP32 chip for this seri
 
 * Temperature/Humidity Detecting using DHT-22 sensor
 * GPS for outdoor positioning
-* WiFi signal strength detection for indoor positioning
+* Connected WiFi signal strength detection
 
-Each sensor and how to wire them up will be covered in the [Device Sensor Setup](./DeviceSensorSetup.md).
+If we have time we will use the WiFi repeaters around the area to workout the device location.  This is based on the signal strength from each detect SSID.
+
+Each sensor and how to wire them up will be covered in the [Device Sensor Setup](./DeviceSensorSetup.md) blog.
 
 ![Device Setup](./images/Step3.png)
 

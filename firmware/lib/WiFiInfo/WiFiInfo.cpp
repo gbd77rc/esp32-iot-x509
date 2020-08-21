@@ -107,6 +107,7 @@ void WiFiInfoClass::toJson(JsonObject ob)
 {
     auto json = ob.createNestedObject("WiFi");
     json["ssid"] = this->getSSID();
+    json["strength"] = WiFi.RSSI();
 }
 
 /**

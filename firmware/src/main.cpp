@@ -16,12 +16,20 @@ SemaphoreHandle_t xSemaphore;
 
 long blinkUntil = 10000;
 
-
+/**
+ * Build the data object that will be sent to the cloud
+ * 
+ * @param payload This is the json object that will contain the data
+ * @param isDeviceTwin Device Twin requires different payload
+*/
 void buildDataObject(JsonObject payload, bool isDeviceTwin)
 {
     payload.clear();
+    WiFiInfo.toJson(payload);    
     LedInfo.toJson(payload);
     EnvSensor.toJson(payload);
+    // Currently Azure Device Twin object cannot accept JSON array object which GeoJSON format uses, therefore 
+    // we send GeoJSON to the telemetry topic but a none array object to Device Twin topic
     if (isDeviceTwin)
     {
         GpsSensor.toJson(payload);
@@ -32,6 +40,9 @@ void buildDataObject(JsonObject payload, bool isDeviceTwin)
     }
 }
 
+/**
+ * This is the device setup routine, only called the once on startup
+ */
 void setup()
 {
     Serial.begin(115200);
@@ -87,6 +98,9 @@ void setup()
     }
 }
 
+/**
+ * This loop function is called every time it exists by the main Arduino bookstrap code.
+ */
 void loop()
 {
     if (WiFiInfo.getIsConnected())
