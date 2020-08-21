@@ -42,6 +42,7 @@ The following information describes the configuration file layout and the sensor
             "name": "",
             "port": 8883,
             "sendTelemetry": true,
+            "sendDeviceTwin": true,
             "intervalSeconds": 60
         },
         "azure": {
@@ -165,6 +166,7 @@ The `CA` in the cloud specific sections contains the public key so that the devi
         "name": "",
         "port": 8883,
         "sendTelemetry": true,
+        "sendDeviceTwin": true,
         "intervalSeconds": 60
     }
 
@@ -176,7 +178,9 @@ The `name` is the name of the IoT Hub/Core. Not settable via the cloud.
 
 The `port` is the port that the IoT Hub/Core is listening on.
 
-The `sendTelemetry` is the flag to indicate that telemetry data should be sent.  This can be settable via the cloud.  Shadow/Device Twin is alway enabled so that configuration and limited telemetry is sent.
+The `sendTelemetry` is the flag to indicate that telemetry data should be sent.  This can be settable via the cloud.  
+
+The `sendDeviceTwin` is the flag to indicate that device twin reported data should be sent.  This can be settable via the cloud.
 
 The `intervalSeconds` is the number of seconds to wait before sending telemetry data again, `sendTelemetry` is enabled.  This can be settable via the cloud.
 

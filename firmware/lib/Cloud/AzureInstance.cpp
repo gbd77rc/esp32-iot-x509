@@ -2,6 +2,7 @@
 #include "LogInfo.h"
 #include "NTPInfo.h"
 #include "WakeUpInfo.h"
+#include "LedInfo.h"
 
 RTC_DATA_ATTR int _Azure_count;
 
@@ -11,7 +12,9 @@ RTC_DATA_ATTR int _Azure_count;
 void AzureInstanceClass::mqttCallback(char *topic, byte *payload, unsigned int length)
 {
     WakeUp.suspendSleep();
+    LedInfo.blinkOn(LED_CLOUD);
     Azure.processReply(topic, payload, length);
+    LedInfo.blinkOff(LED_CLOUD);
     WakeUp.resumeSleep();
 }
 

@@ -116,11 +116,19 @@ void CloudInfoClass::toJson(JsonObject ob)
     json["cloud"] = CloudInfoClass::getStringFromProviderType(this->_config.provider);
 }
 
-
-bool CloudInfoClass::connect()
+/**
+ * Connect to the selected provider
+ * 
+ * @return True if connected
+ */
+bool CloudInfoClass::connect(DATABUILDER builder)
 {
-    this->_provider->connect(&this->_config);
-    return true;
+    if (this->getProvider() != NULL)
+    {
+        this->getProvider()->begin(builder);
+        return this->getProvider()->connect(&this->_config);
+    }
+    return false;
 }
 
 /**
@@ -160,6 +168,11 @@ CloudProviderType CloudInfoClass::getProviderTypeFromString(const char* type)
     return CPT_AZURE;
 }
 
+/**
+ * Load the certificate body into memory
+ * 
+ * @param cert The certificate struct to fill
+ */
 void CloudInfoClass::loadCertificate(CERTIFICATE *cert)
 {
     if (strlen(cert->fileName) > 0)
@@ -179,9 +192,10 @@ void CloudInfoClass::loadCertificate(CERTIFICATE *cert)
  */
 void CloudInfoClass::tick()
 {
-    if( this->_provider != NULL)
+    if( this->getProvider() != NULL)
     {
-        this->_provider->tick();
+        this->getProvider()->sendData();
+        this->getProvider()->tick();
     }
 }
 

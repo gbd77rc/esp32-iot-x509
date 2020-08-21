@@ -17,7 +17,6 @@ typedef struct cloudInstanceStruct
 {
     BaseCloudProvider *instance;
     TaskHandle_t checkTaskHandle;
-    TaskHandle_t sendTaskHandle;
 } CloudInstance;
 
 class BaseCloudProvider
@@ -26,10 +25,10 @@ public:
     static void checkTask(void *parameters);
 
     BaseCloudProvider(CloudProviderType type);
-
+    void begin(DATABUILDER builder);
     bool virtual connect(const IoTConfig *config) = 0;
     void virtual processReply(char *topic, byte *payload, unsigned int length) = 0;
-    bool sendData(JsonObject json);
+    bool sendData();
     bool canSendNow();
     bool getIsConnected();
     const char* getProviderType();
@@ -46,6 +45,7 @@ protected:
     bool sendDeviceReport(JsonObject json);
     bool sendTelemetry(JsonObject json);
     const char* getFirstTopic(TopicType type);
+    void checkForMessages();
     WiFiClientSecure _httpsClient;
     PubSubClient _mqttClient;
     CloudProviderType _providerType;
@@ -57,6 +57,7 @@ protected:
     CloudInstance _cloudInstance;
     uint64_t _lastSent;
     char _buffer[64];
+    DATABUILDER _builder;    
 };
 
 #endif

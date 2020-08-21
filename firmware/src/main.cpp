@@ -16,6 +16,22 @@ SemaphoreHandle_t xSemaphore;
 
 long blinkUntil = 10000;
 
+
+void buildDataObject(JsonObject payload, bool isDeviceTwin)
+{
+    payload.clear();
+    LedInfo.toJson(payload);
+    EnvSensor.toJson(payload);
+    if (isDeviceTwin)
+    {
+        GpsSensor.toJson(payload);
+    } 
+    else 
+    {
+        GpsSensor.toGeoJson(payload);
+    }
+}
+
 void setup()
 {
     Serial.begin(115200);
@@ -59,7 +75,7 @@ void setup()
         OledDisplay.displayLine(0, 40, "Tim: %s", NTPInfo.getFormattedTime());
         OledDisplay.displayLine(0, 50, "Env: %s", EnvSensor.toString());
         OledDisplay.displayLine(0, 60, "GPS: %s", GpsSensor.toString());
-        if ( CloudInfo.connect() == false)
+        if ( CloudInfo.connect(buildDataObject) == false)
         {
             OledDisplay.displayExit(F("Not Connected to the cloud so rebooting to try again!"), 20);
         }
@@ -71,20 +87,6 @@ void setup()
     }
 }
 
-void updateCloud()
-{
-    DynamicJsonDocument payload(800);
-    auto root = payload.to<JsonObject>();
-    LedInfo.toJson(root);
-    EnvSensor.toJson(root);
-    GpsSensor.toJson(root);
-    // Only send if we have valid Epoch (time greater then 2020-01-01)
-    if (NTPInfo.getEpoch() > 1577836800)
-    {
-        CloudInfo.getProvider()->sendData(payload.as<JsonObject>());
-    }    
-}
-
 void loop()
 {
     if (WiFiInfo.getIsConnected())
@@ -94,7 +96,6 @@ void loop()
         GpsSensor.tick();
         NTPInfo.tick();
         CloudInfo.tick();
-        updateCloud();
         WakeUp.tick();
         OledDisplay.displayLine(30, 40, "%s", EnvSensor.toString());
         OledDisplay.displayLine(30, 60, "%s", GpsSensor.toString());

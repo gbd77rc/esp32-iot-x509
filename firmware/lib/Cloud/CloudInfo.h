@@ -5,14 +5,13 @@
 #include "Utilities.h"
 #include "CloudMisc.h"
 #include "BaseCloudProvider.h"
-
 class CloudInfoClass : public BaseConfigInfoClass
 {
 public:
     CloudInfoClass();
 
     void begin(SemaphoreHandle_t flag);
-    bool connect();
+    bool connect(DATABUILDER builder);
     void load(JsonObjectConst obj) override;
     void save(JsonObject ob) override;
     void toJson(JsonObject ob) override;

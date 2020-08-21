@@ -3,6 +3,7 @@
 #include "DeviceInfo.h"
 #include "WakeUpInfo.h"
 #include "NTPInfo.h"
+#include "LedInfo.h"
 
 RTC_DATA_ATTR int _send_count;
 
@@ -26,7 +27,7 @@ void BaseCloudProvider::checkTask(void *parameters)
         {
             if (xSemaphoreTake(cloud->instance->getSemaphore(), portMAX_DELAY))
             {
-                cloud->instance->tick();
+                cloud->instance->checkForMessages();
                 xSemaphoreGive(cloud->instance->getSemaphore());
             }
             else
@@ -53,6 +54,16 @@ BaseCloudProvider::BaseCloudProvider(CloudProviderType type)
 }
 
 /**
+ * Begin initialisation again
+ * 
+ * @param builder This is a pointer to a function that will build the json object the will be sent out
+ */
+void BaseCloudProvider::begin(DATABUILDER builder)
+{
+    this->_builder = builder;
+}
+
+/**
 * Is the instance connected
 * 
 * @return True if connected;
@@ -63,9 +74,17 @@ bool BaseCloudProvider::getIsConnected()
 }
 
 /**
- * Check if there are any messages waiting at the broker for us
+ * Resume the check task
  */
 void BaseCloudProvider::tick()
+{
+    vTaskResume(this->_cloudInstance.checkTaskHandle);
+}
+
+/**
+ *  Check for the any waiting messages on the broker
+ */
+void BaseCloudProvider::checkForMessages()
 {
     if (this->getIsConnected())
     {
@@ -235,13 +254,25 @@ bool BaseCloudProvider::updateProperty(const char *property, JsonVariant value)
     return sent;
 }
 
-bool BaseCloudProvider::sendData(JsonObject json)
+/**
+ * Send data to device twin or 
+ */
+bool BaseCloudProvider::sendData()
 {
-    if (this->getIsConnected() && this->canSendNow())
+    // Only send if we have valid Epoch (time greater then 2020-01-01)
+    if (this->getIsConnected() && this->canSendNow() && NTPInfo.getEpoch() > 1577836800)
     {
-        this->sendDeviceReport(json);
-        this->sendTelemetry(json);
+        WakeUp.suspendSleep();
+        LedInfo.blinkOn(LED_CLOUD);
+        DynamicJsonDocument payload(800);
+        auto root = payload.to<JsonObject>();        
+        this->_builder(root, true);
+        this->sendDeviceReport(root);
+        this->_builder(root, false);
+        this->sendTelemetry(root);
         this->_lastSent = millis();
+        LedInfo.blinkOff(LED_CLOUD);
+        WakeUp.resumeSleep();
         return true;
     }
     return false;

@@ -117,3 +117,8 @@ This library will handle the date/time from the internet.  Basically the ESP32 d
 This library will handle when to sleep and when to wake up.  It wraps the [ESP Sleep Modes](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/sleep_modes.html).  We will go into deep sleep mode.  
 
 > One issue is that the ESP 32 WiFi development board will shutdown the 3.3v line, but the 5v line is still live!  This means that the GPS sensor will keep running. I am still working on how to switch this line off when the ESP32 sleeps.
+
+### Cloud Information
+
+This device is useless unless it can connect to the cloud and report on it sensors. The library has both Azure and AWS implementations, they share a common configuration `CloudInfo` and a common base class `BaseCloudProvider`.  Most of the code to do the actual publish/subscribe and connecting is handle by the base class.  The individual instances handle the topic and server configuration related data.
+

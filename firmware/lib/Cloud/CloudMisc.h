@@ -53,4 +53,6 @@ typedef struct IoTTopic
     bool appendUniqueId;
 } IOTTOPIC;
 
+typedef void (*DATABUILDER)(JsonObject payload, bool isDeviceTwin);
+
 #endif
