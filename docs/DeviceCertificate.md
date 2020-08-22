@@ -38,15 +38,15 @@ So if the CPU Id is `AC8684B5AA8C` then the actual device Id will be `OT-AC8684B
 
 ## From Root Certificate to Device Certificate
 
-We need a private CA to generate the device certificate and create validation chain.  Normally you would have a signing certificate generated from a recognised CA like [digicert](https://www.digicert.com/).  
+We need a private CA to generate the device certificate and create validation chain.  Normally you would have a signing certificate generated from a recognized CA like [digicert](https://www.digicert.com/).  
 
-> I am not associated them, or have ever brought certificates from them. 
+> I am not associated them, or have ever brought certificates from them.
 
 As we don't want the expense, we will create our own and upload that  the cloud, which they allow.  To this make sure you have an `openssl` application installed on your os.  I use a Mac OSX here, but it is available for Windows and Linux.  The command line may differ on Windows.  You will need to do some research on the command if it fails.
 
-The `file names` and `CA Common Name` can be changed to suit your needs.  Just make it consistant.
+The `file names` and `CA Common Name` can be changed to suit your needs.  Just make it consistent.
 
-1. Create the CA Key
+### Create the CA Key
 
 ```shell
 ▶ openssl genrsa -out dev-root-ca.key 4096
@@ -56,7 +56,7 @@ Generating RSA private key, 4096 bit long modulus
 e is 65537 (0x10001)
 ```
 
-2.  Create the PEM file
+### Create the PEM file
 
 ```shell
 ▶ openssl req -x509 -new -key dev-root-ca.key -sha256 -days 365 -out dev-root-ca.pem
@@ -78,7 +78,7 @@ Email Address []:
 
 The `days` parameter is set to expire in a year.  The `Common Name` attribute should be some URI, does not need to exist. 
 
-3. Generate and Sign the Device Certificate
+### Generate and Sign the Device Certificate
 
 ```shell
 ▶ openssl genrsa -out device.key 4096      
@@ -339,5 +339,61 @@ The verification certificate is now ready to be upload to Azure.
   "resourceGroup": "dev-ot-rg",
   "type": "Microsoft.Devices/IotHubs/Certificates"
 }
+```
+
+So now we can register the devices on Azure without having to create new certificates.  Just create the device with the device id as the name.  This will be covered [IoT Device Registration]() article.
+
+### AWS IoT Core
+
+Now we can do the same with AWS IoT core as we did with Azure.
+
+There is no real concept of a resource group, but you can tag resources which we will do.  There is one IoT Core per region per account.   Now we will use the UK region.  We can use the following command.
+
+```shell
+▶ aws ec2 describe-regions --filters 'Name=endpoint,Values=*eu*'
+```
+
+Now the issue here is that the output is on a different stream.
+
+```
+REGIONS ec2.eu-north-1.amazonaws.com    opt-in-not-required     eu-north-1
+REGIONS ec2.eu-west-3.amazonaws.com     opt-in-not-required     eu-west-3
+REGIONS ec2.eu-west-2.amazonaws.com     opt-in-not-required     eu-west-2
+REGIONS ec2.eu-west-1.amazonaws.com     opt-in-not-required     eu-west-1
+REGIONS ec2.eu-central-1.amazonaws.com  opt-in-not-required     eu-central-1
+```
+
+Now London is actually `eu-west-2` so that the region code we will use.
+
+```
+▶ aws iot get-registration-code
+
+{
+    "registrationCode": "d73cf3cc2ef642b380d46e98d8d715febc335c5f24db3b12e13154466a88d1f7"
+}
+```
+
+Like Azure we have to create the CA vertification certificate.  The `CN` is the `registratonCode` property.
+
+```shell
+▶ openssl req -new -key dev-root-ca.key -out verification-aws.csr
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) []:GB
+State or Province Name (full name) []:
+Locality Name (eg, city) []:
+Organization Name (eg, company) []:
+Organizational Unit Name (eg, section) []:
+Common Name (eg, fully qualified host name) []:d73cf3cc2ef642b380d46e98d8d715febc335c5f24db3b12e13154466a88d1f7
+Email Address []:
+
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:
 ```
 

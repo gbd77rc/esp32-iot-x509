@@ -12,8 +12,7 @@ The following links will take the reader to the sections they are interested in.
 * [Firmware Processing](./docs/DeviceFirmwareProcess.md)
 * [Firmware Development](./docs/FirmwareDevelopment.md)
 * [x509 creation and hub creation](./docs/DeviceCertificate.md)
-* Azure IoT Hub device registration
-* AWS IoT core device registration
+* IoT Device Registration
 * Application to show the data from the device
 * Development Setup and source control
 * Serverless and Containers
