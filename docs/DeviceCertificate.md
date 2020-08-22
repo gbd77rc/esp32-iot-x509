@@ -46,6 +46,42 @@ As we don't want the expense, we will create our own and upload that  the cloud,
 
 The `file names` and `CA Common Name` can be changed to suit your needs.  Just make it consistent.
 
+### Mac OSX OpenSSL Workaround
+
+If you are using a Mac OSX, then it is more then likely has LibraSSL installed.  It does not have the `-addext` option to the command.  Which is need to add the `basicConstraints` properties to the root certificate.    To get around this do the following.
+
+```shell
+▶ nano rootca.conf
+```
+
+Add this to the file.
+
+```shell
+
+[ req ]
+distinguished_name       = req_distinguished_name
+extensions               = v3_ca
+req_extensions           = v3_ca
+
+[ v3_ca ]
+basicConstraints         = CA:TRUE
+
+[ req_distinguished_name ]
+countryName                     = Country Name (2 letter code)
+countryName_min                 = 2
+countryName_max                 = 2
+stateOrProvinceName             = State or Province Name (full name)
+localityName                    = Locality Name (eg, city)
+0.organizationName              = Organization Name (eg, company)
+organizationalUnitName          = Organizational Unit Name (eg, section)
+commonName                      = Common Name (eg, fully qualified host name)
+commonName_max                  = 64
+emailAddress                    = Email Address
+emailAddress_max                = 6
+```
+
+If you following [https://github.com/jetstack/cert-manager/issues/279](https://github.com/jetstack/cert-manager/issues/279) this github issue, it will expand other ways around this as well.
+
 ### Create the CA Key
 
 ```shell
@@ -59,7 +95,7 @@ e is 65537 (0x10001)
 ### Create the PEM file
 
 ```shell
-▶ openssl req -x509 -new -key dev-root-ca.key -sha256 -days 365 -out dev-root-ca.pem
+▶ openssl req -new -sha256 -key dev-root-ca.key -nodes -out dev-root-ca.csr -config rootca.conf
 You are about to be asked to enter information that will be incorporated
 into your certificate request.
 What you are about to enter is what is called a Distinguished Name or a DN.
@@ -72,7 +108,23 @@ State or Province Name (full name) []:
 Locality Name (eg, city) []:
 Organization Name (eg, company) []:
 Organizational Unit Name (eg, section) []:
-Common Name (eg, fully qualified host name) []:devices.abc.com    
+Common Name (eg, fully qualified host name) []:devices.abc.com
+Email Address []:
+
+▶ openssl req -x509 -new -in dev-root-ca.csr -key dev-root-ca.key -sha256 -days 365 -out dev-root-ca.pem -config rootca.conf -extensions v3_ca
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) []:GB
+State or Province Name (full name) []:
+Locality Name (eg, city) []:
+Organization Name (eg, company) []:
+Organizational Unit Name (eg, section) []:
+Common Name (eg, fully qualified host name) []:devices.abc.com
 Email Address []:
 ```
 
@@ -107,7 +159,7 @@ to be sent with your certificate request
 A challenge password []:
 ```
 
-You will notice that the `Common Name` now contains the device Id that we retrieved earlier.  You can add a password if you.  Its more secured if you do.
+You will notice that the `Common Name` now contains the device Id that we retrieved earlier.  You can add a password if you like.  Its more secure if you do.
 
 Now lets generate the x509 certificate that will be placed on the device.
 
@@ -246,17 +298,17 @@ Now we are ready to upload the CA certificate we create earlier.
 ```shell
 ▶ az iot hub certificate create --hub-name dev-ot-iot-hub --name dev-root-ca --path ./dev-root-ca.pem
 {
-  "etag": "AAAAASl0QK4=",
+  "etag": "AAAAATH/6c8=",
   "id": "/subscriptions/<subscription id>/resourceGroups/dev-ot-rg/providers/Microsoft.Devices/IotHubs/dev-ot-iot-hub/certificates/dev-root-ca",
   "name": "dev-root-ca",
   "properties": {
     "certificate": null,
-    "created": "2020-08-21T13:48:47+00:00",
-    "expiry": "2021-08-21T10:33:55+00:00",
+    "created": "2020-08-22T13:42:24+00:00",
+    "expiry": "2021-08-22T13:40:00+00:00",
     "isVerified": false,
     "subject": "devices.abc.com",
-    "thumbprint": "224C0C1E48BF483AA2B2D8B3EF891C48393DB5BD",
-    "updated": "2020-08-21T13:48:47+00:00"
+    "thumbprint": "A6E664EC2C1547A2B12924582C02378E68DCDF0B",
+    "updated": "2020-08-22T13:42:24+00:00"
   },
   "resourceGroup": "dev-ot-rg",
   "type": "Microsoft.Devices/IotHubs/Certificates"
@@ -266,20 +318,20 @@ Now we are ready to upload the CA certificate we create earlier.
 Now if you look at the `isVerified` property you notice that is currently `false`.  It needs to be `true` before we can use it.  So do that we need to generate a verification code that Azure will recognise.  You will need the `etag` property above to commplete this command.
 
 ```shell
-▶ az iot hub certificate generate-verification-code --hub-name dev-ot-iot-hub --name dev-root-ca --etag AAAAASl0QK4=
+▶ az iot hub certificate generate-verification-code --hub-name dev-ot-iot-hub --name dev-root-ca --etag AAAAATH/6c8=
 {
-  "etag": "AAAAASmFeVU=",
+  "etag": "AAAAATICxnI=",
   "id": "/subscriptions/<subscription id>/resourceGroups/dev-ot-rg/providers/Microsoft.Devices/IotHubs/dev-ot-iot-hub/certificates/dev-root-ca",
   "name": "dev-root-ca",
   "properties": {
-    "certificate": "",
-    "created": "2020-08-21T13:48:47+00:00",
-    "expiry": "2021-08-21T10:33:55+00:00",
+    "certificate": "...",
+    "created": "2020-08-22T13:42:24+00:00",
+    "expiry": "2021-08-22T13:40:00+00:00",
     "isVerified": false,
     "subject": "devices.abc.com",
-    "thumbprint": "224C0C1E48BF483AA2B2D8B3EF891C48393DB5BD",
-    "updated": "2020-08-21T14:00:44+00:00",
-    "verificationCode": "5BA5E596CE80C50C3053D29BB9593C382292BD94C99A7D05"
+    "thumbprint": "A6E664EC2C1547A2B12924582C02378E68DCDF0B",
+    "updated": "2020-08-22T13:43:33+00:00",
+    "verificationCode": "2978D21A958D22D37BD1747FEF07B538183E3FE6A21B6174"
   },
   "resourceGroup": "dev-ot-rg",
   "type": "Microsoft.Devices/IotHubs/Certificates"
@@ -289,7 +341,7 @@ Now if you look at the `isVerified` property you notice that is currently `false
 The `vertificationCode` is used as a `CN` for the certifcate we are going to generate.  Make a note of the `etag` as well.
 
 ```shell
-▶ openssl req -new -key dev-root-ca.key -out verification.csr    
+▶ openssl req -new -key dev-root-ca.key -out verification-azure.csr
 You are about to be asked to enter information that will be incorporated
 into your certificate request.
 What you are about to enter is what is called a Distinguished Name or a DN.
@@ -302,7 +354,7 @@ State or Province Name (full name) []:
 Locality Name (eg, city) []:
 Organization Name (eg, company) []:
 Organizational Unit Name (eg, section) []:
-Common Name (eg, fully qualified host name) []:5BA5E596CE80C50C3053D29BB9593C382292BD94C99A7D05
+Common Name (eg, fully qualified host name) []:2978D21A958D22D37BD1747FEF07B538183E3FE6A21B6174
 Email Address []:
 
 Please enter the following 'extra' attributes
@@ -322,19 +374,19 @@ Getting CA Private Key
 The verification certificate is now ready to be upload to Azure.
 
 ```shell
-▶ az iot hub certificate verify --etag AAAAASmFeVU= --hub-name dev-ot-iot-hub --path ./verification.pem --name dev-root-ca
+▶ az iot hub certificate verify --etag AAAAATICxnI= --hub-name dev-ot-iot-hub --path ./verification-azure.pem --name dev-root-ca
 {
-  "etag": "AAAAASnEKIk=",
-  "id": "/subscriptions/<subscription id>/resourceGroups/dev-ot-rg/providers/Microsoft.Devices/IotHubs/dev-ot-iot-hub/certificates/dev-root-ca",
+  "etag": "AAAAATIHh+w=",
+  "id": "/subscriptions/6df7a8fe-3186-4cef-a025-420fbd6b14b7/resourceGroups/dev-ot-rg/providers/Microsoft.Devices/IotHubs/dev-ot-iot-hub/certificates/dev-root-ca",
   "name": "dev-root-ca",
   "properties": {
     "certificate": null,
-    "created": "2020-08-21T13:48:47+00:00",
-    "expiry": "2021-08-21T10:33:55+00:00",
+    "created": "2020-08-22T13:42:24+00:00",
+    "expiry": "2021-08-22T13:40:00+00:00",
     "isVerified": true,
     "subject": "devices.abc.com",
-    "thumbprint": "224C0C1E48BF483AA2B2D8B3EF891C48393DB5BD",
-    "updated": "2020-08-21T14:42:06+00:00"
+    "thumbprint": "A6E664EC2C1547A2B12924582C02378E68DCDF0B",
+    "updated": "2020-08-22T13:46:51+00:00"
   },
   "resourceGroup": "dev-ot-rg",
   "type": "Microsoft.Devices/IotHubs/Certificates"
@@ -345,7 +397,7 @@ So now we can register the devices on Azure without having to create new certifi
 
 ### AWS IoT Core
 
-Now we can do the same with AWS IoT core as we did with Azure.
+Now we can do the same with AWS IoT core as we did with Azure.  Make sure you have the AWS Cli installed, these are the [installation instructions](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
 
 There is no real concept of a resource group, but you can tag resources which we will do.  There is one IoT Core per region per account.   Now we will use the UK region.  We can use the following command.
 
@@ -353,7 +405,7 @@ There is no real concept of a resource group, but you can tag resources which we
 ▶ aws ec2 describe-regions --filters 'Name=endpoint,Values=*eu*'
 ```
 
-Now the issue here is that the output is on a different stream.
+Now the issue here is that the output is on a different stream.  Once reviews press `q` to quit the stream.
 
 ```
 REGIONS ec2.eu-north-1.amazonaws.com    opt-in-not-required     eu-north-1
@@ -363,9 +415,9 @@ REGIONS ec2.eu-west-1.amazonaws.com     opt-in-not-required     eu-west-1
 REGIONS ec2.eu-central-1.amazonaws.com  opt-in-not-required     eu-central-1
 ```
 
-Now London is actually `eu-west-2` so that the region code we will use.
+Now London is actually `eu-west-2` so that the region code we will use.  Unlike Azure we can create a registration/verification code before upload the CA certificate. 
 
-```
+```shell
 ▶ aws iot get-registration-code
 
 {
@@ -373,10 +425,20 @@ Now London is actually `eu-west-2` so that the region code we will use.
 }
 ```
 
-Like Azure we have to create the CA vertification certificate.  The `CN` is the `registratonCode` property.
+Lets generate a key that the verification cert can use.
 
 ```shell
-▶ openssl req -new -key dev-root-ca.key -out verification-aws.csr
+▶ openssl genrsa -out verification-aws.key 2048
+Generating RSA private key, 2048 bit long modulus
+.................+++
+......................+++
+e is 65537 (0x10001)
+```
+
+To create the CA vertification certificate use the following and make sure the `CN` is the `registratonCode` from the above output.
+
+```shell
+▶ openssl req -new -key verification-aws.key -out verification-aws.csr
 You are about to be asked to enter information that will be incorporated
 into your certificate request.
 What you are about to enter is what is called a Distinguished Name or a DN.
@@ -384,7 +446,7 @@ There are quite a few fields but you can leave some blank
 For some fields there will be a default value,
 If you enter '.', the field will be left blank.
 -----
-Country Name (2 letter code) []:GB
+Country Name (2 letter code) []:
 State or Province Name (full name) []:
 Locality Name (eg, city) []:
 Organization Name (eg, company) []:
@@ -397,3 +459,17 @@ to be sent with your certificate request
 A challenge password []:
 ```
 
+Again we have the `code signing request` lets generate the actual certificate
+
+```shell
+▶ openssl x509 -req -in verification-aws.csr -CA dev-root-ca.pem -CAkey dev-root-ca.key -CAcreateserial -out verification-aws.pem -days 365 -sha256
+Signature ok
+subject=/CN=d73cf3cc2ef642b380d46e98d8d715febc335c5f24db3b12e13154466a88d1f7
+Getting CA Private Key
+```
+
+Finally we can register the CA and Verification certs in one go.
+
+
+
+▶ aws iot register-ca-certificate --ca-certificate ./dev-root-ca.pem --verification-certificate ./verification-aws.pem
