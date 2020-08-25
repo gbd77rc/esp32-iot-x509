@@ -23,7 +23,7 @@ void setup()
 void loop(){}
 ```
 
-Once flashed the OLED display will show the CPU Id, we combine this with the `prefix` found in this element in the `config.json` file.
+Once flashed the OLED display will show the CPU Id, we combine this with the `prefix` found in the `device` element in the `config.json` file.
 
 ```json
 "device": {
@@ -38,17 +38,17 @@ So if the CPU Id is `AC8684B5AA8C` then the actual device Id will be `OT-AC8684B
 
 ## From Root Certificate to Device Certificate
 
-We need a private CA to generate the device certificate and create validation chain.  Normally you would have a signing certificate generated from a recognized CA like [digicert](https://www.digicert.com/).  
+We need a private CA to generate the device certificate and create a validation chain.  Normally you would have a signing certificate generated from a recognized CA like [digicert](https://www.digicert.com/).  
 
-> I am not associated them, or have ever brought certificates from them.
+> I am not associated them, or have ever brought any certificates from them.
 
-As we don't want the expense, we will create our own and upload that  the cloud, which they allow.  To this make sure you have an `openssl` application installed on your os.  I use a Mac OSX here, but it is available for Windows and Linux.  The command line may differ on Windows.  You will need to do some research on the command if it fails.
+We don't want the expense, so will create our own and upload that  the cloud, which they allow.  To follow along then you need to make sure you have an `openssl` application installed on your os.  I use a Mac OSX here, but it is available for Windows and Linux.  The command line may differ on Windows/Linux.  You will need to do some research on the command if it fails.
 
-The `file names` and `CA Common Name` can be changed to suit your needs.  Just make it consistent.
+The `file names` and `CA Common Name` can be changed to suit your needs.  Just make them consistent.
 
 ### Mac OSX OpenSSL Workaround
 
-If you are using a Mac OSX, then it is more then likely has LibraSSL installed.  It does not have the `-addext` option to the command.  Which is need to add the `basicConstraints` properties to the root certificate.    To get around this do the following.
+If you are using a Mac OSX, then it is more then likely has LibraSSL installed.  It does not have the `-addext` option to the command.  Which is needed to add the `basicConstraints` properties to the root CA certificate.    To get around this do the following.
 
 ```shell
 ▶ nano rootca.conf
@@ -80,7 +80,7 @@ emailAddress                    = Email Address
 emailAddress_max                = 6
 ```
 
-If you following [https://github.com/jetstack/cert-manager/issues/279](https://github.com/jetstack/cert-manager/issues/279) this github issue, it will expand other ways around this as well.
+See the following [https://github.com/jetstack/cert-manager/issues/279](https://github.com/jetstack/cert-manager/issues/279) github issue, it will expand other ways around this as well.
 
 ### Create the CA Key
 
@@ -128,12 +128,12 @@ Common Name (eg, fully qualified host name) []:devices.abc.com
 Email Address []:
 ```
 
-The `days` parameter is set to expire in a year.  The `Common Name` attribute should be some URI, does not need to exist. 
+The `days` parameter is set to expire in a year.  The `Common Name` attribute should be some URI, it does not need to exist.  
 
 ### Generate and Sign the Device Certificate
 
 ```shell
-▶ openssl genrsa -out device.key 4096      
+▶ openssl genrsa -out device.key 4096
 Generating RSA private key, 4096 bit long modulus
 ........................................................................++
 ................................++
@@ -151,7 +151,7 @@ State or Province Name (full name) []:
 Locality Name (eg, city) []:
 Organization Name (eg, company) []:
 Organizational Unit Name (eg, section) []:
-Common Name (eg, fully qualified host name) []:OT-AC8684B5AA8C         
+Common Name (eg, fully qualified host name) []:OT-AC8684B5AA8C
 Email Address []:
 
 Please enter the following 'extra' attributes
@@ -174,7 +174,7 @@ Getting CA Private Key
 You should now have the following files.
 
 ```shell
-▶ ls -lah                                                                                                         
+▶ ls -lah
 total 48
 drwxr-xr-x   8 richardclarke  staff   256B 21 Aug 11:43 .
 drwxr-xr-x  13 richardclarke  staff   416B 21 Aug 11:28 ..
@@ -203,7 +203,7 @@ Make sure you have the Azure Cli installed, these are the [installation instruct
 I am assuming you have already created an Azure Subscription.   To set the subscription in the command use the following,
 
 ```shell
-▶ az account set --subscription "<subscription name>" 
+▶ az account set --subscription "<subscription name>"
 ```
 
 There can only be one free IoT Hub in a subscription, so if you already created one, either use the existing IoT Hub or create a new one with S1 tier.  This will be about $25 per month at the time of writing this article.
@@ -247,7 +247,7 @@ Now we have the group we can create the IoT hub.  The hub name is unique globall
   "location": "ukwest",
   "name": "dev-ot-iot-hub",
   "properties": {
-  	...
+    ...
     "eventHubEndpoints": {
       "events": {
         "endpoint": "sb://iothub-ns-dev-ot-iot-<uniqueid>.servicebus.windows.net/",
@@ -275,7 +275,7 @@ Now we have the group we can create the IoT hub.  The hub name is unique globall
         "role": "secondary"
       }
     ],
-		....
+    ....
     "state": "Active",
     ....
   },
@@ -307,7 +307,7 @@ Now we are ready to upload the CA certificate we create earlier.
     "expiry": "2021-08-22T13:40:00+00:00",
     "isVerified": false,
     "subject": "devices.abc.com",
-    "thumbprint": "A6E664EC2C1547A2B12924582C02378E68DCDF0B",
+    "thumbprint": "",
     "updated": "2020-08-22T13:42:24+00:00"
   },
   "resourceGroup": "dev-ot-rg",
@@ -329,9 +329,9 @@ Now if you look at the `isVerified` property you notice that is currently `false
     "expiry": "2021-08-22T13:40:00+00:00",
     "isVerified": false,
     "subject": "devices.abc.com",
-    "thumbprint": "A6E664EC2C1547A2B12924582C02378E68DCDF0B",
+    "thumbprint": "",
     "updated": "2020-08-22T13:43:33+00:00",
-    "verificationCode": "2978D21A958D22D37BD1747FEF07B538183E3FE6A21B6174"
+    "verificationCode": "297....174"
   },
   "resourceGroup": "dev-ot-rg",
   "type": "Microsoft.Devices/IotHubs/Certificates"
@@ -354,7 +354,7 @@ State or Province Name (full name) []:
 Locality Name (eg, city) []:
 Organization Name (eg, company) []:
 Organizational Unit Name (eg, section) []:
-Common Name (eg, fully qualified host name) []:2978D21A958D22D37BD1747FEF07B538183E3FE6A21B6174
+Common Name (eg, fully qualified host name) []:297....174
 Email Address []:
 
 Please enter the following 'extra' attributes
@@ -367,7 +367,7 @@ Now we have `code signing request` lets generate the actual certificate
 ```shell
 ▶ openssl x509 -req -in verification.csr -CA dev-root-ca.pem -CAkey dev-root-ca.key -CAcreateserial -out verification.pem
 Signature ok
-subject=/C=GB/CN=5BA5E596CE80C50C3053D29BB9593C382292BD94C99A7D05
+subject=/C=GB/CN=5....5
 Getting CA Private Key
 ```
 
@@ -377,7 +377,7 @@ The verification certificate is now ready to be upload to Azure.
 ▶ az iot hub certificate verify --etag AAAAATICxnI= --hub-name dev-ot-iot-hub --path ./verification-azure.pem --name dev-root-ca
 {
   "etag": "AAAAATIHh+w=",
-  "id": "/subscriptions/6df7a8fe-3186-4cef-a025-420fbd6b14b7/resourceGroups/dev-ot-rg/providers/Microsoft.Devices/IotHubs/dev-ot-iot-hub/certificates/dev-root-ca",
+  "id": "/subscriptions/<subscription id>/resourceGroups/dev-ot-rg/providers/Microsoft.Devices/IotHubs/dev-ot-iot-hub/certificates/dev-root-ca",
   "name": "dev-root-ca",
   "properties": {
     "certificate": null,
@@ -385,7 +385,7 @@ The verification certificate is now ready to be upload to Azure.
     "expiry": "2021-08-22T13:40:00+00:00",
     "isVerified": true,
     "subject": "devices.abc.com",
-    "thumbprint": "A6E664EC2C1547A2B12924582C02378E68DCDF0B",
+    "thumbprint": "",
     "updated": "2020-08-22T13:46:51+00:00"
   },
   "resourceGroup": "dev-ot-rg",
@@ -407,7 +407,7 @@ There is no real concept of a resource group, but you can tag resources which we
 
 Now the issue here is that the output is on a different stream.  Once reviews press `q` to quit the stream.
 
-```
+```shell
 REGIONS ec2.eu-north-1.amazonaws.com    opt-in-not-required     eu-north-1
 REGIONS ec2.eu-west-3.amazonaws.com     opt-in-not-required     eu-west-3
 REGIONS ec2.eu-west-2.amazonaws.com     opt-in-not-required     eu-west-2
@@ -415,13 +415,13 @@ REGIONS ec2.eu-west-1.amazonaws.com     opt-in-not-required     eu-west-1
 REGIONS ec2.eu-central-1.amazonaws.com  opt-in-not-required     eu-central-1
 ```
 
-Now London is actually `eu-west-2` so that the region code we will use.  Unlike Azure we can create a registration/verification code before upload the CA certificate. 
+Now London is actually `eu-west-2` so that the region code we will use.  Unlike Azure we can create a registration/verification code before upload the CA certificate.
 
 ```shell
 ▶ aws iot get-registration-code
 
 {
-    "registrationCode": "d73cf3cc2ef642b380d46e98d8d715febc335c5f24db3b12e13154466a88d1f7"
+    "registrationCode": "d7...f7"
 }
 ```
 
@@ -451,7 +451,7 @@ State or Province Name (full name) []:
 Locality Name (eg, city) []:
 Organization Name (eg, company) []:
 Organizational Unit Name (eg, section) []:
-Common Name (eg, fully qualified host name) []:d73cf3cc2ef642b380d46e98d8d715febc335c5f24db3b12e13154466a88d1f7
+Common Name (eg, fully qualified host name) []:d...7
 Email Address []:
 
 Please enter the following 'extra' attributes
@@ -464,7 +464,7 @@ Again we have the `code signing request` lets generate the actual certificate
 ```shell
 ▶ openssl x509 -req -in verification-aws.csr -CA dev-root-ca.pem -CAkey dev-root-ca.key -CAcreateserial -out verification-aws.pem -days 365 -sha256
 Signature ok
-subject=/CN=d73cf3cc2ef642b380d46e98d8d715febc335c5f24db3b12e13154466a88d1f7
+subject=/CN=d7....f7
 Getting CA Private Key
 ```
 
@@ -475,4 +475,3 @@ Finally we can register the CA and Verification certs in one go.
 ```
 
 Now this command should work, but I have not been able to get it.  If I register the same files via the web console.  Then it loads and registers fine.  I will keep investigating but for the time being we have the CA on both Azure and AWS.
-

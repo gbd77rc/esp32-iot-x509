@@ -66,17 +66,17 @@ The logging library uses the configuration to determine which level it will repo
 
 There are 3 LED's to control.  These will give out state to the local environment, if someone is watching that it.  The following states are.
 
-|Colour|State|Meaning
-|---|---|---
-|Power|Blinking|Initialising System
-|Power|Steady|Working Normally
-|Power|Off|Deep Sleep Mode
-|WiFi|Blinking|Try to connect to WiFi
-|WiFi|Steady|Connect to WiFi and have access to internet
-|WiFi|Off|If Power On then WiFi off means no internet detected or can't connect to router
-|Cloud|Blinking|Send/Receive Data
-|Cloud|Steady|Connected to the cloud provider successfully
-|Cloud|Off|If Power On and WiFi On then issue with cloud provider communication
+| Colour | State    | Meaning                                                                         |
+| ------ | -------- | ------------------------------------------------------------------------------- |
+| Power  | Blinking | Initialising System                                                             |
+| Power  | Steady   | Working Normally                                                                |
+| Power  | Off      | Deep Sleep Mode                                                                 |
+| WiFi   | Blinking | Try to connet to WiFi                                                           |
+| WiFi   | Steady   | Connect to WiFi and have access to internet                                     |
+| WiFi   | Off      | If Power On then WiFi off means no internet detected or can't connect to router |
+| Cloud  | Blinking | Send/Receive Data                                                               |
+| Cloud  | Steady   | Connected to the cloud provider successfully                                    |
+| Cloud  | Off      | If Power On and WiFi On then issue with cloud provider communication            |
 
 The blinking state will be handle by a separate task. This task will check a state flag, and if set will automatically set the LED on/off depending on the state flag and then delete itself.
 
@@ -121,4 +121,3 @@ This library will handle when to sleep and when to wake up.  It wraps the [ESP S
 ### Cloud Information
 
 This device is useless unless it can connect to the cloud and report on it sensors. The library has both Azure and AWS implementations, they share a common configuration `CloudInfo` and a common base class `BaseCloudProvider`.  Most of the code to do the actual publish/subscribe and connecting is handle by the base class.  The individual instances handle the topic and server configuration related data.
-
