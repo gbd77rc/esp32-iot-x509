@@ -99,7 +99,7 @@ void setup()
 }
 
 /**
- * This loop function is called every time it exists by the main Arduino bookstrap code.
+ * This loop function is called every time it exits by the main Arduino bookstrap code.
  */
 void loop()
 {
@@ -114,5 +114,9 @@ void loop()
         OledDisplay.displayLine(30, 40, "%s", EnvSensor.toString());
         OledDisplay.displayLine(30, 60, "%s", GpsSensor.toString());
         delay(500);
+    }
+    else
+    {
+        OledDisplay.displayExit(F("Not Connected to WiFi so rebooting as it pointless continuing!"), 30);
     }
 }

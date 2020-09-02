@@ -4,7 +4,7 @@ I am going to produce a series of articles the will take an IoT device, register
 
 ## So Lets Get On With The Journey
 
-There are many short tutorial out in the internet, but nothing to really show a journey on how to get a device securely connected to the cloud and make use of the data in visualization application.  These articles will cover the end to end journey, from device developement, cloud registration, web application deployment and seeing the visualization at the end.  I will try to keep the costs of the cloud down to the minimum by using the free tier where I can and be able to undeploy automatically when I can't.
+There are many short tutorial out in the internet, but nothing to really show a journey on how to get a device securely connected to the cloud and make use of the data in visualization application.  These articles will cover the end to end journey, from device development, cloud registration, web application deployment and seeing the visualization at the end.  I will try to keep the costs of the cloud down to the minimum by using the free tier where I can and be able to undeploy automatically when I can't.
 
 Each of these articles maybe broken into smaller ones, depending on the size of each one.  I will try to limit them to 10 minutes of reading, just to keep it interesting.  This introduction one will be shorter just to wet your appetite.
 
@@ -68,7 +68,4 @@ To keep it shortish I have not included any unit tests, end to end tests, deploy
 
 ## Wrap Up
 
-The final part of the journey will highlight varous resources to continue to research this ideas and technology here.  This is not the end, as technology keeps changing at a rapid pace.  The concepts like data ingestion and visualization will stay near enough the same, but how to do it will change.
-
-
-
+The final part of the journey will highlight various resources to continue to research this ideas and technology here.  This is not the end, as technology keeps changing at a rapid pace.  The concepts like data ingestion and visualization will stay near enough the same, but how to do it will change.

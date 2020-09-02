@@ -6,11 +6,13 @@ I will not be going thought the firmware line by line as that will be boring.  I
 
 If you open up the `platformio.ini` file in the root of the github repo you will notice this sections
 
+```ini
     [platformio]
     data_dir = firmware/data
     src_dir = firmware/src
     include_dir = firmware/include
     lib_dir = firmware/lib
+```
 
 Normally, this would not be included.  As I will be including multiple different sources in this repo, generally just to keep them all self contained, I have add it in.  
 
@@ -71,7 +73,7 @@ There are 3 LED's to control.  These will give out state to the local environmen
 | Power  | Blinking | Initialising System                                                             |
 | Power  | Steady   | Working Normally                                                                |
 | Power  | Off      | Deep Sleep Mode                                                                 |
-| WiFi   | Blinking | Try to connect to WiFi                                                           |
+| WiFi   | Blinking | Try to connect to WiFi                                                          |
 | WiFi   | Steady   | Connect to WiFi and have access to internet                                     |
 | WiFi   | Off      | If Power On then WiFi off means no internet detected or can't connect to router |
 | Cloud  | Blinking | Send/Receive Data                                                               |

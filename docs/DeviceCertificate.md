@@ -407,7 +407,7 @@ The verification certificate is now ready to be upload to Azure.  Remember to re
 }
 ```
 
-So now we can register the devices on Azure without needing to generated the primary/secondary tokens.  Just create the device with the device id as the name.  This will be covered [IoT Device Registration]() article.
+So now we can register the devices on Azure without needing to generated the primary/secondary tokens.  Just create the device with the device id as the name.  This will be covered [IoT Device Registration](./DeviceCloudRegistration.md) article.
 
 ### AWS IoT Core
 
@@ -489,6 +489,8 @@ Finally we can register the CA and Verification certs in one go.
 ```
 
 Now this command should work, but I have not been able to get it.  If I register the same files via the web console.  Then it loads and registers fine.  I will keep investigating but for the time being we have the CA on both Azure and AWS.
+
+So now we can register the devices on AWS without needing to generated a local certificate.  Just create the device with the device id as the name.  This will be covered [IoT Device Registration](./DeviceCloudRegistration.md) article.
 
 #### Steps To Register CA via Portal
 

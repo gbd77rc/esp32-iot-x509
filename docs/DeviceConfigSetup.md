@@ -4,6 +4,7 @@ The following information describes the configuration file layout and the sensor
 
 ## Configuration File Layout
 
+```json
     {
         "logging": {
             "level": "ALL"
@@ -52,12 +53,15 @@ The following information describes the configuration file layout and the sensor
             "ca": "/cloud/console-aws-com.pem"
         }
     }
+```
 
 ## Logging Section
 
+```json
     "logging": {
         "level": "ALL"
     }
+```
 
 Internally the device will echo various log messages to the Serial Port 1.  The level that will be logged to this port are:
 
@@ -72,12 +76,14 @@ Using the level will determine which message types are echoed.  Example if the l
 
 ## LED Information Section
 
+```json
     "ledInfo": {
         "brightness": 100,
         "wifi": 25,
         "cloud": 26,
         "power": 27
     }
+```
 
 The LED's will show the user what the device is doing or is active.  The `brightness` is a percentage value.  0 is off and 100 is fully bright.
 
@@ -87,6 +93,7 @@ The `brightness` flag can set via the cloud Shadow/Device Twin setting.  It will
 
 ## GPS Information Section
 
+```json
     "gpsInfo": {
         "enabled": true,
         "tx": 23,
@@ -94,6 +101,7 @@ The `brightness` flag can set via the cloud Shadow/Device Twin setting.  It will
         "baud": 9600,
         "sim808": false
     }
+```
 
 The sensor will retrieve the latitude/longitude, altitude, direction, speed and how many satellites are locked data.
 
@@ -107,12 +115,14 @@ The `enabled` flag can set via the cloud Shadow/Device Twin setting.  It will au
 
 ## Temperature/Humidity Information Section
 
+```json
     "envSensor": {
         "enabled": true,
         "data": 32,
         "scale": 1,
         "sampleRate": 10000
     }
+```
 
 The sensor will retrieve the current temperature and humidity.  The sensor being used for this is the DHT-22, which has a bigger range and is more sensitive.  
 
@@ -127,12 +137,14 @@ The `sampleRate` is how often should it be read.  There is a minimum sample rate
 
 ## Device Information Section
 
+```json
     "device": {
         "prefix": "OT",
         "wakeup": 1200,
         "sleep": 30,
         "location": "<UNKNOWN>"
     }
+```
 
 This is the ESP32 device related information.  
 
@@ -146,10 +158,12 @@ The `location` is the used for where the device is.  Normally which room it is l
 
 ## Certificate Information Section
 
+```json
     "certs":{
         "certificate": "/cloud/cert.pem",
         "key": "/cloud/key.pem"
     }
+```
 
 These are the certificate and key that identifies the device.
 
@@ -161,20 +175,19 @@ The `CA` in the cloud specific sections contains the public key so that the devi
 
 ## IoT Hub Information Section
 
+```json
     "iotHub":{
         "endpoint": ""
-        "name": "",
         "port": 8883,
         "sendTelemetry": true,
         "sendDeviceTwin": true,
         "intervalSeconds": 60
     }
+```
 
 This is the general information that Azure and AWS share for communicating between the IoT Hub broker and device.  Generally it is an MQTT broker under the hoods.  
 
 The `endpoint` is the URL where the IoT Hub/Core is located in the cloud provider.  Not settable via the cloud.
-
-The `name` is the name of the IoT Hub/Core. Not settable via the cloud.
 
 The `port` is the port that the IoT Hub/Core is listening on.
 
@@ -186,16 +199,20 @@ The `intervalSeconds` is the number of seconds to wait before sending telemetry 
 
 ## Azure Information Section
 
+```json
     "azure": {
         "ca": "/cloud/portal-azure-com.pem"
     }
+```
 
 This is the public key that the cloud provider gives out for decryption of information from them.
 
 ## AWS Information Section
 
+```json
     "aws":{
         "ca": "/cloud/console-aws-com.pem"
     }
+```
 
 This is the public key that the cloud provider gives out for decryption of information from them.
