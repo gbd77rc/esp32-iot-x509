@@ -89,7 +89,7 @@ bool AzureInstanceClass::getCurrentStatus()
  */
 void AzureInstanceClass::buildUserName(char *userName)
 {
-    strcpy(userName, this->_config->hubName);
+    strcpy(userName, this->_config->endPoint);
     strcat(userName, "/");
     strcat(userName, DeviceInfo.getDeviceId());
     strcat(userName, "/?api-version=2018-06-30");

@@ -1,5 +1,6 @@
-#include "LogInfo.h"
 #include "WakeUpInfo.h"
+#include "LogInfo.h"
+#include "Config.h"
 
 RTC_DATA_ATTR int _bootCount = 0;
 RTC_DATA_ATTR unsigned long _bootTime = 0;
@@ -142,7 +143,7 @@ void WakeUpInfoClass::tick()
             }
             if (this->_flag == 0)
             {
-                LogInfo.log(LOG_INFO, F("Going to sleep now"));
+                LogInfo.log(LOG_INFO, "Going to sleep now for %i seconds", this->_wakeupIn);
                 _bootTime += millis();
                 LogInfo.log(LOG_VERBOSE, "Been alive for %lu seconds", _bootTime / 1000);
                 esp_deep_sleep_start();

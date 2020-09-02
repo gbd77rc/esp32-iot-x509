@@ -43,7 +43,6 @@ void CloudInfoClass::load(JsonObjectConst obj)
     if (obj.containsKey("iotHub"))
     {
         strcpy(this->_config.endPoint, obj["iotHub"].containsKey("endpoint") ? obj["iotHub"]["endpoint"].as<const char *>() : "");
-        strcpy(this->_config.hubName, obj["iotHub"].containsKey("name") ? obj["iotHub"]["name"].as<const char *>() : "");
         this->_config.port = obj["iotHub"].containsKey("port") ? obj["iotHub"]["port"].as<int>() : 8883;
         this->_config.sendTelemetry = obj["iotHub"].containsKey("sendTelemetry") ? obj["iotHub"]["sendTelemetry"].as<bool>() : false;
         this->_config.sendDeviceTwin = obj["iotHub"].containsKey("sendDeviceTwin") ? obj["iotHub"]["sendDeviceTwin"].as<bool>() : false;
@@ -70,7 +69,7 @@ void CloudInfoClass::load(JsonObjectConst obj)
 
     LogInfo.log(LOG_VERBOSE, "Connect to %s [%s@%s:%i] Telementy %s Internval %i",
                 CloudInfoClass::getStringFromProviderType(this->_config.provider),
-                this->_config.hubName,
+                DeviceInfo.getDeviceId(),
                 this->_config.endPoint,
                 this->_config.port,
                 this->_config.sendTelemetry ? "Yes" : "No",
@@ -93,7 +92,6 @@ void CloudInfoClass::save(JsonObject obj)
 
     auto iotHub = json.createNestedObject("iotHub");
     iotHub["endpoint"] = this->_config.endPoint;
-    iotHub["name"] = this->_config.hubName;
     iotHub["port"] = this->_config.port;
     iotHub["sendTelemetry"] = this->_config.sendTelemetry;
     iotHub["intervalSeconds"] = this->_config.sendInterval;

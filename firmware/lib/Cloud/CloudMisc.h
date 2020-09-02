@@ -29,7 +29,6 @@ typedef struct IoTConfig
 {
     CloudProviderType provider;
     char endPoint[256];
-    char hubName[64];
     uint32_t port;
     bool sendTelemetry;
     bool sendDeviceTwin;

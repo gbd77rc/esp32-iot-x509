@@ -113,7 +113,7 @@ bool BaseCloudProvider::mqttConnection()
 {
     uint8_t retries = 0;
     LogInfo.log(LOG_VERBOSE, "Connecting to IoT Hub (%s):(%i) - (%s)",
-                this->_config->hubName,
+                this->_config->endPoint,
                 this->_config->port,
                 DeviceInfo.getDeviceId());
     char userName[256];
@@ -122,7 +122,7 @@ bool BaseCloudProvider::mqttConnection()
     {
         if (this->_mqttClient.connect(DeviceInfo.getDeviceId(), userName, NULL))
         {
-            LogInfo.log(LOG_VERBOSE, "Connected Successfully to [%s]", this->_config->hubName);
+            LogInfo.log(LOG_VERBOSE, "Connected Successfully to [%s]", this->_config->endPoint);
             for (uint8_t i = 0; i < sizeof(this->_topics); i++)
             {
                 auto topic = this->_topics[i];

@@ -33,7 +33,6 @@ private:
 extern CloudInfoClass CloudInfo;
 
 // "endpoint": "",
-// "name": "",
 // "port": 8883,
 // "sendTelemetry": true,
 // "intervalSeconds": 45

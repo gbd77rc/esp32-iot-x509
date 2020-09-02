@@ -32,9 +32,9 @@ All developed libraries are in the `lib` folder.  By the time this published you
 
 ## Development IDE
 
-The recommended IDE from Platform.io is to use [Visual Studio Code](https://code.visualstudio.com/download) and use the [PlatformIO IDE](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) extension.  Personally I have a lot more extensions added to cloud interaction, formatting, docker/containers etc.
+The recommended IDE from Platform.io is to use [Visual Studio Code](https://code.visualstudio.com/download) and use the [PlatformIO IDE](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) extension.  Personally I have a lot more extensions added for cloud interaction, formatting, docker/containers etc.
 
-This is a great open source free IDE.  It can be a bit limiting sometimes, depends on the language you are using.  
+This is a great open source IDE.  It can be a bit limiting sometimes, depends on the language you are using.  
 
 ## Language
 
@@ -71,7 +71,7 @@ There are 3 LED's to control.  These will give out state to the local environmen
 | Power  | Blinking | Initialising System                                                             |
 | Power  | Steady   | Working Normally                                                                |
 | Power  | Off      | Deep Sleep Mode                                                                 |
-| WiFi   | Blinking | Try to connet to WiFi                                                           |
+| WiFi   | Blinking | Try to connect to WiFi                                                           |
 | WiFi   | Steady   | Connect to WiFi and have access to internet                                     |
 | WiFi   | Off      | If Power On then WiFi off means no internet detected or can't connect to router |
 | Cloud  | Blinking | Send/Receive Data                                                               |

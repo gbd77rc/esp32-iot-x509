@@ -1,6 +1,9 @@
 #ifndef WAKEUPINFO_H
 #define WAKEUPINFO_H
 
+#define ARDUINOJSON_USE_LONG_LONG 1
+#include <ArduinoJson.h>
+
 #define uS_TO_S_FACTOR 1000000 /* Conversion factor for micro seconds to seconds */
 #define ms_TO_S_FACTOR 1000    /* Conversion factor for milliseconds to seconds */
 
