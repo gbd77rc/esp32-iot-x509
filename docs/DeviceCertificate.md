@@ -4,7 +4,7 @@ Each device should have its own certificate with its `Common Name` set to the de
 
 ## Device Id aka Common Name
 
-So the first step is to work out the device identifier.  If we the manufacturer, then this would be part of the automatic certificate creation process when the device is produced.  As we are not then the quick why is to flash the following code to it. See the [Device Development](./FirmwareDevelopment.md) article on possible ways of doing this.
+So the first step is to work out the device identifier.  If we where the manufacturer, then this would be part of the automatic certificate creation process when the device is produced.  As we are not, then the quick way is to flash the following code to it. See the [Device Development](./FirmwareDevelopment.md) article on possible ways of doing this.
 
 ```c++
 #include <Arduino.h>
@@ -26,6 +26,7 @@ void loop(){}
 
 Once flashed the OLED display will show the CPU Id.  The relevant output from the upload/monitor is as follows
 
+```shell
     Processing heltec-wifi-esp32 (platform: espressif32; board: heltec_wifi_kit_32; framework: arduino)
     -------------------------------------------------------------------------------------------------------------------------------------------------
     PLATFORM: Espressif 32 1.12.4 > Heltec WiFi Kit 32
@@ -36,12 +37,10 @@ Once flashed the OLED display will show the CPU Id.  The relevant output from th
     - tool-esptoolpy 1.20600.0 (2.6.0) 
     - tool-mkspiffs 2.230.0 (2.30) 
     - toolchain-xtensa32 2.50200.80 (5.2.0)
-    
     Checking size .pio/build/heltec-wifi-esp32/firmware.elf
     Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
     RAM:   [=         ]   5.6% (used 18244 bytes from 327680 bytes)
     Flash: [==        ]  20.0% (used 261590 bytes from 1310720 bytes)
-    
     Connecting........____
     Chip is ESP32D0WDQ6 (revision 1)
     Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
@@ -50,8 +49,9 @@ Once flashed the OLED display will show the CPU Id.  The relevant output from th
     Hash of data verified.
 
     398:VRB:1:CPU Id is 105783B5AA8C
+```
 
-You combine this with the `prefix` found in the `device` element in the `config.json` file.
+You would combine this with the `prefix` found in the `device` element in the `config.json` file.
 
 ```json
 "device": {
@@ -70,7 +70,7 @@ We need a private CA to generate the device certificate and create a validation 
 
 > I am not associated them, or have ever brought any certificates from them.
 
-We don't want the expense, so will create our own and upload that  the cloud, which they allow.  To follow along then you need to make sure you have an `openssl` application installed on your os.  I use a Mac OSX here, but it is available for Windows and Linux.  The command line may differ on Windows/Linux.  You will need to do some research on the command if it fails.
+We don't want the expense, so will create our own and upload that the cloud, which they allow.  To follow along then you need to make sure you have an `openssl` application installed on your os.  I use a Mac OSX here, but it is available for Windows and Linux.  The command line may differ on Windows/Linux.  You will need to do some research on the command if it fails.
 
 The `file names` and `CA Common Name` can be changed to suit your needs.  Just make them consistent.
 
@@ -104,7 +104,7 @@ commonName                      = Common Name (eg, fully qualified host name)
 commonName_max                  = 64
 ```
 
-This file does remove some of the fields that you normally would see like the State and Email.
+This file does remove some of the fields that you normally see like the State and Email.
 
 See the following [https://github.com/jetstack/cert-manager/issues/279](https://github.com/jetstack/cert-manager/issues/279) github issue, it will expand other ways around this as well.
 
@@ -120,7 +120,7 @@ e is 65537 (0x10001)
 
 ### Create the PEM file
 
-You need to initially create a certificate signing request (CSR) file.
+You need to initially create a certificate signing request (CSR) file.  The `Common Name` attribute should be some URI, it does not need to exist, but should be the same in both files.
 
 ```shell
 ▶ openssl req -new -sha256 -key dev-root-ca.key -nodes -out dev-root-ca.csr -config rootca.conf
@@ -154,7 +154,7 @@ Organizational Unit Name (eg, section) []:
 Common Name (eg, fully qualified host name) []:devices.abc.com
 ```
 
-The `days` parameter is set to expire in a year.  The `Common Name` attribute should be some URI, it does not need to exist.  
+The `days` parameter is set to expire in a year.  
 
 ### Generate and Sign the Device Certificate
 
@@ -168,7 +168,7 @@ Generating RSA private key, 4096 bit long modulus
 e is 65537 (0x10001)
 ```
 
-Now using that this key file you can then create the device signing request.  Make sure the `Common Name` is set to the device ID.  If would make the output file name the cpu or device id.  This way multiple CSR files can be created in the same directory.
+Now using this key file you can then create the device signing request (CSR).  Make sure the `Common Name` is set to the device ID.  I would make the output file name the cpu or device id.  This way multiple CSR/PEM files can be created in the same directory.
 
 ```shell
 ▶ openssl req -new -key device.key -out 105783B5AA8C.csr
@@ -221,7 +221,7 @@ drwxr-xr-x  12   staff   384  2 Sep 10:44 ..
 -rw-r--r--   1   staff   588  2 Sep 10:47 rootca.conf
 ```
 
-Copy the `105783B5AA8C-cert.pem` and `device.key` to `<clone repo>/firmware/data/cloud` folder.  As the configuration is expecting `device-cert.pem` as the certificate I would rename it to that during the copy process.
+Copy the `105783B5AA8C-cert.pem` and `device.key` to `<clone repo>/firmware/data/cloud` folder.  As the configuration is expecting `device-cert.pem` as the certificate file name I would rename it to that during the copy process.
 
 ```shell
 ▶ cp 105783B5AA8C-cert.pem <clone repo>/firmware/data/cloud/device-cert.pem
@@ -246,11 +246,11 @@ I am assuming you have already created an Azure Subscription.   To set the subsc
 ▶ az account set --subscription "<subscription name>"
 ```
 
-There can only be one free IoT Hub in a subscription, so if you already created one, either use the existing IoT Hub or create a new one with S1 tier.  This will be about $25 per month at the time of writing this article.
+There can only be one free IoT Hub in a subscription, so if you already created one, either use this or create a new one with S1 tier.  This will be about $25 per month at the time of writing this article.
 
-So with that being said let create an IoT hub in the subscription selected.  The first step is to create a `Resource Group`.  Resource groups are create to isolate all resources to single group.  You can apply subscriptions and RBAC to them to control who has access etc.  Thats the short story, look at the various Azure documentation about them.
+So with that being said let create an IoT hub in the subscription selected.  The first step is to create a `Resource Group`.  You can apply subscriptions and RBAC to the resource group to control who has access etc.  Thats the short story, look at the various Azure documentation about them.
 
-Resource groups need a default location where the resource be created.  I live the UK so I am going to use one of those regions.   To list out the location/regions use this command.
+Resource groups need a default location where the resources are to be created.  I live the UK so I am going to use one of those regions.   To list out the location/regions use this command.
 
 ```shell
 ▶ az account list-locations --query "[?contains(regionalDisplayName, 'UK')].name"
@@ -305,7 +305,7 @@ Now we have the group we can create the IoT hub.  The hub name is unique globall
 }
 ```
 
-I have removed a lot of the output and just showing the important bits.  Make a note of the `hostname` as it will be required for the entries in `config.json` file.
+I have removed a lot of the output and just showing the important bits.  Make a note of the `hostname` as it will be required for the `endpoint` entry in `config.json` file.
 
 Now we are ready to upload the CA certificate we create earlier.
 
@@ -345,7 +345,7 @@ Now if you look at the `isVerified` property you notice that is currently `false
     "subject": "devices.abc.com",
     "thumbprint": "",
     "updated": "2020-09-02T11:28:19+00:00",
-    "verificationCode": "92C9227A211E48F3D373E35F46325DC02F1A92EF84705081"
+    "verificationCode": "92...81"
   },
   "resourceGroup": "dev-ot-rg",
   "type": "Microsoft.Devices/IotHubs/Certificates"
@@ -368,7 +368,7 @@ State or Province Name (full name) []:
 Locality Name (eg, city) []:
 Organization Name (eg, company) []:
 Organizational Unit Name (eg, section) []:
-Common Name (eg, fully qualified host name) []:92C9227A211E48F3D373E35F46325DC02F1A92EF84705081
+Common Name (eg, fully qualified host name) []:92...81
 Email Address []:
 
 Please enter the following 'extra' attributes
@@ -381,7 +381,7 @@ Now we have `code signing request` lets generate the actual certificate
 ```shell
 ▶ openssl x509 -req -in verification-azure.csr -CA dev-root-ca.pem -CAkey dev-root-ca.key -CAcreateserial -out verification-azure.pem
 Signature ok
-subject=/C=GB/CN=92C9227A211E48F3D373E35F46325DC02F1A92EF84705081
+subject=/C=GB/CN=92...81
 Getting CA Private Key
 ```
 
@@ -407,13 +407,13 @@ The verification certificate is now ready to be upload to Azure.  Remember to re
 }
 ```
 
-So now we can register the devices on Azure without having to create new certificates.  Just create the device with the device id as the name.  This will be covered [IoT Device Registration]() article.
+So now we can register the devices on Azure without needing to generated the primary/secondary tokens.  Just create the device with the device id as the name.  This will be covered [IoT Device Registration]() article.
 
 ### AWS IoT Core
 
-Now we can do the same with AWS IoT core as we did with Azure.  Make sure you have the AWS Cli installed, these are the [installation instructions](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
+Now we can do the same with AWS IoT Core as we did with Azure.  Make sure you have the AWS Cli installed, these are the [installation instructions](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
 
-There is no real concept of a resource group, but you can tag resources which we will do.  There is one IoT Core per region per account.   Now we will use the UK region.  We can use the following command.
+There is no real concept of a resource group, but you can tag resources to group them.  There is one IoT Core per region per account.   Now we will use the UK region.  We can use the following command to view the region names.
 
 ```shell
 ▶ aws ec2 describe-regions --filters 'Name=endpoint,Values=*eu*' --output text
@@ -429,7 +429,7 @@ REGIONS ec2.eu-west-1.amazonaws.com     opt-in-not-required     eu-west-1
 REGIONS ec2.eu-central-1.amazonaws.com  opt-in-not-required     eu-central-1
 ```
 
-Now London is actually `eu-west-2` so that the region code we will use.  Unlike Azure we can create a registration/verification code before upload the CA certificate.
+London is actually `eu-west-2` so that the region code we will use.  Unlike Azure we can create a registration/verification code before upload the CA certificate.  This code does not change for the account, unlike the Azure code.
 
 ```shell
 ▶ aws iot get-registration-code
@@ -478,7 +478,7 @@ Again we have the `code signing request` lets generate the actual certificate
 ```shell
 ▶ openssl x509 -req -in verification-aws.csr -CA dev-root-ca.pem -CAkey dev-root-ca.key -CAcreateserial -out verification-aws.pem -days 365 -sha256
 Signature ok
-subject=/CN=d7....f7
+subject=/CN=d7...f7
 Getting CA Private Key
 ```
 
