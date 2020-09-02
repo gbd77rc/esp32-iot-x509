@@ -34,23 +34,25 @@ The following information describes the configuration file layout and the sensor
             "sleep": 30,
             "location": "<UNKNOWN>"
         },
-        "certs":{
-            "certificate": "/cloud/cert.pem",
-            "key": "/cloud/key.pem"
-        },
-        "iotHub":{
-            "endpoint": "",
-            "name": "",
-            "port": 8883,
-            "sendTelemetry": true,
-            "sendDeviceTwin": true,
-            "intervalSeconds": 60
-        },
-        "azure": {
-            "ca": "/cloud/portal-azure-com.pem"
-        },
-        "aws":{
-            "ca": "/cloud/console-aws-com.pem"
+        "cloud": {
+            "provider": "azure",
+            "certs": {
+                "certificate": "/cloud/device-cert.pem",
+                "key": "/cloud/device.key"
+            },
+            "iotHub": {
+                "endpoint": "",
+                "port": 8883,
+                "sendTelemetry": true,
+                "sendDeviceTwin": true,
+                "intervalSeconds": 45
+            },
+            "azure": {
+                "ca": "/cloud/portal-azure-com.pem"
+            },
+            "aws": {
+                "ca": "/cloud/console-aws-com.pem"
+            }
         }
     }
 ```
@@ -99,7 +101,7 @@ The `brightness` flag can set via the cloud Shadow/Device Twin setting.  It will
         "tx": 23,
         "rx": 22,
         "baud": 9600,
-        "sim808": false
+        "sampleRate": 1000
     }
 ```
 
@@ -109,9 +111,9 @@ The configuration is for the pin numbers used to communicate with the GPS sensor
 
 The `baud` rate is how fast the serial communication can happen in bits per seconds.  Most GPS's only transmit at `9600` baud by default.  Some of them you change this, the NEO-6M can be changed, but I have left it at the default.  Not setting able via the cloud.
 
-The `sim808` is another type of GPS, not used in this project.  It relies on GSM/GPRS signals and SIM card.  Not setting able via the cloud.
-
 The `enabled` flag can set via the cloud Shadow/Device Twin setting.  It will automatically switch the sensor on or off when set.  The pin values, once set should never need changing.
+
+The `sampleRate` is the how often will the GPS information be requested.
 
 ## Temperature/Humidity Information Section
 
@@ -157,6 +159,24 @@ The `sleep` is used for how long to wake before going to sleep.  Set it to zero 
 The `location` is the used for where the device is.  Normally which room it is located in, i.e. Home Office.
 
 ## Certificate Information Section
+
+```json
+    "cloud": {
+        "provider": "azure",
+        "certs": {
+        },
+        "iotHub": {
+        },
+        "azure": {
+        },
+        "aws": {
+        }
+    }
+```
+
+This element controls how the device will connect to the cloud.  
+
+The `provider` property tells the device which cloud settings to use.
 
 ```json
     "certs":{
