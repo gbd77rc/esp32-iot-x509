@@ -498,9 +498,11 @@ Log into your AWS account, make sure the region is set to the required one.  The
 
 This will show the list of registered `CA's` or as the screen shot above you will get the welcome to registration.
 
+Click on the `Register a CA` button and it will be give the `Select a CA` screen, as we don't have one registered yet, click on the `Register CA` button.  
+
 ![AWS IoT Core CA Register](./images/AWS-CA-Reg2.png)
 
-Click on the `Register a CA` button and it will be give the `Select a CA` screen, as we don't have one registered yet, click on the `Register CA` button.  It will give you the steps required to generate the verification certificate etc, that we have done already.  You just need to complete steps 5 & 6.
+It will give you the steps required to generate the verification certificate etc, that we have done already.  You just need to complete steps 5 & 6.
 
 ![AWS IoT Core CA Select Cert Files](./images/AWS-CA-Reg3.png)
 
