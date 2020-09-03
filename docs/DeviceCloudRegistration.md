@@ -70,7 +70,7 @@ Now if you follow the instructions in [Device Development](./FirmwareDevelopment
 This command will show the current device twin state.
 
 ```shell
-az iot hub device-twin show --device-id OT-105783B5AA8C --hub-name dev-ot-iot-hub
+▶ az iot hub device-twin show --device-id OT-105783B5AA8C --hub-name dev-ot-iot-hub
 ```
 
 I have not shown the output as it is big.  If you don't see anything in the `desired` element then there is something wrong.  Check the logs on the device, as explained in the [Device Development](./FirmwareDevelopment.md) article.
