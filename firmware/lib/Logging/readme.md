@@ -14,3 +14,4 @@ Each function has been commented.
     LogInfo.log(LOG_ERROR, F("This is a problem"));
     LogInfo.log(LOG_WARNING, "This is a problem: %s", "This is the error Msg");
     LogInfo.log(LOG_INFO, F("Logging Config") LogInfo.toJson());
+

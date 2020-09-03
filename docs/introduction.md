@@ -38,6 +38,8 @@ The device will have individual x509 certificate so it can Just-In-Time register
 * [AWS](https://docs.aws.amazon.com/iot/latest/developerguide/jit-provisioning.html)
 * [Azure](https://docs.microsoft.com/en-us/azure/iot-dps/about-iot-dps#:~:text=Microsoft%20Azure%20provides%20a%20rich,hub%20without%20requiring%20human%20intervention.)
 
+This series of blogs will cover the basics and will manually register the device. I may update these articles to include the Just-In-Time registration progress using the Azure Device Provision Service.  
+
 The device will make use of Shadow/Device Twin features for configuration/connection data and standard topic for telemetry data.  
 
 > It could have used standard topics for telemetry and control messages, but need to show off these extra cloud features.  Control topic messages may be covered in cloud related articles, AWS and Azure seem to do it differently or do they?

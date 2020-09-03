@@ -70,7 +70,8 @@ void setup()
     Configuration.add(&GpsSensor);
     Configuration.add(&CloudInfo);
     Configuration.load();
-    LedInfo.switchOn(LED_POWER);
+    LedInfo.switchOn(LED_POWER);    
+    LedInfo.blinkOn(LED_POWER);
     OledDisplay.clear();
     OledDisplay.displayLine(0, 10, "ID : %s", DeviceInfo.getDeviceId());
     OledDisplay.displayLine(0, 20, "Loc: %s", DeviceInfo.getLocation());
@@ -96,6 +97,7 @@ void setup()
     {
         OledDisplay.displayExit(F("Not Connected to WiFi so rebooting as it pointless continuing!"), 30);
     }
+    LedInfo.blinkOff(LED_POWER);
 }
 
 /**

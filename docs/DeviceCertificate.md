@@ -228,7 +228,7 @@ Copy the `105783B5AA8C-cert.pem` and `device.key` to `<clone repo>/firmware/data
 ▶ cp device.key <clone repo>/firmware/data/cloud/device.key
 ```
 
-Once this done you will need to `Upload File System image` to the device.  As before this is explained in the [Device Development](./FirmwareDevelopment.md) article.
+Once this done you will need to `Upload File System image` to the device. I would wait until you can read the [DeviceCloudRegistration.md](./DeviceCloudRegistration.md) document before doing this as you will need to update the `config.json` file as well.
 
 You are now ready for the cloud part.
 

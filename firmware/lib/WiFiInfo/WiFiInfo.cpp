@@ -8,7 +8,6 @@
 
 static esp_wps_config_t config;
 
-
 /**
  * Begin the initialization of the WiFi configuration
  */
@@ -30,23 +29,26 @@ bool WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
 {
     LogInfo.log(LOG_VERBOSE, F("Initialising WiFi...."));
     LedInfo.blinkOn(LED_WIFI);
-    while (WiFi.status() != WL_CONNECTED) {
+    while (WiFi.status() != WL_CONNECTED)
+    {
         if (this->previousMillisWiFi < this->intervalWiFi)
         {
             previousMillisWiFi = millis();
             delay(500);
         }
-        else break;
+        else
+            break;
     }
 
-    if (WiFi.status() != WL_CONNECTED) {
-        OledDisplay.displayLine(x, y, "WiFi: %s", "waiting for WPA");
+    if (WiFi.status() != WL_CONNECTED)
+    {
+        OledDisplay.displayLine(x, y, "WiF: %s", "waiting for WPA");
         LogInfo.log(LOG_VERBOSE, F("Not Connected so switching to STA Mode...."));
         WiFi.onEvent(WiFiInfoClass::WiFiEvent);
         WiFi.mode(WIFI_MODE_STA);
         WiFiInfoClass::wpsInitConfig();
         esp_wifi_wps_enable(&config);
-        if (esp_wifi_wps_start(0) == ESP_OK)
+        if (esp_wifi_wps_start(10) == ESP_OK)
         {
             uint16_t count = 0;
             while (WiFi.status() != WL_CONNECTED)
@@ -56,19 +58,19 @@ bool WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
                     strcpy(this->_ssid, WiFi.SSID().c_str());
                     LogInfo.log(LOG_INFO, "Connected to        : %s", this->getSSID());
                     LogInfo.log(LOG_INFO, "Got IP              : %s", WiFi.localIP().toString().c_str());
-                    OledDisplay.displayLine(x, y, "WiFi: %s ", this->getSSID());
+                    OledDisplay.displayLine(x, y, "WiF: %s ", this->getSSID());
                     this->_connected = true;
                     LedInfo.blinkOff(LED_WIFI);
                     vTaskDelay(200);
-                    LedInfo.switchOn(LED_WIFI);      
-                    NTPInfo.tick();              
+                    LedInfo.switchOn(LED_WIFI);
+                    NTPInfo.tick();
                     break;
                 }
                 if (millis() - this->previousMillisWiFi >= 1000)
                 {
                     this->previousMillisWiFi = millis();
                     count++;
-                    OledDisplay.displayLine(x, y, "WiFi: %i secs", count);
+                    OledDisplay.displayLine(x + 25, y, " %i secs ", count);
                 }
             }
         }
@@ -78,7 +80,7 @@ bool WiFiInfoClass::connect(u8g2_uint_t x, u8g2_uint_t y)
         strcpy(this->_ssid, WiFi.SSID().c_str());
         LogInfo.log(LOG_INFO, "Connected to        : %s", WiFi.SSID().c_str());
         LogInfo.log(LOG_INFO, "Got IP              : %s", WiFi.localIP().toString().c_str());
-        OledDisplay.displayLine(x, y, "WiFi: %s ", this->getSSID());
+        OledDisplay.displayLine(x, y, "WiF: %s ", this->getSSID());
         this->_connected = true;
         LedInfo.blinkOff(LED_WIFI);
         vTaskDelay(200);
@@ -115,7 +117,7 @@ void WiFiInfoClass::toJson(JsonObject ob)
  * 
  * @return The SSID name
  */
-const char* WiFiInfoClass::getSSID()
+const char *WiFiInfoClass::getSSID()
 {
     return this->_ssid;
 }
@@ -123,7 +125,8 @@ const char* WiFiInfoClass::getSSID()
 /**
  * Initialize the WPS configuration
  */
-void WiFiInfoClass::wpsInitConfig() {
+void WiFiInfoClass::wpsInitConfig()
+{
     config.crypto_funcs = &g_wifi_default_wps_crypto_funcs;
     config.wps_type = WPS_TYPE_PBC;
     strcpy_P(config.factory_info.manufacturer, PSTR("LUXOFT"));
@@ -138,8 +141,10 @@ void WiFiInfoClass::wpsInitConfig() {
  * @param event The event been raised
  * @param info The information related to the event
  */
-void WiFiInfoClass::WiFiEvent(WiFiEvent_t event, system_event_info_t info) {
-    switch (event) {
+void WiFiInfoClass::WiFiEvent(WiFiEvent_t event, system_event_info_t info)
+{
+    switch (event)
+    {
     case SYSTEM_EVENT_STA_START:
         LogInfo.log(LOG_INFO, F("Station Mode Started"));
         break;
@@ -185,14 +190,15 @@ void WiFiInfoClass::WiFiEvent(WiFiEvent_t event, system_event_info_t info) {
  * 
  * @return The WPS pin
  */
-String WiFiInfoClass::numbersToString(uint8_t a[]) {
+String WiFiInfoClass::numbersToString(uint8_t a[])
+{
     char wps_pin[9];
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++)
+    {
         wps_pin[i] = a[i];
     }
     wps_pin[8] = '\0';
     return (String)wps_pin;
 }
-
 
 WiFiInfoClass WiFiInfo;

@@ -37,6 +37,7 @@ public:
 
 
 protected:
+    void virtual loadTopics() = 0;
     void initialiseConnection(std::function<void (char *, uint8_t *, unsigned int)> callback);
     bool mqttConnection();
     void virtual buildUserName(char *userName) = 0;
@@ -54,6 +55,7 @@ protected:
     uint8_t _retries;
     bool _tryConnecting;
     IOTTOPIC _topics[6];
+    uint8_t _topicsAdded;
     CloudInstance _cloudInstance;
     uint64_t _lastSent;
     char _buffer[64];

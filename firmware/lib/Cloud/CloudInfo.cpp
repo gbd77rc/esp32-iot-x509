@@ -67,7 +67,7 @@ void CloudInfoClass::load(JsonObjectConst obj)
         this->_provider = &Azure;
     }
 
-    LogInfo.log(LOG_VERBOSE, "Connect to %s [%s@%s:%i] Telementy %s Internval %i",
+    LogInfo.log(LOG_VERBOSE, "Connect to %s [%s@%s:%i] Telemetry %s Interval %i seconds",
                 CloudInfoClass::getStringFromProviderType(this->_config.provider),
                 DeviceInfo.getDeviceId(),
                 this->_config.endPoint,

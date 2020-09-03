@@ -15,6 +15,7 @@ public:
 protected:
     void buildUserName(char *userName) override;
     void processDesiredStatus(JsonObject doc) override;
+    void loadTopics() override;
 
 private:    
     bool getCurrentStatus();

@@ -5,6 +5,8 @@
 #include "Utilities.h"
 #include "CloudMisc.h"
 #include "BaseCloudProvider.h"
+
+#define ms_TO_S_FACTOR 1000    /* Conversion factor for milliseconds to seconds */
 class CloudInfoClass : public BaseConfigInfoClass
 {
 public:

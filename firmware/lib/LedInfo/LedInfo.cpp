@@ -12,7 +12,7 @@ TaskHandle_t LedInfoClass::blinkTaskHandles[LED_COUNT];
  */
 void LedInfoClass::blinkTask(void *parameters)
 {
-    LedState *pLed = (struct ledStateStruct*)parameters;
+    LedState *pLed = (struct ledStateStruct *)parameters;
     LogInfo.log(LOG_VERBOSE, "Starting to blink for %s on pin %i", pLed->typeName, pLed->pin);
     uint32_t ulStop;
     for (;;)
@@ -21,17 +21,20 @@ void LedInfoClass::blinkTask(void *parameters)
         if (ulStop > 0)
         {
             analogWrite(pLed->pin, 0);
-            pLed->isOn = false;
-            LogInfo.log(LOG_VERBOSE, "Stopping blinking for %s on pin %i at %i brightness", pLed->typeName, pLed->pin, pLed->brightness);
+            if (pLed->isOn)
+            {
+                // Switch back on if we had use switchOn method before the blink
+                vTaskDelay(500 / portTICK_PERIOD_MS);
+                analogWrite(pLed->pin, 1);
+            }
+            LogInfo.log(LOG_VERBOSE, "Stopping blinking for %s on pin %i at %i brightness and state is %s", pLed->typeName, pLed->pin, pLed->brightness, pLed->isOn ? "ON" : "OFF");
             vTaskDelete(LedInfoClass::blinkTaskHandles[pLed->idx]);
             LedInfoClass::blinkTaskHandles[pLed->idx] = NULL;
             break; // should not be needed, but just incase.
         }
         analogWrite(pLed->pin, pLed->brightness);
-        pLed->isOn = true;
         vTaskDelay(500 / portTICK_PERIOD_MS);
         analogWrite(pLed->pin, 0);
-        pLed->isOn = false;
     }
 }
 
@@ -77,8 +80,9 @@ void LedInfoClass::toJson(JsonObject ob)
 {
     auto json = ob.createNestedObject(this->getSectionName());
     json["brightness"] = this->_brightness;
-    for (uint8_t i = 0;i< LED_COUNT;i++){
-        json[this->_led[i].typeName] = this->_led[i].isOn ? "ON": "OFF";
+    for (uint8_t i = 0; i < LED_COUNT; i++)
+    {
+        json[this->_led[i].typeName] = this->_led[i].isOn ? "ON" : "OFF";
     }
 }
 
@@ -158,8 +162,8 @@ void LedInfoClass::blinkOn(LedType type)
 {
     if (LedInfoClass::blinkTaskHandles[type] == NULL)
     {
-        xTaskCreate(LedInfoClass::blinkTask, 
-                    "ledBlinking", 
+        xTaskCreate(LedInfoClass::blinkTask,
+                    "ledBlinking",
                     10000,
                     (void *)&this->_led[type],
                     1,
@@ -176,7 +180,7 @@ void LedInfoClass::blinkOff(LedType type)
 {
     if (LedInfoClass::blinkTaskHandles[type] != NULL)
     {
-        xTaskNotify(LedInfoClass::blinkTaskHandles[type], 1, eSetValueWithOverwrite );
+        xTaskNotify(LedInfoClass::blinkTaskHandles[type], 1, eSetValueWithOverwrite);
     }
 }
 
@@ -185,8 +189,8 @@ void LedInfoClass::blinkOff(LedType type)
  * 
  *  @param level The LedType enum level to work with
  *  @return the pointer to the string.
- */ 
-const char* LedInfoClass::ledTypeToString(LedType level)
+ */
+const char *LedInfoClass::ledTypeToString(LedType level)
 {
     switch (level)
     {

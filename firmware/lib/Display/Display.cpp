@@ -120,7 +120,7 @@ void DisplayClass::writeLine(u8g2_uint_t x, u8g2_uint_t y, const char *msg)
     {
         yt = FONT_ONE_HEIGHT / 2;
     }
-    u8g2.drawBox(x, yt, 128, (FONT_ONE_HEIGHT + 1));
+    u8g2.drawBox(x, yt, 128, (FONT_ONE_HEIGHT + 2));
     u8g2.setDrawColor(1);
     u8g2.drawStr(x, yt, msg);
     u8g2.sendBuffer();

@@ -34,7 +34,7 @@
             "key": "/cloud/device.key"
         },
         "iotHub": {
-            "endpoint": ".azure-devices.net",
+            "endpoint": "dev-ot-iot-hub.azure-devices.net",
             "port": 8883,
             "sendTelemetry": true,
             "sendDeviceTwin": true,

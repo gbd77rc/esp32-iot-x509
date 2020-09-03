@@ -23,24 +23,6 @@ void AzureInstanceClass::mqttCallback(char *topic, byte *payload, unsigned int l
  */
 AzureInstanceClass::AzureInstanceClass() : BaseCloudProvider(CPT_AZURE)
 {
-    strcpy(this->_topics[0].topic, "$iothub/twin/PATCH/properties/desired/#");
-    this->_topics[0].type = TT_SUBSCRIBE;
-    strcpy(this->_topics[1].topic, "$iothub/twin/res/#");
-    this->_topics[1].type = TT_SUBSCRIBE;
-    strcpy(this->_topics[2].topic, "devices/");
-    strcat(this->_topics[2].topic, DeviceInfo.getDeviceId());
-    strcat(this->_topics[2].topic, "/messages/events/");
-    this->_topics[2].type = TT_SUBSCRIBE;
-    strcpy(this->_topics[3].topic, "devices/");
-    strcat(this->_topics[3].topic, DeviceInfo.getDeviceId());
-    strcat(this->_topics[3].topic, "/messages/events/");
-    this->_topics[3].type = TT_TELEMETRY;
-    strcpy(this->_topics[4].topic, "$iothub/twin/PATCH/properties/reported/?$rid=");
-    this->_topics[4].type = TT_DEVICETWIN;
-    this->_topics[4].appendUniqueId = true;
-    strcpy(this->_topics[5].topic, "$iothub/twin/GET/?$rid=");
-    this->_topics[5].type = TT_SYNCDEVICETWIN;
-    this->_topics[5].appendUniqueId = true;
 }
 
 /**
@@ -80,7 +62,7 @@ bool AzureInstanceClass::getCurrentStatus()
             topic,
             nullptr);
     }
-    LogInfo.log(LOG_INFO, "Current GET status is %s at %s", sent ? "True" : "False", NTPInfo.getISO8601Formatted());
+    LogInfo.log(LOG_INFO, "Current GET status is %s at %s", sent ? "True" : "False", NTPInfo.getISO8601Formatted().c_str());
     return sent;
 }
 
@@ -168,6 +150,32 @@ void AzureInstanceClass::processDesiredStatus(JsonObject doc)
             this->updateProperty("location", element["location"]);
         }
     }    
+}
+
+/**
+ * Load the topics into the provider
+ */
+void AzureInstanceClass::loadTopics()
+{
+    strcpy(this->_topics[0].topic, "$iothub/twin/PATCH/properties/desired/#");
+    this->_topics[0].type = TT_SUBSCRIBE;
+    strcpy(this->_topics[1].topic, "$iothub/twin/res/#");
+    this->_topics[1].type = TT_SUBSCRIBE;
+    strcpy(this->_topics[2].topic, "devices/");
+    strcat(this->_topics[2].topic, DeviceInfo.getDeviceId());
+    strcat(this->_topics[2].topic, "/messages/events/");
+    this->_topics[2].type = TT_SUBSCRIBE;
+    strcpy(this->_topics[3].topic, "devices/");
+    strcat(this->_topics[3].topic, DeviceInfo.getDeviceId());
+    strcat(this->_topics[3].topic, "/messages/events/");
+    this->_topics[3].type = TT_TELEMETRY;
+    strcpy(this->_topics[4].topic, "$iothub/twin/PATCH/properties/reported/?$rid=");
+    this->_topics[4].type = TT_DEVICETWIN;
+    this->_topics[4].appendUniqueId = true;
+    strcpy(this->_topics[5].topic, "$iothub/twin/GET/?$rid=");
+    this->_topics[5].type = TT_SYNCDEVICETWIN;
+    this->_topics[5].appendUniqueId = true;
+    this->_topicsAdded = 6;
 }
 
 AzureInstanceClass Azure;

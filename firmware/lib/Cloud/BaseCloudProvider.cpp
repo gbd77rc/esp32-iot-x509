@@ -61,6 +61,7 @@ BaseCloudProvider::BaseCloudProvider(CloudProviderType type)
 void BaseCloudProvider::begin(DATABUILDER builder)
 {
     this->_builder = builder;
+    this->_cloudInstance.instance->loadTopics();
 }
 
 /**
@@ -97,6 +98,7 @@ void BaseCloudProvider::checkForMessages()
  */
 void BaseCloudProvider::initialiseConnection(std::function<void(char *, uint8_t *, unsigned int)> callback)
 {
+    LedInfo.blinkOn(LED_CLOUD);
     this->_httpsClient.setCACert(this->_config->certificates[CT_CA].contents);
     this->_httpsClient.setCertificate(this->_config->certificates[CT_CERT].contents);
     this->_httpsClient.setPrivateKey(this->_config->certificates[CT_KEY].contents);
@@ -123,7 +125,7 @@ bool BaseCloudProvider::mqttConnection()
         if (this->_mqttClient.connect(DeviceInfo.getDeviceId(), userName, NULL))
         {
             LogInfo.log(LOG_VERBOSE, "Connected Successfully to [%s]", this->_config->endPoint);
-            for (uint8_t i = 0; i < sizeof(this->_topics); i++)
+            for (uint8_t i = 0; i < this->_topicsAdded; i++)
             {
                 auto topic = this->_topics[i];
                 if (topic.type == TT_SUBSCRIBE)
@@ -133,6 +135,7 @@ bool BaseCloudProvider::mqttConnection()
                                 subbed ? "Yes" : "No", topic.topic);
                 }
             }
+            break;
         }
         else
         {
@@ -140,7 +143,8 @@ bool BaseCloudProvider::mqttConnection()
             delay(100);
             retries++;
         }
-    }
+    }   
+    LedInfo.blinkOff(LED_CLOUD);
     this->_tryConnecting = false;
     if (!this->_mqttClient.connected())
     {
@@ -158,7 +162,7 @@ bool BaseCloudProvider::mqttConnection()
                                 &this->_cloudInstance.checkTaskHandle,
                                 0);
     }
-
+    LedInfo.switchOn(LED_CLOUD); 
     return this->getIsConnected();
 }
 
@@ -198,7 +202,7 @@ const SemaphoreHandle_t BaseCloudProvider::getSemaphore()
 const char *BaseCloudProvider::getFirstTopic(TopicType type)
 {
     IoTTopic found = IoTTopic{"", TT_UNKNOWN, false};
-    for (uint8_t i = 0; i < sizeof(this->_topics); i++)
+    for (uint8_t i = 0; i < this->_topicsAdded; i++)
     {
         if (this->_topics[i].type == type)
         {
@@ -310,7 +314,7 @@ bool BaseCloudProvider::sendDeviceReport(JsonObject json)
 
         LogInfo.log(LOG_INFO, "Current Publish status is %s at %s",
                     sent ? "True" : "False",
-                    NTPInfo.getISO8601Formatted());
+                    NTPInfo.getISO8601Formatted().c_str());
     }
     return sent;
 }
@@ -344,7 +348,7 @@ bool BaseCloudProvider::sendTelemetry(JsonObject json)
             payload);
 
         LogInfo.log(LOG_INFO, "Current Send status is %s at %s",
-                    sent ? "True" : "False", NTPInfo.getISO8601Formatted());
+                    sent ? "True" : "False", NTPInfo.getISO8601Formatted().c_str());
     }
 
     return sent;
@@ -357,7 +361,7 @@ bool BaseCloudProvider::sendTelemetry(JsonObject json)
  */
 bool BaseCloudProvider::canSendNow()
 {
-    if ((millis() - this->_lastSent) > this->_config->sendInterval)
+    if ((millis() - this->_lastSent) > this->_config->sendInterval *  ms_TO_S_FACTOR)
     {
         return true;
     }
