@@ -70,12 +70,10 @@ Now using a breadboard, I have added pre-cut wires and sensors to it.  These can
 
 #### Step 2
 
-Plug in the battery to the bottom of the ESP32 development board.  It can only connect one way.
+Now press in the ESP32 WiFi board into the breadboard.  Be very careful here, as pressing down too hard on the display edge will break it.  I have done this once!
 
-#### Step 3
-
-Now insert the ESP32 development board into the breadboard, aligning the pins correctly.
-
-![Step 3](./images/Step3.png)
+![Top View](./images/Step2.png)
+![Back View](./images/Step3.png)
+![Front View](./images/Step4.png)
 
 Once the external ariel is connected and end of the GPS Antenna is placed outside, or has a direct line of sight to the sky.  Make sure if you have double glazing, this can cause interference as well, open up the window if you can.

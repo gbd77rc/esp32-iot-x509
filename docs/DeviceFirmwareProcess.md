@@ -14,7 +14,9 @@ The device will automatically switch to WPS mode under the following conditions.
 1. Cannot find previous router
 1. Cannot connect in a timely manner to an existing router
 
-It will display `waiting for WPA` and give a count of seconds it has waited for.  The user will then be able to press the routers WPA button and reset the ESP32 to try again.  During testing I have noticed it asks for WPA 1 in 10 resets.  I had to just reset it again to connect automatically.  
+![WiFi](./images/WaitWiFi.png)
+
+It will display give a count of seconds it has waited for, it only give this count if waiting for WPS mode.  The user will then be able to press the routers WPA button and reset the ESP32 to try again.  During testing I have noticed it asks for WPA 1 in 10 resets.  I had to just reset it again to connect automatically.  
 
 >__*I leave it up to the reader to add the code to automatically reset if it detects that the router's SSID is detected and within range (DB Strength).*__
 

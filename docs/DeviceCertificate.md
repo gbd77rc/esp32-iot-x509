@@ -32,10 +32,10 @@ Once flashed the OLED display will show the CPU Id.  The relevant output from th
     PLATFORM: Espressif 32 1.12.4 > Heltec WiFi Kit 32
     HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
     DEBUG: Current (esp-prog) External (esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
-    PACKAGES: 
-    - framework-arduinoespressif32 3.10004.200129 (1.0.4) 
-    - tool-esptoolpy 1.20600.0 (2.6.0) 
-    - tool-mkspiffs 2.230.0 (2.30) 
+    PACKAGES:
+    - framework-arduinoespressif32 3.10004.200129 (1.0.4)
+    - tool-esptoolpy 1.20600.0 (2.6.0)
+    - tool-mkspiffs 2.230.0 (2.30)
     - toolchain-xtensa32 2.50200.80 (5.2.0)
     Checking size .pio/build/heltec-wifi-esp32/firmware.elf
     Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
@@ -61,6 +61,8 @@ You would combine this with the `prefix` found in the `device` element in the `c
   "location": "<UNKNOWN>"
 }
 ```
+
+![Back View](./images/CPU-ID.png)
 
 So if the CPU Id is `105783B5AA8C` then the actual device Id will be `OT-105783B5AA8C`.
 

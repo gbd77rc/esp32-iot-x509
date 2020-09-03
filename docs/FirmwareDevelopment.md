@@ -297,12 +297,6 @@ Hash of data verified.
 Leaving...
 Hard resetting via RTS pin...
 =========== [SUCCESS] Took 18.28 seconds ==============
-
-********************************************************
-There is a new version 5.0.0 of PlatformIO available.
-Please upgrade it via `PlatformIO IDE Menu: Upgrade PlatformIO`.
-Changes: https://docs.platformio.org/en/latest/history.html
-********************************************************
 ```
 
 This is the output from the command.  Most of it is not useful, the main useful bit is the list of files being embedded in the image.
@@ -339,9 +333,9 @@ Example of Logging Details
 398:VRB:1:CPU Id is 105783B5AA8C
 ```
 
-398 is the milliseconds since start of the device
-VRB is the logging status
-1 is the processor ID that the log was created on
+398: is the milliseconds since start of the device
+VRB: is the logging status
+1: is the processor ID that the log was created on
 CPU Id is 105783B5AA8C is the actual message
 
 ### LED Control
@@ -405,6 +399,8 @@ This library will handle when to sleep and when to wake up.  It wraps the [ESP S
 This device is useless unless it can connect to the cloud and report on it sensors. The library has both Azure and AWS implementations, they share a common configuration `CloudInfo` and a common base class `BaseCloudProvider`.  Most of the code to do the actual publish/subscribe and connecting is handle by the base class.  The individual instances handle the topic and server configuration related data.
 
 ## Starting
+
+![WiFi](./images/Connected.png)
 
 Once you have uploaded and connected to the WiFi router, the following logs where generated.
 
@@ -593,4 +589,4 @@ Once you have uploaded and connected to the WiFi router, the following logs wher
      60022:VRB:1:Been alive for 60 seconds
 ```
 
-This is the log I got after loading it and connect to a WiFi router.  You will notice the GPS data has be reset to 0.0 as it does give my location.  You will also notice that the Epoch/Time starts at 1st Jan 1970, but after a while it gets the correct date/time.
+This is the log I got after loading it and connect to a WiFi router.  You will notice the GPS data has be reset to 0.0 as it does give my location.  You will also notice that the Epoch/Time starts at 1st Jan 1970, but after a while it gets the correct date/time.  This happens sometimes, I think its due to NTP checking issue in the third party library.  The code checks to see if the epoch time is sensible, as it is greater then 1st Jan 2020, and only then will send the data to the cloud.
