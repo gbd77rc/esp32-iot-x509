@@ -12,7 +12,7 @@ The _**GPS External Ariel/5 U.FL Mini PCI to SMA Female**_ is really only needed
 
 The MT3608 is required because the GPS wants 5v power, and during the testing on battery the 5v line from the ESP32 was 1.75v, so not enough power being generated.  
 
-I have added in 3 LED's to show power on, wifi connected and sending/receiving data to/from the cloud.
+I have added in 3 LED's to show power on, wifi connected and cloud connected.
 
 The OLED display on the ESP32 board will display information on startup and normal mode.
 
@@ -25,6 +25,10 @@ If we have time at the end I will show how we could connect the following
 * [Li-ion Charging Module TP4056 + DW01](https://smile.amazon.co.uk/gp/product/B07GDRNDMS/ref=ppx_yo_dt_b_asin_title_o00_s01?ie=UTF8&psc=1)
 * [MT3608 Step-Up Adjustable DC-DC](https://smile.amazon.co.uk/gp/product/B07MY3NZ18/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&psc=1)
 
+<!-- I have built/soldered the solar panel, TP4056 and battery together.
+
+![Power Pack](./images/ESP32SolarBattery.png) -->
+
 The EPS32 Development board accepts 5v via the USB connector, but the battery connector underneath only seems to accept the 3.7v from the Lithium battery.  This is a problem in that the GPS needs between 3.3v and 5v, closer to 5v the better to get a satellite fix.  The ESP32 board has an onboard voltage regulator, so we don't need to worry about frying the ESP32 chip itself and I think this is where we run into difficulties.  Still waiting for information from the manufacturer about the 3.3v and 5v power pins and acceptable power inputs.  The power pins do not switch off when you tell the ESP32 chip to go to deep sleep.  I think this will end up being a separate blog.
 
 ## Building The System
@@ -33,13 +37,12 @@ I have already pre-soldered ESP32 Development board.  From the photos you can se
 
 ![ESP32 Device Board](./images/ESP32DevBoard.png)
 
-I have built/soldered the solar panel, TP4056 and battery together.
-
-![Power Pack](./images/ESP32SolarBattery.png)
-
 The following circuit diagram will help with the connecting of pins.
 
 ![Circuit Diagram](./images/CircuitDiagram.svg)
+
+The above circuit diagram does include an external power supply that uses a solar panel, lithium battery, and a step up booster.  As explained in the `External Power` section, this may or may not be done yet.
+
 ![ESP32 PinOuts](./images/ESP32PinOuts.png)
 
 The pin numbers are the physical pin layout on the board.  The configuration settings uses logical pin layout, see the table in the diagram.  
@@ -58,7 +61,7 @@ The LED has a negative and positive leg.  Its important that you get them the ri
 
 Connect the negative and positive probes and the LED should light up.  Switch the probes around if not.  Now you know which side is the negative.
 
-> On a side note, the resistor value is 330ohms used for each LED.  This may not be correct depending on the LED colour value, but should not any real problem.  The main problem will be that the LED will not be bright as it could be.  For brightness control, the GPIO pins should support analog mode.
+> On a side note, the resistor value is 330ohms used for each LED.  This may not be correct depending on the LED colour value, but should not cause any real problem.  The main problem will be that the LED will not be bright as it could be.  For brightness control, the GPIO pins should support analog mode.
 
 ### Wiring The Sensors
 
@@ -76,4 +79,4 @@ Now press in the ESP32 WiFi board into the breadboard.  Be very careful here, as
 ![Back View](./images/Step3.png)
 ![Front View](./images/Step4.png)
 
-Once the external ariel is connected and end of the GPS Antenna is placed outside, or has a direct line of sight to the sky.  Make sure if you have double glazing, this can cause interference as well, open up the window if you can.
+Once the external ariel is connected and end of the GPS Antenna is placed outside, or has a direct line of sight to the sky, you are ready to power it.  Make sure if you have double glazing, this can cause interference as well, open up the window if you can.  When power is applied the GPS red led will start to flash any where between 5 seconds to a minute.  If you leave it powered it should come alive.  If after 5 minutes nothing is seen, either the antenna does not have line of sight to the satellites or you don't have enough power to the GPS, or it is broken.  Those are generally the only reasons it will not work.  Now getting something sensible from it is a different story.  As long as the `RX` and `TX` pins are connected correctly the library should be able communicate with it.
