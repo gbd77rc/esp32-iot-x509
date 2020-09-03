@@ -1,6 +1,6 @@
 # Device Certificate
 
-Each device should have its own certificate with its `Common Name` set to the device identifier.  
+Each device should have its own certificate with its `Common Name` set to the device identifier.  There are two sides to secure communication, this blog show how to create the certificates that the device will use to encrypt the data and how the cloud side will decrypt the data.  So that the device knowns how to read the data coming from the cloud we will need a public cert/key to do the decryption.  The details on these certs can be found in [DeviceConfigSetup.md](./DeviceConfigSetup.md) `Azure Information Section` and `AWS Information Section` sections.
 
 ## Device Id aka Common Name
 

@@ -191,13 +191,11 @@ The `certificate` is the file that contains the `CN` of the device.
 
 The `key` is the private key that will encrypt the communication between the device and the cloud provider.  The cloud provider will have the public key to decrypt this information.
 
-The `CA` in the cloud specific sections contains the public key so that the device can decrypt the information being sent from the cloud provider.
-
 ## IoT Hub Information Section
 
 ```json
     "iotHub":{
-        "endpoint": ""
+        "endpoint": "",
         "port": 8883,
         "sendTelemetry": true,
         "sendDeviceTwin": true,
@@ -225,7 +223,9 @@ The `intervalSeconds` is the number of seconds to wait before sending telemetry 
     }
 ```
 
-This is the public key that the cloud provider gives out for decryption of information from them.
+This is the public key that the cloud provider gives out for decryption of information from them and is included in the repro.  The expiry is 12th May 2025.
+
+The actual root certificate is pretty hard to find.  The entire cert is embedded in Azure-IoT-SDK-C [certs.c](https://github.com/Azure/azure-iot-sdk-c/blob/master/certs/certs.c) file.  Also the documentation in [iot-hub-mqtt-support.md](https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/iot-hub/iot-hub-mqtt-support.md) contains information about it.  Thats about the only places I have seen so far.
 
 ## AWS Information Section
 
@@ -235,4 +235,6 @@ This is the public key that the cloud provider gives out for decryption of infor
     }
 ```
 
-This is the public key that the cloud provider gives out for decryption of information from them.
+This is the public key that the cloud provider gives out for decryption of information from them and is included in the repo.  The expiry is 17th Jan 2038.
+
+Unlike Azure the AWS root certificate has a handy link to [download](https://www.amazontrust.com/repository/AmazonRootCA1.pem) it.  I have downloaded the RSA 2048 Bit key and not the legacy one.  The information around this can be location in the [Server Authentication](https://docs.aws.amazon.com/iot/latest/developerguide/server-authentication.html) documents in the AWS IoT Developer Guide.
