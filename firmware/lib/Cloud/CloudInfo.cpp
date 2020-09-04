@@ -1,6 +1,7 @@
 #include "CloudInfo.h"
 #include "LogInfo.h"
 #include "AzureInstance.h"
+#include "AwsInstance.h"
 
 /**
  * Base Class Constructor
@@ -31,6 +32,7 @@ void CloudInfoClass::begin(SemaphoreHandle_t flag)
  */
 void CloudInfoClass::load(JsonObjectConst obj)
 {
+    LogInfo.log(LOG_VERBOSE, "Provider is %s", obj.containsKey("provider") ? obj["provider"].as<const char *>() : "UNKNOWN");
     this->_config.provider = CloudInfoClass::getProviderTypeFromString(obj.containsKey("provider") ? obj["provider"].as<const char *>() : "");
 
     if (obj.containsKey("certs"))
@@ -56,7 +58,6 @@ void CloudInfoClass::load(JsonObjectConst obj)
     if (obj.containsKey("aws") && this->_config.provider == CPT_AWS)
     {
         strcpy(this->_config.certificates[CT_CA].fileName, obj["aws"].containsKey("ca") ? obj["aws"]["ca"].as<const char *>() : "");
-        CloudInfoClass::loadCertificate(&this->_config.certificates[CT_CA]);
     }
     strcpy(this->ca_aws_fileName, obj["aws"].containsKey("ca") ? obj["aws"]["ca"].as<const char *>() : "");
 
@@ -65,6 +66,11 @@ void CloudInfoClass::load(JsonObjectConst obj)
     if (this->_config.provider == CPT_AZURE)
     {
         this->_provider = &Azure;
+    }
+
+    if (this->_config.provider == CPT_AWS)
+    {
+        this->_provider = &Aws;
     }
 
     LogInfo.log(LOG_VERBOSE, "Connect to %s [%s@%s:%i] Telemetry %s Interval %i seconds",
@@ -143,9 +149,9 @@ const char *CloudInfoClass::getStringFromProviderType(CloudProviderType type)
     case CPT_AZURE:
         return "azure";
     default:
-        return "azure";
+        return "default";
     }
-    return "azure";
+    return "unknown";
 }
 
 /**
@@ -163,7 +169,7 @@ CloudProviderType CloudInfoClass::getProviderTypeFromString(const char* type)
     {
         return CPT_AWS;
     } 
-    return CPT_AZURE;
+    return CPT_UNKNOWN;
 }
 
 /**

@@ -1,27 +1,27 @@
-#include "AzureInstance.h"
+#include "AwsInstance.h"
 #include "LogInfo.h"
 #include "NTPInfo.h"
 #include "WakeUpInfo.h"
 #include "LedInfo.h"
 
-RTC_DATA_ATTR int _Azure_count;
+RTC_DATA_ATTR int _Aws_count;
 
 /**
  * This the static callback for processing messages return from the IoT broker
 */
-void AzureInstanceClass::mqttCallback(char *topic, byte *payload, unsigned int length)
+void AwsInstanceClass::mqttCallback(char *topic, byte *payload, unsigned int length)
 {
     WakeUp.suspendSleep();
     LedInfo.blinkOn(LED_CLOUD);
-    Azure.processReply(topic, payload, length);
+    Aws.processReply(topic, payload, length);
     LedInfo.blinkOff(LED_CLOUD);
     WakeUp.resumeSleep();
 }
 
 /**
- * Azure Instance Constructor
+ * Aws Instance Constructor
  */
-AzureInstanceClass::AzureInstanceClass() : BaseCloudProvider(CPT_AZURE)
+AwsInstanceClass::AwsInstanceClass() : BaseCloudProvider(CPT_AWS)
 {
 }
 
@@ -30,13 +30,13 @@ AzureInstanceClass::AzureInstanceClass() : BaseCloudProvider(CPT_AZURE)
  * 
  * @return True if connected
  */
-bool AzureInstanceClass::connect(const IoTConfig *config)
+bool AwsInstanceClass::connect(const IoTConfig *config)
 {
     if (this->_tryConnecting == false)
     {
         this->_tryConnecting = true;
         this->_config = config;
-        this->initialiseConnection(AzureInstanceClass::mqttCallback);
+        this->initialiseConnection(AwsInstanceClass::mqttCallback);
         if (this->mqttConnection())
         {
             this->getCurrentStatus();
@@ -50,14 +50,16 @@ bool AzureInstanceClass::connect(const IoTConfig *config)
  * 
  * @return The current status of the device twin
  */
-bool AzureInstanceClass::getCurrentStatus()
+bool AwsInstanceClass::getCurrentStatus()
 {
     bool sent = false;
     if (this->getIsConnected())
     {
         char topic[64];
-        strcpy(topic, ("$iothub/twin/GET/?$rid=" + String(++_Azure_count)).c_str());
-        LogInfo.log(LOG_VERBOSE, "Getting Current Status to[%s]", topic);
+        strcpy(topic, this->_shadowPrefix);
+        strcat(topic, "/get");
+
+        LogInfo.log(LOG_VERBOSE, "Getting Current Status to [%s]", topic);
         sent = this->_mqttClient.publish(
             topic,
             nullptr);
@@ -69,12 +71,9 @@ bool AzureInstanceClass::getCurrentStatus()
 /**
  * Build the user name to connect to the hub
  */
-void AzureInstanceClass::buildUserName(char *userName)
+void AwsInstanceClass::buildUserName(char *userName)
 {
-    strcpy(userName, this->_config->endPoint);
-    strcat(userName, "/");
-    strcat(userName, DeviceInfo.getDeviceId());
-    strcat(userName, "/?api-version=2018-06-30");
+    userName = NULL;
 }
 
 /**
@@ -84,9 +83,9 @@ void AzureInstanceClass::buildUserName(char *userName)
  * @param payload The body of the message, generally in JSON format
  * @param length The size of the payload
  */
-void AzureInstanceClass::processReply(char *topic, byte *payload, unsigned int length)
+void AwsInstanceClass::processReply(char *topic, byte *payload, unsigned int length)
 {
-    LogInfo.log(LOG_VERBOSE, "Received Azure Reply from [%s][%u]", topic, length);
+    LogInfo.log(LOG_VERBOSE, "Received Aws Reply from [%s][%u]", topic, length);
     DynamicJsonDocument doc(length * 2);
     bool hasBody = false;
     if (length > 0)
@@ -100,26 +99,27 @@ void AzureInstanceClass::processReply(char *topic, byte *payload, unsigned int l
         LogInfo.log(LOG_VERBOSE, F("MQTT Update Message"), doc.as<JsonObject>());
         hasBody = true;
     }
-    // check for 204 on twin update
+    // check for accepted twin update
     char reply[64];
-    strcpy(reply, "$iothub/twin/res/204/?$rid=");
-    strcat(reply, String(_Azure_count).c_str());
+    strcpy(reply, this->_shadowPrefix);
+    strcat(reply, "/update/accepted");
     if (strstr(topic, reply) != NULL)
     {
         LogInfo.log(LOG_VERBOSE, "OK Reply from hub ");
     }
-    strcpy(reply, "$iothub/twin/res/200/?$rid=");
-    strcat(reply, String(_Azure_count).c_str());
+    strcpy(reply, this->_shadowPrefix);
+    strcpy(reply, "/get/accepted");
     if (strstr(topic, reply) != NULL && hasBody)
     {
-        this->processDesiredStatus(doc.as<JsonObject>());
+        this->processDesiredStatus(doc["state"].as<JsonObject>());
     }
-    //$iothub/twin/PATCH/properties/desired/?$version=9
-    strcpy(reply, "$iothub/twin/PATCH/properties/desired/?$version=");
+
+    strcpy(reply, this->_shadowPrefix);
+    strcpy(reply, "/update/delta");
     if (strstr(topic, reply) != NULL && hasBody)
     {
-        this->processDesiredStatus(doc.as<JsonObject>());
-    }
+        this->processDesiredStatus(doc["state"].as<JsonObject>());
+    }    
 
     LogInfo.log(LOG_VERBOSE, "Finished Updating - Body: %s",
                 hasBody ? "Yes" : "No");
@@ -130,7 +130,7 @@ void AzureInstanceClass::processReply(char *topic, byte *payload, unsigned int l
  * 
  * @param doc The doc object that contains the desired element.
  */
-void AzureInstanceClass::processDesiredStatus(JsonObject doc)
+void AwsInstanceClass::processDesiredStatus(JsonObject doc)
 {
     JsonObject element;
     if (doc.containsKey("desired"))
@@ -155,27 +155,26 @@ void AzureInstanceClass::processDesiredStatus(JsonObject doc)
 /**
  * Load the topics into the provider
  */
-void AzureInstanceClass::loadTopics()
+void AwsInstanceClass::loadTopics()
 {
-    strcpy(this->_topics[0].topic, "$iothub/twin/PATCH/properties/desired/#");
-    this->_topics[0].type = TT_SUBSCRIBE;
-    strcpy(this->_topics[1].topic, "$iothub/twin/res/#");
+    strcpy(this->_shadowPrefix, "$aws/things/");
+    strcat(this->_shadowPrefix, DeviceInfo.getDeviceId());
+    strcat(this->_shadowPrefix, "/shadow");
+
+    strcpy(this->_topics[0].topic, this->_shadowPrefix);
+    strcpy(this->_topics[0].topic, "/update");
+    this->_topics[0].type = TT_DEVICETWIN;
+    strcpy(this->_topics[1].topic, this->_shadowPrefix);
+    strcpy(this->_topics[1].topic, "/update/delta");
     this->_topics[1].type = TT_SUBSCRIBE;
-    strcpy(this->_topics[2].topic, "devices/");
-    strcat(this->_topics[2].topic, DeviceInfo.getDeviceId());
-    strcat(this->_topics[2].topic, "/messages/events/");
+    strcpy(this->_topics[2].topic, this->_shadowPrefix);
+    strcpy(this->_topics[2].topic, "/update/accepted");
     this->_topics[2].type = TT_SUBSCRIBE;
     strcpy(this->_topics[3].topic, "devices/");
     strcat(this->_topics[3].topic, DeviceInfo.getDeviceId());
     strcat(this->_topics[3].topic, "/messages/events/");
     this->_topics[3].type = TT_TELEMETRY;
-    strcpy(this->_topics[4].topic, "$iothub/twin/PATCH/properties/reported/?$rid=");
-    this->_topics[4].type = TT_DEVICETWIN;
-    this->_topics[4].appendUniqueId = true;
-    strcpy(this->_topics[5].topic, "$iothub/twin/GET/?$rid=");
-    this->_topics[5].type = TT_SYNCDEVICETWIN;
-    this->_topics[5].appendUniqueId = true;
-    this->_topicsAdded = 6;
+    this->_topicsAdded = 4;
 }
 
-AzureInstanceClass Azure;
+AwsInstanceClass Aws;

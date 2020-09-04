@@ -200,7 +200,7 @@ Now lets generate the x509 certificate that will be placed on the device.
 
 ```shell
 ▶ openssl x509 -req -in 105783B5AA8C.csr -CA dev-root-ca.pem -CAkey dev-root-ca.key \
--CAcreateserial -out 105783B5AA8C-cert.pem
+-CAcreateserial -out 105783B5AA8C-cert.pem -sha256
 Signature ok
 subject=/C=GB/CN=OT-105783B5AA8C
 Getting CA Private Key

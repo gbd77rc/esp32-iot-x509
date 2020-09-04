@@ -11,7 +11,7 @@ The following links will take the reader to the sections they are interested in.
 * [Device Sensor Setup](./docs/DeviceSensorSetup.md)
 * [Firmware Processing](./docs/DeviceFirmwareProcess.md)
 * [Firmware Development](./docs/FirmwareDevelopment.md)
-* [x509 creation and hub creation](./docs/DeviceCertificate.md)
+* [Device Certificate Creation](./docs/DeviceCertificate.md)
 * [IoT Device Registration](./docs/DeviceCloudRegistration.md)
 * Application to show the data from the device
 * Development Setup and source control

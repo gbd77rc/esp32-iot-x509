@@ -114,10 +114,11 @@ void BaseCloudProvider::initialiseConnection(std::function<void(char *, uint8_t 
 bool BaseCloudProvider::mqttConnection()
 {
     uint8_t retries = 0;
-    LogInfo.log(LOG_VERBOSE, "Connecting to IoT Hub (%s):(%i) - (%s)",
+    LogInfo.log(LOG_VERBOSE, "Connecting to IoT Hub (%s):(%i) - (%s) @ %s",
                 this->_config->endPoint,
                 this->_config->port,
-                DeviceInfo.getDeviceId());
+                DeviceInfo.getDeviceId(),
+                NTPInfo.getISO8601Formatted().c_str());
     char userName[256];
     this->buildUserName(userName);
     while (!this->_mqttClient.connected() && retries < RECONNECT_RETRIES)
@@ -179,6 +180,8 @@ const char *BaseCloudProvider::getProviderType()
         return "aws";
     case CPT_AZURE:
         return "azure";
+    case CPT_UNKNOWN:
+        return "UNKNOWN";
     }
     return "";
 }

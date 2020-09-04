@@ -15,7 +15,8 @@ typedef enum
 typedef enum
 {
     CPT_AZURE = 0,
-    CPT_AWS = 1
+    CPT_AWS = 1,
+    CPT_UNKNOWN =2
 } CloudProviderType;
 
 typedef struct CertificateInfo

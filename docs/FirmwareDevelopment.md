@@ -333,10 +333,10 @@ Example of Logging Details
 398:VRB:1:CPU Id is 105783B5AA8C
 ```
 
-398: is the milliseconds since start of the device
-VRB: is the logging status
-1: is the processor ID that the log was created on
-CPU Id is 105783B5AA8C is the actual message
+**_398:_** is the milliseconds since start of the device  
+**_VRB:_** is the logging status  
+**_1:_** is the processor ID that the log was created on  
+**_CPU Id is 105783B5AA8C_** is the actual message  
 
 ### LED Control
 

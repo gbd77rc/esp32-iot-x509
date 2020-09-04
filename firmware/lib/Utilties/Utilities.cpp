@@ -90,14 +90,14 @@ namespace Utilities
      */
     bool compare(const char *left, const char *right, bool ignoreCase)
     {
-        for (;; left++, right++)
+        auto s1 = String(left);
+        auto s2 = String(right);
+        if( ignoreCase)
         {
-            int res = tolower((unsigned char)*left) - tolower((unsigned char)*right);
-            if (res != 0 || !*left)
-            {
-                return false;
-            }
+            s1.toLowerCase();
+            s2.toLowerCase();
         }
-        return true;
+
+        return s1 == s2;
     }
 } // namespace Utilities
