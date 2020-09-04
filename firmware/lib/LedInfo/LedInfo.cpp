@@ -25,7 +25,7 @@ void LedInfoClass::blinkTask(void *parameters)
             {
                 // Switch back on if we had use switchOn method before the blink
                 vTaskDelay(500 / portTICK_PERIOD_MS);
-                analogWrite(pLed->pin, 1);
+                analogWrite(pLed->pin, 100);
             }
             LogInfo.log(LOG_VERBOSE, "Stopping blinking for %s on pin %i at %i brightness and state is %s", pLed->typeName, pLed->pin, pLed->brightness, pLed->isOn ? "ON" : "OFF");
             vTaskDelete(LedInfoClass::blinkTaskHandles[pLed->idx]);

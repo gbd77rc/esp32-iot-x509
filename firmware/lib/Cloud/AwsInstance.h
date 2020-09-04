@@ -16,6 +16,7 @@ protected:
     void buildUserName(char *userName) override;
     void processDesiredStatus(JsonObject doc) override;
     void loadTopics() override;
+    bool sendDeviceReport(JsonObject json) override;
 
 private:    
     bool getCurrentStatus();

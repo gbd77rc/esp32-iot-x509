@@ -98,6 +98,8 @@ void setup()
         OledDisplay.displayExit(F("Not Connected to WiFi so rebooting as it pointless continuing!"), 30);
     }
     LedInfo.blinkOff(LED_POWER);
+    // LedInfo.switchOn(LED_POWER);
+    // LedInfo.switchOn(LED_CLOUD);
 }
 
 /**
@@ -110,6 +112,7 @@ void loop()
         OledDisplay.displayLine(30, 50, "%s", NTPInfo.getFormattedTime());
         EnvSensor.tick();
         GpsSensor.tick();
+        delay(500);
         NTPInfo.tick();
         CloudInfo.tick();
         WakeUp.tick();

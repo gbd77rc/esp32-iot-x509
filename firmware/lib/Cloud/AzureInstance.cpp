@@ -26,6 +26,22 @@ AzureInstanceClass::AzureInstanceClass() : BaseCloudProvider(CPT_AZURE)
 }
 
 /**
+ * Send Device Twin Reported Properties
+ * 
+ * @param json The properties to be reported on
+ * @return True if successfully sent
+ */
+bool AzureInstanceClass::sendDeviceReport(JsonObject json)
+{
+    LogInfo.log(LOG_VERBOSE, F("Calling Azure sendDeviceReport"));
+    DynamicJsonDocument doc(500);
+    doc.set(json);
+    doc["location"] = DeviceInfo.getLocation();
+    doc["deviceId"] = DeviceInfo.getDeviceId();    
+    return BaseCloudProvider::sendDeviceReport(doc.as<JsonObject>());
+}
+
+/**
  * Connect and initialise the broker.
  * 
  * @return True if connected

@@ -35,7 +35,7 @@ void BaseCloudProvider::checkTask(void *parameters)
                 LogInfo.log(LOG_VERBOSE, "Could not get flag for %s", cloud->instance->getProviderType());
             }
         }
-        vTaskDelay(10);
+        vTaskDelay(20);
         WakeUp.resumeSleep();
         vTaskSuspend(cloud->checkTaskHandle);
     }
@@ -293,24 +293,18 @@ bool BaseCloudProvider::sendData()
  */
 bool BaseCloudProvider::sendDeviceReport(JsonObject json)
 {
+    LogInfo.log(LOG_VERBOSE, F("Calling Base sendDeviceReport"));
     bool sent = false;
     if (this->_config->sendDeviceTwin)
     {
         auto topic = this->getFirstTopic(TT_DEVICETWIN);
         _send_count++;
-        DynamicJsonDocument doc(500);
-
-        //JsonObject reported = doc.createNestedObject("reported");
-        doc.set(json);
-        //reported.set(json);
-        doc["location"] = DeviceInfo.getLocation();
-        doc["deviceId"] = DeviceInfo.getDeviceId();
-        size_t len = measureJson(doc);
+        size_t len = measureJson(json);
         char payload[len];
-        serializeJson(doc, payload, len + 1);
+        serializeJson(json, payload, len + 1);
         LogInfo.log(LOG_VERBOSE, "Publishing to[%s]", topic);
-        LogInfo.log(LOG_VERBOSE, F("Device Twin Payload"), doc.as<JsonObject>());
-        LogInfo.log(LOG_INFO, "JSON Size : %u", measureJson(doc));
+        LogInfo.log(LOG_VERBOSE, F("Device Twin Payload"), json);
+        LogInfo.log(LOG_INFO, "JSON Size : %u", measureJson(json));
         sent = this->_mqttClient.publish(
             topic,
             payload);

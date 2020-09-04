@@ -26,6 +26,24 @@ AwsInstanceClass::AwsInstanceClass() : BaseCloudProvider(CPT_AWS)
 }
 
 /**
+ * Send Device Twin Reported Properties
+ * 
+ * @param json The properties to be reported on
+ * @return True if successfully sent
+ */
+bool AwsInstanceClass::sendDeviceReport(JsonObject json)
+{
+    LogInfo.log(LOG_VERBOSE, F("Calling AWS sendDeviceReport"));
+    DynamicJsonDocument doc(500);
+    JsonObject state = doc.createNestedObject("state");
+    JsonObject reported = state.createNestedObject("reported");
+    reported.set(json);
+    reported["location"] = DeviceInfo.getLocation();
+    reported["deviceId"] = DeviceInfo.getDeviceId();    
+    return BaseCloudProvider::sendDeviceReport(doc.as<JsonObject>());
+}
+
+/**
  * Connect and initialise the broker.
  * 
  * @return True if connected
@@ -162,17 +180,17 @@ void AwsInstanceClass::loadTopics()
     strcat(this->_shadowPrefix, "/shadow");
 
     strcpy(this->_topics[0].topic, this->_shadowPrefix);
-    strcpy(this->_topics[0].topic, "/update");
+    strcat(this->_topics[0].topic, "/update");
     this->_topics[0].type = TT_DEVICETWIN;
     strcpy(this->_topics[1].topic, this->_shadowPrefix);
-    strcpy(this->_topics[1].topic, "/update/delta");
+    strcat(this->_topics[1].topic, "/update/delta");
     this->_topics[1].type = TT_SUBSCRIBE;
     strcpy(this->_topics[2].topic, this->_shadowPrefix);
-    strcpy(this->_topics[2].topic, "/update/accepted");
+    strcat(this->_topics[2].topic, "/update/accepted");
     this->_topics[2].type = TT_SUBSCRIBE;
     strcpy(this->_topics[3].topic, "devices/");
     strcat(this->_topics[3].topic, DeviceInfo.getDeviceId());
-    strcat(this->_topics[3].topic, "/messages/events/");
+    strcat(this->_topics[3].topic, "/messages/events");
     this->_topics[3].type = TT_TELEMETRY;
     this->_topicsAdded = 4;
 }

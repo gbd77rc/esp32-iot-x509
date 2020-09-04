@@ -271,4 +271,3 @@ The output will be like
 ```
 
 To test AWS, update the `provider` property to `aws`.  We will need to update the `endpoint` to the `endpointAddress`.  Then you can run the `Upload File System image` command to upload to the device.  This is explained in the [Device Development](./FirmwareDevelopment.md) article.
-

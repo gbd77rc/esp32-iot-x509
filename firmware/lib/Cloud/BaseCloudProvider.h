@@ -43,7 +43,7 @@ protected:
     void virtual buildUserName(char *userName) = 0;
     void virtual processDesiredStatus(JsonObject doc) = 0;
     bool virtual updateProperty(const char *property, JsonVariant value);
-    bool sendDeviceReport(JsonObject json);
+    bool virtual sendDeviceReport(JsonObject json);
     bool sendTelemetry(JsonObject json);
     const char* getFirstTopic(TopicType type);
     void checkForMessages();
