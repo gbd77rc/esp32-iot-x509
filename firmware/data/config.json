@@ -1,6 +1,6 @@
 {
-    "logging": {
-        "level": "ALL"
+    "LogInfo": {
+        "level": "ERROR"
     },
     "ledInfo": {
         "brightness": 75,

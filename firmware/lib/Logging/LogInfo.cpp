@@ -21,6 +21,7 @@ void LogInfoClass::load(JsonObjectConst obj)
 {
     this->setLogLevel(obj["level"].as<const char*>());
     this->log(LOG_VERBOSE, "Chip Id: %s", this->getUniqueId());
+    this->log(LOG_OFF, "Log Level: %s", this->getLogLevel());
     this->_changed = false;
 }
 

@@ -199,6 +199,7 @@ void CloudInfoClass::tick()
     if( this->getProvider() != NULL)
     {
         this->getProvider()->sendData();
+        delay(500);
         this->getProvider()->tick();
     }
 }
