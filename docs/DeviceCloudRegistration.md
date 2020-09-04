@@ -96,14 +96,14 @@ With that being said, the following policy will be used.  This is generic one in
         "iot:Connect"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:iot:::client/${iot:Connection.Thing.ThingName}"
+      "Resource": "*"
     },
     {
       "Action": [
         "iot:Subscribe"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:iot:::topicfilter/devices/${iot:Connection.Thing.ThingName}/*"
+      "Resource": "*"
     },  
     {
       "Action": [
@@ -111,7 +111,7 @@ With that being said, the following policy will be used.  This is generic one in
         "iot:Receive"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:iot:::topic/devices/${iot:Connection.Thing.ThingName}/*"
+      "Resource": "*"
     },  
     {
       "Action": [
@@ -142,7 +142,7 @@ It should give you the following output
 {
     "policyName": "ot-iot-device-policy",
     "policyArn": "arn:aws:iot:eu-west-2::policy/ot-iot-device-policy",
-    "policyDocument": "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Action\": [\n        \"iot:Connect\"\n      ],\n      \"Effect\": \"Allow\",\n      \"Resource\": \"arn:aws:iot:::client/${iot:Connection.Thing.ThingName}\"\n    },\n    {\n      \"Action\": [\n        \"iot:Subscribe\"\n      ],\n      \"Effect\": \"Allow\",\n      \"Resource\": \"arn:aws:iot:::topicfilter/devices/${iot:Connection.Thing.ThingName}/*\"\n    },  \n    {\n      \"Action\": [\n        \"iot:Publish\",\n        \"iot:Receive\"\n      ],\n      \"Effect\": \"Allow\",\n      \"Resource\": \"arn:aws:iot:::topic/devices/${iot:Connection.Thing.ThingName}/*\"\n    },  \n    {\n      \"Action\": [\n        \"iot:DeleteThingShadow\",\n        \"iot:GetThingShadow\",\n        \"iot:UpdateThingShadow\"\n      ],\n      \"Effect\": \"Allow\",\n      \"Resource\": \"*\"\n    }\n  ]\n}\n\n",
+    "policyDocument": "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Action\": [\n        \"iot:Connect\"\n      ],\n      \"Effect\": \"Allow\",\n      \"Resource\": \"*\"\n    },\n    {\n      \"Action\": [\n        \"iot:Subscribe\"\n      ],\n      \"Effect\": \"Allow\",\n      \"Resource\": \"*\"\n    },  \n    {\n      \"Action\": [\n        \"iot:Publish\",\n        \"iot:Receive\"\n      ],\n      \"Effect\": \"Allow\",\n      \"Resource\": \"*\"\n    },  \n    {\n      \"Action\": [\n        \"iot:DeleteThingShadow\",\n        \"iot:GetThingShadow\",\n        \"iot:UpdateThingShadow\"\n      ],\n      \"Effect\": \"Allow\",\n      \"Resource\": \"*\"\n    }\n  ]\n}\n\n",
     "policyVersionId": "1"
 }
 ```
@@ -259,14 +259,14 @@ This should give you an output of
 Now we need the `endpoint` for the IoT Core, this can be returned using this command.
 
 ```shell
-▶ aws iot describe-endpoint
+▶ aws iot describe-endpoint --endpoint-type "iot:Data-ATS"
 ```
 
 The output will be like
 
 ```json
 {
-    "endpointAddress": "a...9.iot.eu-west-2.amazonaws.com"
+    "endpointAddress": "a...9-ats..iot.eu-west-2.amazonaws.com"
 }
 ```
 

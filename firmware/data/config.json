@@ -34,7 +34,7 @@
             "key": "/cloud/device.key"
         },
         "iotHub": {
-            "endpoint": "a1bqyju1450wf9.iot.eu-west-2.amazonaws.com",
+            "endpoint": "a1bqyju1450wf9-ats.iot.eu-west-2.amazonaws.com",
             "port": 8883,
             "sendTelemetry": true,
             "sendDeviceTwin": true,
@@ -44,7 +44,7 @@
             "ca": "/cloud/portal-azure-com.pem"
         },
         "aws": {
-            "ca": "/cloud/dev-root-ca.pem"
+            "ca": "/cloud/console-aws-com.pem"
         }
     }
 }
