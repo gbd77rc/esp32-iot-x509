@@ -6,14 +6,14 @@
         "iot:Connect"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:iot:::client/${iot:Connection.Thing.ThingName}"
+      "Resource": "*"
     },
     {
       "Action": [
         "iot:Subscribe"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:iot:::topicfilter/devices/${iot:Connection.Thing.ThingName}/*"
+      "Resource": "*"
     },  
     {
       "Action": [
@@ -21,7 +21,7 @@
         "iot:Receive"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:iot:::topic/devices/${iot:Connection.Thing.ThingName}/*"
+      "Resource": "*"
     },  
     {
       "Action": [
