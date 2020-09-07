@@ -1,4 +1,5 @@
 #include "Utilities.h"
+#include "LogInfo.h"
 
 namespace Utilities
 {
@@ -44,9 +45,10 @@ namespace Utilities
             {
                 result = file.read((uint8_t *)buffer, size);
                 file.close();
-                buffer[size] = '\0';
+                //buffer[size] = '\0';
             }
         }
+        LogInfo.log(LOG_VERBOSE, "File %s - Expected Size %i Actual Size %i", fileName, size, result);
         return result;
     }
 

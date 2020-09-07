@@ -1,6 +1,6 @@
 {
     "LogInfo": {
-        "level": "ERROR"
+        "level": "ALL"
     },
     "ledInfo": {
         "brightness": 75,

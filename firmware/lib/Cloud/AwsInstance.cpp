@@ -55,10 +55,18 @@ bool AwsInstanceClass::connect(const IoTConfig *config)
         this->_tryConnecting = true;
         this->_config = config;
         this->initialiseConnection(AwsInstanceClass::mqttCallback);
+        if (heap_caps_check_integrity_all(true) == false)
+        {
+            LogInfo.log(LOG_ERROR, F("Heap Corruption detected! -AWS Connect -1"));
+        }        
         if (this->mqttConnection())
         {
             this->getCurrentStatus();
         }
+        if (heap_caps_check_integrity_all(true) == false)
+        {
+            LogInfo.log(LOG_ERROR, F("Heap Corruption detected! -AWS Connect -2"));
+        }          
     }
     return this->getIsConnected();
 }
@@ -92,6 +100,10 @@ bool AwsInstanceClass::getCurrentStatus()
 void AwsInstanceClass::buildUserName(char *userName)
 {
     userName = NULL;
+    if (heap_caps_check_integrity_all(true) == false)
+    {
+        LogInfo.log(LOG_ERROR, F("Heap Corruption detected! -buildUserName"));
+    }    
 }
 
 /**

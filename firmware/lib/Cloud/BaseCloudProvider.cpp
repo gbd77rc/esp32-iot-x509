@@ -121,19 +121,45 @@ bool BaseCloudProvider::mqttConnection()
                 NTPInfo.getISO8601Formatted().c_str());
     char userName[256];
     this->buildUserName(userName);
+    uint32_t free = xPortGetFreeHeapSize();
+    LogInfo.log(LOG_VERBOSE, "Current Free Heap Size is %i", free);
     while (!this->_mqttClient.connected() && retries < RECONNECT_RETRIES)
     {
+        if (heap_caps_check_integrity_all(true) == false)
+        {
+            LogInfo.log(LOG_ERROR, F("Heap Corruption detected! -Base Mqtt Connect -1"));
+            return false;
+        }
+        this->_mqttClient.setBufferSize(2048);
         if (this->_mqttClient.connect(DeviceInfo.getDeviceId(), userName, NULL))
         {
+            if (heap_caps_check_integrity_all(true) == false)
+            {
+                LogInfo.log(LOG_ERROR, F("Heap Corruption detected! -Base Mqtt Connect -2"));
+                return false;
+            }
+            LogInfo.log(LOG_VERBOSE, "Current Free Heap Size is %i", free);
             LogInfo.log(LOG_VERBOSE, "Connected Successfully to [%s]", this->_config->endPoint);
+            LogInfo.log(LOG_VERBOSE, "Checking %i Topic for subscription", this->_topicsAdded);
             for (uint8_t i = 0; i < this->_topicsAdded; i++)
             {
-                auto topic = this->_topics[i];
-                if (topic.type == TT_SUBSCRIBE)
+                auto topic = &this->_topics[i];
+                if (topic->type == TT_SUBSCRIBE)
                 {
-                    bool subbed = this->_mqttClient.subscribe(topic.topic, QOS_LEVEL);
+                    if (heap_caps_check_integrity(MALLOC_CAP_8BIT, true) == false)
+                    {
+                        LogInfo.log(LOG_ERROR, F("DRAM Heap Corruption detected! -Base Mqtt Connect -0"));
+                        return false;
+                    }
+                    bool subbed = this->_mqttClient.subscribe(topic->topic, QOS_LEVEL);
                     LogInfo.log(LOG_VERBOSE, "Subscribed: %s (%s)",
-                                subbed ? "Yes" : "No", topic.topic);
+                                subbed ? "Yes" : "No", topic->topic);
+                    if (heap_caps_check_integrity(MALLOC_CAP_8BIT, true) == false)
+                    {
+                        LogInfo.log(LOG_ERROR, F("DRAM Heap Corruption detected! -Base Mqtt Connect -0"));
+                        return false;
+                    }
+                    LogInfo.log(LOG_VERBOSE, "Current Free Heap Size is %i", free);
                 }
             }
             break;
@@ -144,7 +170,8 @@ bool BaseCloudProvider::mqttConnection()
             delay(100);
             retries++;
         }
-    }   
+    }
+
     LedInfo.blinkOff(LED_CLOUD);
     this->_tryConnecting = false;
     if (!this->_mqttClient.connected())
@@ -157,13 +184,18 @@ bool BaseCloudProvider::mqttConnection()
     {
         LogInfo.log(LOG_VERBOSE, "Creating %s Check Messages Task on Core 0", this->getProviderType());
         xTaskCreatePinnedToCore(BaseCloudProvider::checkTask, "CheckMsgsTask",
-                                10000,
+                                16392,
                                 (void *)&this->_cloudInstance,
                                 1,
                                 &this->_cloudInstance.checkTaskHandle,
                                 0);
     }
-    LedInfo.switchOn(LED_CLOUD); 
+    if (heap_caps_check_integrity_all(true) == false)
+    {
+        LogInfo.log(LOG_ERROR, F("Heap Corruption detected! -Base Mqtt Connect -2"));
+        return false;
+    }
+    LedInfo.switchOn(LED_CLOUD);
     return this->getIsConnected();
 }
 
@@ -272,7 +304,7 @@ bool BaseCloudProvider::sendData()
         WakeUp.suspendSleep();
         LedInfo.blinkOn(LED_CLOUD);
         DynamicJsonDocument payload(800);
-        auto root = payload.to<JsonObject>();        
+        auto root = payload.to<JsonObject>();
         this->_builder(root, true);
         this->sendDeviceReport(root);
         this->_builder(root, false);
@@ -358,7 +390,7 @@ bool BaseCloudProvider::sendTelemetry(JsonObject json)
  */
 bool BaseCloudProvider::canSendNow()
 {
-    if ((millis() - this->_lastSent) > this->_config->sendInterval *  ms_TO_S_FACTOR)
+    if ((millis() - this->_lastSent) > this->_config->sendInterval * ms_TO_S_FACTOR)
     {
         return true;
     }

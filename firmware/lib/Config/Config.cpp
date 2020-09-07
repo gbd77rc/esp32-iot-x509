@@ -60,6 +60,10 @@ bool ConfigClass::load()
                 {
                     LogInfo.log(LOG_VERBOSE, "Loading section (%s)", kv.key().c_str());
                     this->_configs[i]->load(kv.value().as<JsonObject>());
+                    if(heap_caps_check_integrity_all(true) == false)
+                    {
+                        LogInfo.log(LOG_ERROR, F("Heap Corruption detected! Config -1"));
+                    }                      
                 }
             }
         }

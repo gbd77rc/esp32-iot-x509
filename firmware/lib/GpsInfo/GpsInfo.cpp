@@ -168,7 +168,7 @@ const bool GpsInfoClass::connect()
     {
         LogInfo.log(LOG_VERBOSE, "Creating %s Task on Core 0", this->getName());
         xTaskCreatePinnedToCore(GpsInfoClass::task, "ReadGpsTask",
-                                10000,
+                                16352,
                                 (void *)&this->_instance,
                                 1,
                                 &this->_taskHandle,

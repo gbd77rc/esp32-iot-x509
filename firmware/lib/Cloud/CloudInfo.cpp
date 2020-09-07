@@ -184,9 +184,14 @@ void CloudInfoClass::loadCertificate(CERTIFICATE *cert)
         size_t size = Utilities::fileSize(cert->fileName);
         if (size > 0)
         {
-            cert->contents = new char[size];
-            Utilities::readFile(cert->fileName, cert->contents, size);
+            LogInfo.log(LOG_VERBOSE, "File %s is %i bytes", cert->fileName, size);
+            cert->contents = new char[size+1];
+            Utilities::readFile(cert->fileName, cert->contents, size+1);
             LogInfo.log(LOG_VERBOSE, "Loaded Certificate (%s)", cert->fileName);
+            if(heap_caps_check_integrity_all(true) == false)
+            {
+                LogInfo.log(LOG_ERROR, F("Heap Corruption detected! -Setup -0"));
+            }              
         }
     }
 }

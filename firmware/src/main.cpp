@@ -25,16 +25,16 @@ long blinkUntil = 10000;
 void buildDataObject(JsonObject payload, bool isDeviceTwin)
 {
     payload.clear();
-    WiFiInfo.toJson(payload);    
+    WiFiInfo.toJson(payload);
     LedInfo.toJson(payload);
     EnvSensor.toJson(payload);
-    // Currently Azure Device Twin object cannot accept JSON array object which GeoJSON format uses, therefore 
+    // Currently Azure Device Twin object cannot accept JSON array object which GeoJSON format uses, therefore
     // we send GeoJSON to the telemetry topic but a none array object to Device Twin topic
     if (isDeviceTwin)
     {
         GpsSensor.toJson(payload);
-    } 
-    else 
+    }
+    else
     {
         GpsSensor.toGeoJson(payload);
     }
@@ -47,7 +47,6 @@ void setup()
 {
     Serial.begin(115200);
     xSemaphore = xSemaphoreCreateMutex();
-
     LogInfo.begin();
     OledDisplay.begin();
     DeviceInfo.begin();
@@ -70,7 +69,12 @@ void setup()
     Configuration.add(&GpsSensor);
     Configuration.add(&CloudInfo);
     Configuration.load();
-    LedInfo.switchOn(LED_POWER);    
+    if (heap_caps_check_integrity_all(true) == false)
+    {
+        LogInfo.log(LOG_ERROR, F("Heap Corruption detected! -Setup -1"));
+        OledDisplay.displayExit(F("Heap Corruption detected! Rebooting"), 5);
+    }
+    LedInfo.switchOn(LED_POWER);
     LedInfo.blinkOn(LED_POWER);
     OledDisplay.clear();
     OledDisplay.displayLine(0, 10, "ID : %s", DeviceInfo.getDeviceId());
@@ -87,10 +91,15 @@ void setup()
         OledDisplay.displayLine(0, 40, "Tim: %s", NTPInfo.getFormattedTime());
         OledDisplay.displayLine(0, 50, "Env: %s", EnvSensor.toString());
         OledDisplay.displayLine(0, 60, "GPS: %s", GpsSensor.toString());
-        if ( CloudInfo.connect(buildDataObject) == false)
+        if (CloudInfo.connect(buildDataObject) == false)
         {
             OledDisplay.displayExit(F("Not Connected to the cloud so rebooting to try again!"), 20);
         }
+        if (heap_caps_check_integrity_all(true) == false)
+        {
+            LogInfo.log(LOG_ERROR, F("Heap Corruption detected! -setup -5"));
+            OledDisplay.displayExit(F("Heap Corruption detected! Rebooting"), 5);
+        }        
         LogInfo.log(LOG_VERBOSE, "Startup Completed at %s", NTPInfo.getISO8601Formatted().c_str());
     }
     else
@@ -98,8 +107,11 @@ void setup()
         OledDisplay.displayExit(F("Not Connected to WiFi so rebooting as it pointless continuing!"), 30);
     }
     LedInfo.blinkOff(LED_POWER);
-    // LedInfo.switchOn(LED_POWER);
-    // LedInfo.switchOn(LED_CLOUD);
+    if (heap_caps_check_integrity_all(true) == false)
+    {
+        LogInfo.log(LOG_ERROR, F("Heap Corruption detected! -setup -end"));
+        OledDisplay.displayExit(F("Heap Corruption detected! Rebooting"), 5);
+    }
 }
 
 /**
@@ -109,6 +121,11 @@ void loop()
 {
     if (WiFiInfo.getIsConnected())
     {
+        if (heap_caps_check_integrity_all(true) == false)
+        {
+            LogInfo.log(LOG_ERROR, F("Heap Corruption detected! -1"));
+            OledDisplay.displayExit(F("Heap Corruption detected! Rebooting"), 5);
+        }
         OledDisplay.displayLine(30, 50, "%s", NTPInfo.getFormattedTime());
         EnvSensor.tick();
         GpsSensor.tick();

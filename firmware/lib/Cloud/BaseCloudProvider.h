@@ -23,6 +23,7 @@ class BaseCloudProvider
 {
 public:
     static void checkTask(void *parameters);
+    static void connectTask(void *parameters);
 
     BaseCloudProvider(CloudProviderType type);
     void begin(DATABUILDER builder);

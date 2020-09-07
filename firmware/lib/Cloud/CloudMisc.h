@@ -48,7 +48,7 @@ typedef enum{
 
 typedef struct IoTTopic
 {
-    char topic[64];
+    char topic[128];
     TopicType type;
     bool appendUniqueId;
 } IOTTOPIC;
