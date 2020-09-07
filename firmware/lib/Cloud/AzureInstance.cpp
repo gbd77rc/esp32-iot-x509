@@ -36,8 +36,8 @@ bool AzureInstanceClass::sendDeviceReport(JsonObject json)
     LogInfo.log(LOG_VERBOSE, F("Calling Azure sendDeviceReport"));
     DynamicJsonDocument doc(500);
     doc.set(json);
-    doc["location"] = DeviceInfo.getLocation();
-    doc["deviceId"] = DeviceInfo.getDeviceId();    
+    DeviceInfo.toJson(doc.as<JsonObject>());
+    doc["time_epoch"] = NTPInfo.getEpoch();    
     return BaseCloudProvider::sendDeviceReport(doc.as<JsonObject>());
 }
 

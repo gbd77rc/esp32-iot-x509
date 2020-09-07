@@ -41,10 +41,6 @@ The firmware will use a mix of libraries from 3rd party or ones we will make.
 
 All 3rd party libraries are registered in the `platformio.ini` file, in the `lib_deps` setting.
 
-### PubSubClient
-
-The default buffer size in this library is really too small at 
-
 All developed libraries are in the `lib` folder.  By the time this published you should find the following in each sub folder.  The `.cpp` and `.h` files that contain the library and a `readme.md` that will explain it.
 
 ## Development IDE
@@ -329,9 +325,9 @@ The configuration library depends heavily on the [ArduinoJSON](https://arduinojs
 
 ### Logging
 
-The logging library uses the configuration to determine which level it will report on.  The single instance name is `LogInfo`.  Why LogInfo, basically because this is another 3rd party library that uses `Logging` as their instance name, so to avoid conflicts I renamed mine.
+The logging library uses the configuration to determine which level it will report on.  The single instance name is `LogInfo`.  Why LogInfo, basically because there is another 3rd party library that uses `Logging` as their instance name, so to avoid conflicts I renamed mine.
 
-Example of Logging Details
+Example of Logging Output
 
 ```ini
 398:VRB:1:CPU Id is 105783B5AA8C

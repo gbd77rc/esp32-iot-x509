@@ -22,7 +22,6 @@ void BaseCloudProvider::checkTask(void *parameters)
     vTaskSuspend(cloud->checkTaskHandle);
     for (;;)
     {
-        WakeUp.suspendSleep();
         if (cloud->instance->getIsConnected())
         {
             if (xSemaphoreTake(cloud->instance->getSemaphore(), portMAX_DELAY))
@@ -36,7 +35,6 @@ void BaseCloudProvider::checkTask(void *parameters)
             }
         }
         vTaskDelay(20);
-        WakeUp.resumeSleep();
         vTaskSuspend(cloud->checkTaskHandle);
     }
 }
@@ -359,10 +357,9 @@ bool BaseCloudProvider::sendTelemetry(JsonObject json)
     bool sent = false;
     if (this->_config->sendTelemetry)
     {
-        DynamicJsonDocument doc(500);
+        DynamicJsonDocument doc(600);
         doc.set(json);
-        doc["location"] = DeviceInfo.getLocation();
-        doc["deviceId"] = DeviceInfo.getDeviceId();
+        DeviceInfo.toJson(doc.as<JsonObject>());
         doc["time_epoch"] = NTPInfo.getEpoch();
         size_t len = measureJson(doc);
         char payload[len];

@@ -10,7 +10,6 @@ RTC_DATA_ATTR unsigned long _bootTime = 0;
  */
 void WakeUpInfoClass::begin()
 {
-    this->suspendSleep();
     this->_isPowerReset = false;
     esp_sleep_wakeup_cause_t wakeup_reason;
     wakeup_reason = esp_sleep_get_wakeup_cause();
@@ -50,7 +49,6 @@ void WakeUpInfoClass::begin()
         break;
     }
     _bootCount++;
-    this->resumeSleep();
 }
 
 /**
@@ -108,7 +106,7 @@ void WakeUpInfoClass::suspendSleep()
  * Resume can sleep test
  */
 void WakeUpInfoClass::resumeSleep()
-{
+{ 
     this->_flag--;
 
     if (this->_flag < 0)
@@ -132,6 +130,7 @@ boolean WakeUpInfoClass::isPoweredOn()
  */
 void WakeUpInfoClass::tick()
 {
+    delay(10);
     if (this->_flag == 0)
     {
         if (((millis() - this->_last_check) / ms_TO_S_FACTOR) >= this->getSleepTime())

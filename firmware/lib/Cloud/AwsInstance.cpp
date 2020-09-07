@@ -38,8 +38,10 @@ bool AwsInstanceClass::sendDeviceReport(JsonObject json)
     JsonObject state = doc.createNestedObject("state");
     JsonObject reported = state.createNestedObject("reported");
     reported.set(json);
-    reported["location"] = DeviceInfo.getLocation();
-    reported["deviceId"] = DeviceInfo.getDeviceId();    
+    DeviceInfo.toJson(reported);
+    // reported["location"] = DeviceInfo.getLocation();
+    // reported["deviceId"] = DeviceInfo.getDeviceId();    
+    reported["time_epoch"] = NTPInfo.getEpoch();
     return BaseCloudProvider::sendDeviceReport(doc.as<JsonObject>());
 }
 

@@ -64,7 +64,8 @@ void EnvSensorClass::toJson(JsonObject ob)
     json["temperature"] = this->_temperature;
     json["humidity"] = this->_humidity;
     json["read_count"] = _envCount;
-    json["timestamp"] = this->_epoch_time;
+    json["last_read"] = this->_last_read;
+    json["last_epoch"] = this->_epoch_time;
 }
 
 /**
@@ -89,6 +90,7 @@ bool EnvSensorClass::taskToRun()
         }
         LogInfo.log(LOG_VERBOSE, "Temp = %s @ %s", this->toString(), NTPInfo.getISO8601Formatted().c_str());
         _envCount++;
+        this->setEpoch();
         return true;
     }
     return false;

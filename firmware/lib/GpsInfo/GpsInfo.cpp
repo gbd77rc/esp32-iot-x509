@@ -70,7 +70,8 @@ void GpsInfoClass::toJson(JsonObject ob)
     loc["course"] = this->_course;
     loc["speed"] = this->_speed;
     loc["altitude"] = this->_altitude;
-    loc["timestamp"] = this->_epoch_time;
+    loc["last_read"] = this->_last_read;    
+    loc["last_epoch"] = this->_epoch_time;    
 }
 
 /**
@@ -93,7 +94,8 @@ void GpsInfoClass::toGeoJson(JsonObject ob)
     coords.add(this->_lat);
     coords.add(this->_altitude);
     auto props = feature.createNestedObject("properties");
-    props["last_epoch"] = this->_epoch_time;
+    props["last_read"] = this->_last_read;    
+    props["last_epoch"] = this->_epoch_time;    
 }
 
 /**

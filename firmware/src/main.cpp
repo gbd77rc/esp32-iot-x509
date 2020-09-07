@@ -14,8 +14,6 @@
 
 SemaphoreHandle_t xSemaphore;
 
-long blinkUntil = 10000;
-
 /**
  * Build the data object that will be sent to the cloud
  * 
@@ -82,7 +80,6 @@ void setup()
     LogInfo.log(LOG_VERBOSE, "Connecting to sensors");
     EnvSensor.connect();
     GpsSensor.connect();
-    delay(2000);
 
     WiFiInfo.connect(0, 30);
 

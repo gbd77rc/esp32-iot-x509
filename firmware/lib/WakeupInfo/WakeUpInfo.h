@@ -24,7 +24,7 @@ public:
 private:
     boolean _manualWakeup;
     boolean _isPowerReset;
-    volatile int _flag;
+    int _flag;
     char _wakeupReason[32];
     uint32_t _wakeupIn;
     uint32_t _sleepIn;
