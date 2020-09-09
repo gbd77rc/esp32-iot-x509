@@ -54,5 +54,6 @@ typedef struct IoTTopic
 } IOTTOPIC;
 
 typedef void (*DATABUILDER)(JsonObject payload, bool isDeviceTwin);
+typedef void (*DESIREDPROCESSOR)(JsonObject payload);
 
 #endif

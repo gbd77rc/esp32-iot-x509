@@ -42,6 +42,24 @@ bool AzureInstanceClass::sendDeviceReport(JsonObject json)
 }
 
 /**
+ * Update the desired property to signal that we have accepted/rejected the change, if property value is JSON NULL then it is rejected
+ * 
+ * @param element The element to update
+ * @return True if successfully updated
+ */
+bool AzureInstanceClass::updateProperty(JsonObjectConst element)
+{
+    LogInfo.log(LOG_VERBOSE, F("Calling Azure updateProperty"));    
+    if (this->getIsConnected())
+    {
+        DynamicJsonDocument doc(500);
+        doc.set(element);
+        return BaseCloudProvider::updateProperty(doc.as<JsonObject>());
+    }
+    return false;
+}
+
+/**
  * Connect and initialise the broker.
  * 
  * @return True if connected
@@ -139,33 +157,6 @@ void AzureInstanceClass::processReply(char *topic, byte *payload, unsigned int l
 
     LogInfo.log(LOG_VERBOSE, "Finished Updating - Body: %s",
                 hasBody ? "Yes" : "No");
-}
-
-/**
- * Process the desired properties and set the configuration elements
- * 
- * @param doc The doc object that contains the desired element.
- */
-void AzureInstanceClass::processDesiredStatus(JsonObject doc)
-{
-    JsonObject element;
-    if (doc.containsKey("desired"))
-    {
-        element = doc["desired"].as<JsonObject>();
-    }
-    else 
-    {
-        element = doc;
-    }
-
-    if (element.containsKey("location"))
-    {
-        LogInfo.log(LOG_VERBOSE, F("Found Location Change"));
-        if (DeviceInfo.setLocation(element["location"].as<char *>()))
-        {
-            this->updateProperty("location", element["location"]);
-        }
-    }    
 }
 
 /**

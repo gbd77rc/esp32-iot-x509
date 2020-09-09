@@ -25,7 +25,7 @@ void LedInfoClass::blinkTask(void *parameters)
             {
                 // Switch back on if we had use switchOn method before the blink
                 vTaskDelay(500 / portTICK_PERIOD_MS);
-                analogWrite(pLed->pin, 100);
+                analogWrite(pLed->pin, pLed->brightness);
             }
             LogInfo.log(LOG_VERBOSE, "Stopping blinking for %s on pin %i at %i brightness and state is %s", pLed->typeName, pLed->pin, pLed->brightness, pLed->isOn ? "ON" : "OFF");
             vTaskDelete(LedInfoClass::blinkTaskHandles[pLed->idx]);
@@ -91,7 +91,7 @@ void LedInfoClass::toJson(JsonObject ob)
  * 
  * @param brightness The new brightness level to set
  */
-void LedInfoClass::setBrightness(uint8_t brightness)
+bool LedInfoClass::setBrightness(uint8_t brightness)
 {
     if (this->_brightness != brightness)
     {
@@ -105,7 +105,9 @@ void LedInfoClass::setBrightness(uint8_t brightness)
                 analogWrite(this->_led[i].pin, this->_brightness);
             }
         }
+        return true;
     }
+    return false;
 }
 
 /**

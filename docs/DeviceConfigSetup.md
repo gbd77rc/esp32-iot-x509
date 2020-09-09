@@ -152,11 +152,11 @@ This is the ESP32 device related information.
 
 The `prefix` is used in front of the CPU ID, to give it a more identifiable ID. Its short here so that it will fit on the OLED display, but can be any length.  Not settable via the cloud, as it will make up the device ID which is `common name` in the x509 certificate on the device.  The cloud provides check that the CN is the same as the device ID when connecting.
 
-The `wakeup` is used for how often the device should resume from deep sleep.  This can be settable via the cloud.  It may take time to set tho, as it has to wake up first before accepting the new value.
+The `wakeup` is used for how often the device should resume from deep sleep.
 
-The `sleep` is used for how long to wake before going to sleep.  Set it to zero to never go to sleep.  This can be settable via the cloud.  It may take time to set tho, as it has to wake up first before accepting the new value.
+The `sleep` is used for how long to wake before going to sleep.  Set it to zero to never go to sleep.
 
-The `location` is the used for where the device is.  Normally which room it is located in, i.e. Home Office.
+The `location` is the used for where the device is.  Normally which room it is located in, i.e. Home Office.  This is settable via the cloud.
 
 ## Certificate Information Section
 
@@ -205,15 +205,15 @@ The `key` is the private key that will encrypt the communication between the dev
 
 This is the general information that Azure and AWS share for communicating between the IoT Hub broker and device.  Generally it is an MQTT broker under the hoods.  
 
-The `endpoint` is the URL where the IoT Hub/Core is located in the cloud provider.  Not settable via the cloud.
+The `endpoint` is the URL where the IoT Hub/Core is located in the cloud provider. 
 
 The `port` is the port that the IoT Hub/Core is listening on.
 
-The `sendTelemetry` is the flag to indicate that telemetry data should be sent.  This can be settable via the cloud.  
+The `sendTelemetry` is the flag to indicate that telemetry data should be sent. 
 
-The `sendDeviceTwin` is the flag to indicate that device twin reported data should be sent.  This can be settable via the cloud.
+The `sendDeviceTwin` is the flag to indicate that device twin reported data should be sent. 
 
-The `intervalSeconds` is the number of seconds to wait before sending telemetry data again, `sendTelemetry` is enabled.  This can be settable via the cloud.
+The `intervalSeconds` is the number of seconds to wait before sending telemetry data again, `sendTelemetry` is enabled. 
 
 ## Azure Information Section
 

@@ -39,7 +39,7 @@ public:
     void switchOff(LedType type);
     void blinkOn(LedType type);
     void blinkOff(LedType type);
-    void setBrightness(uint8_t brightness);
+    bool setBrightness(uint8_t brightness);
     
 private:
     bool _isEnabled;

@@ -39,6 +39,43 @@ void buildDataObject(JsonObject payload, bool isDeviceTwin)
 }
 
 /**
+ * This is the desired state received from the cloud.
+ * 
+ * @param payload This is the desired json object
+ */
+void updateConfig(JsonObject payload)
+{
+    auto doc = DynamicJsonDocument(200);
+    if (payload.containsKey("device"))
+    {
+        if (payload["device"].containsKey("location"))
+        {
+            LogInfo.log(LOG_VERBOSE, F("Found Location Change"));
+            if (DeviceInfo.setLocation(payload["device"]["location"].as<char *>()))
+            {
+                auto loc = doc.createNestedObject("device");
+                loc["location"] = payload["device"]["location"].as<char *>();
+                CloudInfo.getProvider()->updateProperty(doc.as<JsonObjectConst>());
+            }
+        }
+    }       
+    if (payload.containsKey("ledInfo"))
+    {
+        if (payload["ledInfo"].containsKey("brightness"))
+        {
+            LogInfo.log(LOG_VERBOSE, F("Found Brightness Change"));
+            if (LedInfo.setBrightness(payload["ledInfo"]["brightness"].as<int>()))
+            {
+                doc.clear();
+                auto bright = doc.createNestedObject("ledInfo");
+                bright["brightness"] = payload["ledInfo"]["brightness"].as<int>();
+                CloudInfo.getProvider()->updateProperty(doc.as<JsonObjectConst>());
+            }
+        }
+    }      
+}
+
+/**
  * This is the device setup routine, only called the once on startup
  */
 void setup()
@@ -88,7 +125,7 @@ void setup()
         OledDisplay.displayLine(0, 40, "Tim: %s", NTPInfo.getFormattedTime());
         OledDisplay.displayLine(0, 50, "Env: %s", EnvSensor.toString());
         OledDisplay.displayLine(0, 60, "GPS: %s", GpsSensor.toString());
-        if (CloudInfo.connect(buildDataObject) == false)
+        if (CloudInfo.connect(buildDataObject, updateConfig) == false)
         {
             OledDisplay.displayExit(F("Not Connected to the cloud so rebooting to try again!"), 20);
         }

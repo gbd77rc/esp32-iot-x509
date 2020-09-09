@@ -26,24 +26,23 @@ public:
     static void connectTask(void *parameters);
 
     BaseCloudProvider(CloudProviderType type);
-    void begin(DATABUILDER builder);
+    void begin(DATABUILDER builder, DESIREDPROCESSOR processor);
     bool virtual connect(const IoTConfig *config) = 0;
-    void virtual processReply(char *topic, byte *payload, unsigned int length) = 0;
     bool sendData();
     bool canSendNow();
     bool getIsConnected();
     const char* getProviderType();
     void tick();
     const SemaphoreHandle_t getSemaphore();
-
+    bool virtual updateProperty(JsonObjectConst element);
+    void virtual processReply(char *topic, byte *payload, unsigned int length) = 0;        
 
 protected:
     void virtual loadTopics() = 0;
     void initialiseConnection(std::function<void (char *, uint8_t *, unsigned int)> callback);
     bool mqttConnection();
     void virtual buildUserName(char *userName) = 0;
-    void virtual processDesiredStatus(JsonObject doc) = 0;
-    bool virtual updateProperty(const char *property, JsonVariant value);
+    void processDesiredStatus(JsonObject doc);
     bool virtual sendDeviceReport(JsonObject json);
     bool sendTelemetry(JsonObject json);
     const char* getFirstTopic(TopicType type);
@@ -61,6 +60,7 @@ protected:
     uint64_t _lastSent;
     char _buffer[64];
     DATABUILDER _builder;    
+    DESIREDPROCESSOR _processor;
 };
 
 #endif

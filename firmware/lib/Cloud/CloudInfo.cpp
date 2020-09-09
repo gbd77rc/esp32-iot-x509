@@ -90,16 +90,17 @@ void CloudInfoClass::load(JsonObjectConst obj)
 void CloudInfoClass::save(JsonObject obj)
 {
     auto json = obj.createNestedObject(this->_sectionName);
-    json["connect"] = CloudInfoClass::getStringFromProviderType(this->_config.provider);
+    json["provider"] = CloudInfoClass::getStringFromProviderType(this->_config.provider);
 
     auto certs = json.createNestedObject("certs");
-    certs["certficate"] = this->_config.certificates[CT_CERT].fileName;
+    certs["certificate"] = this->_config.certificates[CT_CERT].fileName;
     certs["key"] = this->_config.certificates[CT_KEY].fileName;
 
     auto iotHub = json.createNestedObject("iotHub");
     iotHub["endpoint"] = this->_config.endPoint;
     iotHub["port"] = this->_config.port;
     iotHub["sendTelemetry"] = this->_config.sendTelemetry;
+    iotHub["sendDeviceTwin"] = this->_config.sendDeviceTwin;    
     iotHub["intervalSeconds"] = this->_config.sendInterval;
 
     auto azure_ca = json.createNestedObject("azure");
@@ -123,13 +124,15 @@ void CloudInfoClass::toJson(JsonObject ob)
 /**
  * Connect to the selected provider
  * 
+ * @param builder This fuction pointer will build the data to be sent to the cloud
+ * @param processor This function pointer will process the desired state
  * @return True if connected
  */
-bool CloudInfoClass::connect(DATABUILDER builder)
+bool CloudInfoClass::connect(DATABUILDER builder, DESIREDPROCESSOR processor)
 {
     if (this->getProvider() != NULL)
     {
-        this->getProvider()->begin(builder);
+        this->getProvider()->begin(builder, processor);
         return this->getProvider()->connect(&this->_config);
     }
     return false;

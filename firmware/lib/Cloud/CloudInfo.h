@@ -13,7 +13,7 @@ public:
     CloudInfoClass();
 
     void begin(SemaphoreHandle_t flag);
-    bool connect(DATABUILDER builder);
+    bool connect(DATABUILDER builder, DESIREDPROCESSOR processor);
     void load(JsonObjectConst obj) override;
     void save(JsonObject ob) override;
     void toJson(JsonObject ob) override;

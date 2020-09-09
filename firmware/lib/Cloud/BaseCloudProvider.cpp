@@ -55,10 +55,12 @@ BaseCloudProvider::BaseCloudProvider(CloudProviderType type)
  * Begin initialisation again
  * 
  * @param builder This is a pointer to a function that will build the json object the will be sent out
+ * @param processor This function pointer will process the desired state 
  */
-void BaseCloudProvider::begin(DATABUILDER builder)
+void BaseCloudProvider::begin(DATABUILDER builder, DESIREDPROCESSOR processor)
 {
     this->_builder = builder;
+    this->_processor = processor;
     this->_cloudInstance.instance->loadTopics();
 }
 
@@ -260,33 +262,34 @@ const char *BaseCloudProvider::getFirstTopic(TopicType type)
     return "";
 }
 
+
 /**
  * Update the desired property to signal that we have accepted/rejected the change
  * 
- * @param property The name of the property to update
- * @param value The value of the property
+ * @param element The element to update
  * @return True if successfully updated
  */
-bool BaseCloudProvider::updateProperty(const char *property, JsonVariant value)
+bool BaseCloudProvider::updateProperty(JsonObjectConst element)
 {
+    LogInfo.log(LOG_VERBOSE, F("Calling Base updateProperty"));    
     bool sent = false;
     if (this->getIsConnected())
     {
         auto topic = this->getFirstTopic(TT_DEVICETWIN);
         _send_count++;
 
-        DynamicJsonDocument doc(500);
-        doc[property] = value;
-        size_t len = measureJson(doc);
+        size_t len = measureJson(element);
         char payload[len];
-        serializeJson(doc, payload, len + 1);
+        serializeJson(element, payload, len + 1);
         LogInfo.log(LOG_VERBOSE, "Updating Property to [%s]", topic);
+        LogInfo.log(LOG_VERBOSE, F("Device Twin Payload"), element);
+        LogInfo.log(LOG_INFO, "JSON Size : %u", measureJson(element));        
         sent = this->_mqttClient.publish(
             topic,
             payload);
     }
     LogInfo.log(LOG_INFO, "Current Property status is %s at %s",
-                sent ? "True" : "False", NTPInfo.getISO8601Formatted());
+                sent ? "True" : "False", NTPInfo.getISO8601Formatted().c_str());
 
     return sent;
 }
@@ -392,4 +395,24 @@ bool BaseCloudProvider::canSendNow()
         return true;
     }
     return false;
+}
+
+
+/**
+ * Process the desired properties and set the configuration elements
+ * 
+ * @param doc The doc object that contains the desired element.
+ */
+void BaseCloudProvider::processDesiredStatus(JsonObject doc)
+{
+    JsonObject element;
+    if (doc.containsKey("desired"))
+    {
+        element = doc["desired"].as<JsonObject>();
+    }
+    else 
+    {
+        element = doc;
+    }
+    this->_processor(element);
 }

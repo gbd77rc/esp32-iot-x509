@@ -10,11 +10,11 @@ public:
     static void mqttCallback(char *topic, byte *payload, unsigned int length);
     AwsInstanceClass(); 
     bool connect(const IoTConfig *config) override;
-    void processReply(char *topic, byte *payload, unsigned int length) override;
+    void processReply(char *topic, byte *payload, unsigned int length) override;    
+    bool updateProperty(JsonObjectConst element) override;    
 
 protected:
     void buildUserName(char *userName) override;
-    void processDesiredStatus(JsonObject doc) override;
     void loadTopics() override;
     bool sendDeviceReport(JsonObject json) override;
 

@@ -46,6 +46,26 @@ bool AwsInstanceClass::sendDeviceReport(JsonObject json)
 }
 
 /**
+ * Update the desired property to signal that we have accepted/rejected the change, if property value is JSON NULL then it is rejected
+ * 
+ * @param element The element to update
+ * @return True if successfully updated
+ */
+bool AwsInstanceClass::updateProperty(JsonObjectConst element)
+{
+    LogInfo.log(LOG_VERBOSE, F("Calling AWS updateProperty"));    
+    if (this->getIsConnected())
+    {
+        DynamicJsonDocument doc(500);
+        JsonObject state = doc.createNestedObject("state");
+        JsonObject reported = state.createNestedObject("reported");
+        reported.set(element);
+        return BaseCloudProvider::updateProperty(doc.as<JsonObject>());
+    }
+    return false;
+}
+
+/**
  * Connect and initialise the broker.
  * 
  * @return True if connected
@@ -158,33 +178,6 @@ void AwsInstanceClass::processReply(char *topic, byte *payload, unsigned int len
 }
 
 /**
- * Process the desired properties and set the configuration elements
- * 
- * @param doc The doc object that contains the desired element.
- */
-void AwsInstanceClass::processDesiredStatus(JsonObject doc)
-{
-    JsonObject element;
-    if (doc.containsKey("desired"))
-    {
-        element = doc["desired"].as<JsonObject>();
-    }
-    else 
-    {
-        element = doc;
-    }
-
-    if (element.containsKey("location"))
-    {
-        LogInfo.log(LOG_VERBOSE, F("Found Location Change"));
-        if (DeviceInfo.setLocation(element["location"].as<char *>()))
-        {
-            this->updateProperty("location", element["location"]);
-        }
-    }    
-}
-
-/**
  * Load the topics into the provider
  */
 void AwsInstanceClass::loadTopics()
@@ -206,7 +199,10 @@ void AwsInstanceClass::loadTopics()
     strcat(this->_topics[3].topic, DeviceInfo.getDeviceId());
     strcat(this->_topics[3].topic, "/messages/events");
     this->_topics[3].type = TT_TELEMETRY;
-    this->_topicsAdded = 4;
+    strcpy(this->_topics[4].topic, this->_shadowPrefix);
+    strcat(this->_topics[4].topic, "/get/accepted");
+    this->_topics[4].type = TT_SUBSCRIBE;    
+    this->_topicsAdded = 5;
 }
 
 AwsInstanceClass Aws;

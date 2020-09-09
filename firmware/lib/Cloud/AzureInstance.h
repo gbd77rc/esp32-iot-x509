@@ -11,10 +11,10 @@ public:
     AzureInstanceClass(); 
     bool connect(const IoTConfig *config) override;
     void processReply(char *topic, byte *payload, unsigned int length) override;
+    bool updateProperty(JsonObjectConst element) override;      
 
 protected:
     void buildUserName(char *userName) override;
-    void processDesiredStatus(JsonObject doc) override;
     bool sendDeviceReport(JsonObject json) override;
     void loadTopics() override;
 

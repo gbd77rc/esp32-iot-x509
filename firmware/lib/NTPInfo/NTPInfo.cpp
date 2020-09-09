@@ -79,18 +79,19 @@ String NTPInfoClass::getFormattedTime() // Get the formatted time from the gener
 void NTPInfoClass::tick() // Call the NTP update function to pool the site
 {
     int8_t count = 0;
+    this->_ntp.update();
     long epoch = this->getEpoch();
-    do
+    while (epoch < 1577836800)
     {
         count++;
-        if ( count > 10)
+        if (count > 10)
         {
             break;
         }
         this->_ntp.update();
-        delay(10);
+        delay(50);
         epoch = this->getEpoch();
-    } while (epoch < 1577836800);
+    };
 }
 
 /**
