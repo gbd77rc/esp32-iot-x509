@@ -3,7 +3,7 @@
         "level": "ALL"
     },
     "ledInfo": {
-        "brightness": 75,
+        "brightness": 100,
         "cloud": 25,
         "wifi": 26,
         "power": 27
@@ -28,13 +28,13 @@
         "location": "<UNKNOWN>"
     },
     "cloud": {
-        "provider": "aws",
+        "provider": "azure",
         "certs": {
             "certificate": "/cloud/device-cert.pem",
             "key": "/cloud/device.key"
         },
         "iotHub": {
-            "endpoint": "a1bqyju1450wf9-ats.iot.eu-west-2.amazonaws.com",
+            "endpoint": "",
             "port": 8883,
             "sendTelemetry": true,
             "sendDeviceTwin": true,
