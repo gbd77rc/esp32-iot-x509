@@ -1,6 +1,6 @@
 # IoT Visualization Journey
 
-I am going to produce a series of articles the will take an IoT device, register it with a cloud provider ([AWS](https://aws.amazon.com/) and [Azure](https://azure.microsoft.com/en-us/)), then take the data the device sends and how this in a web application.  I will be making public the source code and documentations in a git hub repository which you can find at [https://github.com/gbd77rc/esp32-iot-x509.git](https://github.com/gbd77rc/esp32-iot-x509.git).  This repository was originally just going to be for x509 registration, but I have extended it the series.
+I am going to produce a series of articles the will take an IoT device, register it with a cloud provider ([AWS](https://aws.amazon.com/) and [Azure](https://azure.microsoft.com/en-us/), then take the data the device sends and how this in a web application.  I will be making public the source code and documentations in a git hub repository which you can find at [https://github.com/gbd77rc/esp32-iot-x509.git](https://github.com/gbd77rc/esp32-iot-x509.git).  This repository was originally just going to be for x509 registration, but I have extended it the series.
 
 ## So Lets Get On With The Journey
 
