@@ -3,26 +3,26 @@
 By now you should have installed the command line tools for both Azure and AWS.  I will not cover that here.  From the `config.json` the following element can be found.
 
 ```json
-    "cloud": {
-        "provider": "azure",
-        "certs": {
-            "certificate": "/cloud/device-cert.pem",
-            "key": "/cloud/device.key"
-        },
-        "iotHub": {
-            "endpoint": "dev-ot-iot-hub.azure-devices.net",
-            "port": 8883,
-            "sendTelemetry": true,
-            "sendDeviceTwin": true,
-            "intervalSeconds": 45
-        },
-        "azure": {
-            "ca": "/cloud/portal-azure-com.pem"
-        },
-        "aws": {
-            "ca": "/cloud/console-aws-com.pem"
-        }
-    }
+  "cloud": {
+      "provider": "azure",
+      "certs": {
+          "certificate": "/cloud/device-cert.pem",
+          "key": "/cloud/device.key"
+      },
+      "iotHub": {
+          "endpoint": "dev-ot-iot-hub.azure-devices.net",
+          "port": 8883,
+          "sendTelemetry": true,
+          "sendDeviceTwin": true,
+          "intervalSeconds": 45
+      },
+      "azure": {
+          "ca": "/cloud/portal-azure-com.pem"
+      },
+      "aws": {
+          "ca": "/cloud/console-aws-com.pem"
+      }
+  }
 ```
 
 We will test Azure first, as you can see I have default the `provider` property to this value.  We will need to update the `endpoint` to the `hostname` that was create in [DeviceCertificate.md](./DeviceCertificate.md) Azure IoT Hub creation step.  When the certificates have been copied and `endpoint` updated you can run the `Upload File System image` command to upload to the device.  This is explained in the [Device Development](./FirmwareDevelopment.md) article.
@@ -73,7 +73,7 @@ This command will show the current device twin state.
 ▶ az iot hub device-twin show --device-id OT-105783B5AA8C --hub-name dev-ot-iot-hub
 ```
 
-I have not shown the output as it is big.  If you don't see anything in the `desired` element then there is something wrong.  Check the logs on the device, as explained in the [Device Development](./FirmwareDevelopment.md) article.
+I have not shown the output as it is big.  If you don't see anything in the `reported` element then there is something wrong.  Check the logs on the device, as explained in the [Device Development](./FirmwareDevelopment.md) article.
 
 ## AWS Registration
 

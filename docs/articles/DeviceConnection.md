@@ -757,17 +757,130 @@ Getting CA Private Key
 The verification certificate is now ready to be upload to Azure.  Remember to replace the `etag` you received from the previous `az` command here.
 
 ```shell
-az iot hub certificate verify --etag AAAAAZDsxuE= --hub-name dev-ot-iot-hub --path ./verification-azure.pem --name dev-root-ca
+▶ az iot hub certificate verify --etag AAAAAZDsxuE= --hub-name dev-ot-iot-hub --path ./verification-azure.pem --name dev-root-ca
 ```
 
 So now we can register the devices on Azure without needing to generated the primary/secondary tokens.  Just create the device with the device id as the name.  This will be covered in **Cloud Registration** section.
 
 #### Step 5 - AWS CA Registration
 
-Now we can do the same with AWS IoT Core as we did with Azure.  There is no real concept of a resource group, but you can tag resources to group them.  There is one IoT Core per region per account.   Now we will use the UK region, London is actually `eu-west-2` so that the region code we will use.  Unlike Azure we can create a registration/verification code before upload the CA certificate.  This code does not change for the account, unlike the Azure code.
+Now we can do the same with AWS IoT Core as we did with Azure.  There is no real concept of a resource group, but you can tag resources to group them.  There is one IoT Core per region per account.   Now we will use the UK region, London is actually `eu-west-2` so that the region code we will use.  
 
+> Now version 2 of the CLI uses the default OS pager.  This can be bit annoying if you just want a the output to appear next to the command, or you need to visible for the next command.  So to disable this feature you can do the following on Mac/Linux.  
+>
+> ```shell
+> ▶ export AWS_PAGER=""
+> ```
 
+Unlike Azure we can create a registration/verification code before upload the CA certificate.  This code does not change for the account, unlike the Azure code.
+
+```shell
+▶ aws iot get-registration-code
+{
+    "registrationCode": "d7...f7"
+}
+```
+
+Lets generate a key that the verification cert can use.
+
+```shell
+▶ openssl genrsa -out verification-aws.key 4098
+Generating RSA private key, 2048 bit long modulus
+.................+++
+......................+++
+e is 65537 (0x10001)
+```
+
+To create the CA verification certificate use the following and make sure the `CN` is the `registrationCode` from the above output.
+
+```shell
+▶ openssl req -new -key verification-aws.key -out verification-aws.csr
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) []:GB
+State or Province Name (full name) []:
+Locality Name (eg, city) []:
+Organization Name (eg, company) []:
+Organizational Unit Name (eg, section) []:
+Common Name (eg, fully qualified host name) []:d...7
+Email Address []:
+
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []
+```
+
+Again we have the `CSR` lets generate the actual certificate.
+
+```shell
+▶ openssl x509 -req -in verification-aws.csr -CA dev-root-ca.pem -CAkey dev-root-ca.key -CAcreateserial -out verification-aws.pem -days 365 -sha256
+Signature ok
+subject=/CN=d7...f7
+Getting CA Private Key
+```
+
+Finally we can register the CA and Verification certs in one go.
+
+```shell
+▶ aws iot register-ca-certificate --ca-certificate ./dev-root-ca.pem --verification-certificate ./verification-aws.pem --set-as-active --allow-auto-registration
+```
+
+Now this command should work, but I have not been able to get it.  If I register the same files via the web console.  Then it loads and registers fine.  I will keep investigating but for the time being we have the CA on both Azure and AWS.
+
+##### Steps To Register CA via the Portal
+
+Log into your AWS account, make sure the region is set to the required one.  Then select `IoT Core` from the service and select `Secure->CAs` from the nav menu
+
+<img src="../images/AWS-CA-Reg1.png" alt="AWS IoT Core CAs" style="zoom:50%;" />
+
+This will show the list of registered `CA's` or as the screen shot above you will get the welcome to registration.  Click on the `Register a CA` button and it will be give the `Select a CA` screen, as we don't have one registered yet, click on the `Register CA` button.  
+
+<img src="../images/AWS-CA-Reg2.png" alt="AWS IoT Core CA Register" style="zoom:50%;" />
+
+It will give you the steps required to generate the verification certificate etc, that we have done already.  You just need to complete steps 5 & 6.
+
+<img src="../images/AWS-CA-Reg3.png" alt="AWS IoT Core CA Select Cert Files" style="zoom:50%;" />
+
+Once you have selected the files and checked both tick boxes click on the `Register CA Certificate` and it should successfully load.
+
+<img src="../images/AWS-CA-Reg4.png" alt="AWS IoT Core CA Success" style="zoom:50%;" />
 
 
 
 ### Cloud Registration
+
+From the `config.json` the `cloud` element can found, as described in the `Cloud Info Element`.  We will test Azure first, as you can see I have defaulted the `provider` property to this value.  We will need to update the `endpoint` to the `hostname` that was create in `Step 4 - Azure CA Registraton`.   Don't upload yet.
+
+#### Register The Device On Azure
+
+The following command will create and active the device on Azure.
+
+```shell
+▶ az iot hub device-identity create --hub-name dev-ot-iot-hub --device-id OT-105783B5AA8C --am x509_ca
+```
+
+The important part is the -`-device-id` which **MUST** match the `CN` in the certificate on the device.  There is an issue with Azure and asymmetric keys aka x509, and having the `iotEdge` flag enabled.  It is currently not supported.  I have not tried OTA updates on an Azure IoT device yet, so don't know if this would cause it to fail or not.  I believe this flag is for the Azure IoT Edge ([https://azure.microsoft.com/en-us/services/iot-edge/](https://azure.microsoft.com/en-us/services/iot-edge/)) service.  More investigation is required.
+
+Now you run the `Upload File System image` command to upload configration and certificates, then run the `Upload` command to build the code and flash the device.   Connect the device to a router, using WPA and after a while the device will go to sleep, by then it should have sent a few device twin messages and telemetry messages successfully to Azure.
+
+The following command will show the device twin document.
+
+```shell
+ ▶ az iot hub device-twin show --device-id OT-105783B5AA8C --hub-name dev-ot-iot-hub
+```
+
+I have not shown the output as it is big.  If you don't see anything in the `reported` element then there is something wrong.  Use the `Monitor` command and restart the device to see if there are any issues.
+
+#### Register The Device On AWS
+
+There is a lot more involvement required on AWS side of things.  Talking of things, AWS has a concept of Thing types ([https://docs.aws.amazon.com/iot/latest/developerguide/thing-types.html](https://docs.aws.amazon.com/iot/latest/developerguide/thing-types.html)).  This allows you to group things together and store common configuration associated with all things aka devices.  This makes management of the things easier.  As this is a simple system for now we want worry about it as it is optional.
+
+> During the writing of these articles AWS released a new feature on IoT Core Shadow.  This is called `Named Shadow`, basically it allow multiple Shadows to be assigned to a device.  It is explained here [https://aws.amazon.com/about-aws/whats-new/2020/07/aws-iot-core-now-supports-multiple-shadows-for-a-single-iot-device/](https://aws.amazon.com/about-aws/whats-new/2020/07/aws-iot-core-now-supports-multiple-shadows-for-a-single-iot-device/).  We still use the what is called the `classic` shadow.  I will create an additional article later in the year to explain how to use this new feature.
+
+
+
