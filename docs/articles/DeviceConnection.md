@@ -17,7 +17,7 @@ Throughout this journey I will introduce some TLA.  Most of the meanings below I
 | Terminology | Meaning                                                      |
 | ----------- | ------------------------------------------------------------ |
 | **CA**      | **Certificate Authority** - in simplist terms, a **CA** is an entity that issues digital **certificates** |
-| CSR         | **Certificate Signing Request** - the request need to help generate a certificate |
+| **CSR**     | **Certificate Signing Request** - the request need to help generate a certificate |
 | **JITR**    | **Just In Time Registration** - is the ability to allow devices to automatically register with a cloud provider when they first switch on and have access to the internet. |
 | **OTA**     | **Over The Air** - is the process where the firmware/configuration can be remotely updated/replaced. |
 | **SOC**     | **System On a Chip** - is an integrated circuit (also known as a "**chip**") that integrates all or most components of a computer or other electronic **system** |
@@ -474,11 +474,11 @@ This is done by replacing the connects of `firmware/src/main.cpp`file with the a
 
 One you have update the `main.cpp` click on the `Platformio` menu item and select `Upload`.  It should then build the source files and upload the binary to the ESP32 development board.
 
-![ID Check Build](/Users/richard/Projects/seshat/sim-device-2/docs/images/Code-IDCheckBuild.png)
+<img src="../images/Code-IDCheckBuild.png" alt="ID Check Build" style="zoom:50%;" />
 
 The OLED display should show
 
-![CPU-ID](/Users/richard/Projects/seshat/sim-device-2/docs/images/CPU-ID.png)
+<img src="../images/CPU-ID.png" alt="CPU-ID" style="zoom:50%;" />
 
 As the `prefix` in the configuration is `OT`  and the CPU Id is `105783B5AA8C` then the actual device Id will be `OT-105783B5AA8C`.
 
@@ -636,7 +636,7 @@ Copy the `105783B5AA8C-cert.pem` and `device.key` to `<clone repo>/firmware/data
 
 Once this done you will need to `Upload File System Image` to the device.
 
-![Code-FileUpload](/Users/richard/Projects/seshat/sim-device-2/docs/images/Code-FileUpload.png)
+<img src="../images/Code-FileUpload.png" alt="Code-FileUpload" style="zoom:50%;" />
 
 #### Step 4 - Azure CA Registration
 
@@ -878,9 +878,197 @@ I have not shown the output as it is big.  If you don't see anything in the `rep
 
 #### Register The Device On AWS
 
-There is a lot more involvement required on AWS side of things.  Talking of things, AWS has a concept of Thing types ([https://docs.aws.amazon.com/iot/latest/developerguide/thing-types.html](https://docs.aws.amazon.com/iot/latest/developerguide/thing-types.html)).  This allows you to group things together and store common configuration associated with all things aka devices.  This makes management of the things easier.  As this is a simple system for now we want worry about it as it is optional.
+There is a lot more involvement required on AWS side of things.  Talking of things, AWS has a concept of Thing types ([https://docs.aws.amazon.com/iot/latest/developerguide/thing-types.html](https://docs.aws.amazon.com/iot/latest/developerguide/thing-types.html)).  This allows you to group things together and store common configuration associated with all things aka devices.  This makes management of the things easier.  As this is a simple system for now we will not worry about it as it is optional.
 
 > During the writing of these articles AWS released a new feature on IoT Core Shadow.  This is called `Named Shadow`, basically it allow multiple Shadows to be assigned to a device.  It is explained here [https://aws.amazon.com/about-aws/whats-new/2020/07/aws-iot-core-now-supports-multiple-shadows-for-a-single-iot-device/](https://aws.amazon.com/about-aws/whats-new/2020/07/aws-iot-core-now-supports-multiple-shadows-for-a-single-iot-device/).  We still use the what is called the `classic` shadow.  I will create an additional article later in the year to explain how to use this new feature.
+
+##### Policy Creation
+
+All 'things' have to associated with a security policy some how, or it will not connect.  I normally assign the policy to a group, that why you don't have to assign it individually.  I will not cover how to use policy/permissions, that can be done via AWS own documentation ([https://docs.aws.amazon.com/iot/latest/developerguide/iot-policies.html](https://docs.aws.amazon.com/iot/latest/developerguide/iot-policies.html)).  If you want a full lock down device then, it may be an idea to place individual policies against the thing.  This policy would have specific ARN on the resources that it can access.  Now that being said I did try to use a policy with generic ARN to limit the devices to specific wildcard topics.  This did not work, it kept getting handshake errors during the TLS negotiation phase.  In the end I use full wildcard for the resource ARN.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "iot:Connect"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    },
+    {
+      "Action": [
+        "iot:Subscribe"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    },  
+    {
+      "Action": [
+        "iot:Publish",
+        "iot:Receive"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    },  
+    {
+      "Action": [
+        "iot:DeleteThingShadow",
+        "iot:GetThingShadow",
+        "iot:UpdateThingShadow"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+This policy will allow the device to connect, create, update and delete its own shadow and publish/subscribe to any topic.  Create a text file called `ot-iot-policy.json` and copy the above policy json into it and save it.  
+
+Using the following command you should be able to create the policy.
+
+```shell
+▶ aws iot create-policy --policy-name ot-iot-device-policy --policy-document file://ot-iot-policy.json
+```
+
+> Now make sure you use the IoT policy create command and not the IAM one, or you will spend an hour trying to workout way you can't attach it to the group, like want I did!
+
+As we are going to connect this policy to a thing group we need to create the group,  
+
+```shell
+▶ aws iot create-thing-group --thing-group-name ot-devices 
+{
+    "thingGroupName": "ot-devices",
+    "thingGroupArn": "arn:aws:iot:eu-west-2:<account id>:thinggroup/ot-devices",
+    "thingGroupId": "ae...f53"
+}
+```
+
+Time to attach the policy to the group.  Just make sure the `<account id>` is your account id.
+
+```shell
+▶ aws iot attach-policy --target "arn:aws:iot:eu-west-2:<account id>:thinggroup/ot-devices" --policy-name "ot-iot-device-policy"
+```
+
+##### Registration
+
+The following command will create and active the device on Aws.  It follows the Single-thing provision ([https://docs.aws.amazon.com/iot/latest/developerguide/provision-w-cert.html](https://docs.aws.amazon.com/iot/latest/developerguide/provision-w-cert.html)) concept.  
+
+Unlike Azure, you have to register the certificate before you can connect the device.  Now using the file created in `Step 2 - Create the Device Certificate` do the following.
+
+```shell
+▶ aws iot register-certificate --certificate-pem file://105783B5AA8C-cert.pem --ca-certificate-pem file://dev-root-ca.pem --set-as-active
+{
+    "certificateArn": "arn:aws:iot:eu-west-2::cert/73...e1",
+    "certificateId": "73...e1"
+}
+```
+
+> Now if you get Invalid Certificate, then the possible answer is you created certificate without the -sha256 flag.  
+
+Make a note of the `certificateId` you will need it.
+
+Provisioning template for single use is required.  If JITP is used then you could have assigned this template the the CA certificate.  The following template will be used.
+
+```json
+{
+    "Parameters" : {
+        "DeviceId" : {
+            "Type" : "String"
+        },
+        "CertificateId" : {
+            "Type" : "String"
+        }
+    },
+    "Resources" : {
+        "thing" : {
+            "Type" : "AWS::IoT::Thing",
+            "OverrideSettings":{
+                "AttributePayload":"MERGE",
+                "ThingGroups":"DO_NOTHING"
+            },
+            "Properties" : {
+                "AttributePayload" : { "version" : "v1"},
+                "ThingGroups" : ["ot-devices"],
+                "ThingName" : { "Ref" : "DeviceId"}
+            }
+        },
+        "certificate" : {
+            "Type" : "AWS::IoT::Certificate",
+            "Properties" : {
+                "CertificateId": {"Ref" : "CertificateId"}
+            }
+        }
+    }
+}
+```
+
+Now using that template we can create the following command.  Pay attention to the `--parameters` option.
+
+```shell
+▶ aws iot register-thing \
+    --template-body '{"Parameters":{"DeviceId":{"Type":"String"},"CertificateId":{"Type":"String"}},"Resources":{"thing":{"Type":"AWS::IoT::Thing","OverrideSettings":{"AttributePayload":"MERGE","ThingGroups":"DO_NOTHING"},"Properties":{"AttributePayload":{"version":"v1"},"ThingGroups":["ot-devices"],"ThingName":{"Ref":"DeviceId"}}},"certificate":{"Type":"AWS::IoT::Certificate","Properties":{"CertificateId":{"Ref":"CertificateId"}}}}}' \
+    --parameters '{"DeviceId":"OT-105783B5AA8C","CertificateId":"73...e1"}'
+{
+    "certificatePem": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n",
+    "resourceArns": {
+        "certificate": "arn:aws:iot:eu-west-2::cert/73...e1",
+        "thing": "arn:aws:iot:eu-west-2::thing/OT-105783B5AA8C"
+    }
+}
+```
+
+Now we need the `endpoint` for the IoT Core, this can be returned using this command.
+
+```shell
+▶ aws iot describe-endpoint --endpoint-type "iot:Data-ATS"
+{
+    "endpointAddress": "a...9-ats..iot.eu-west-2.amazonaws.com"
+}
+```
+
+To test AWS, update the `provider` property in the `config.json` to `aws`.  We will need to update the `endpoint` to the `endpointAddress` above.  Then you can run the `Upload File System image` command to upload to the device. 
+
+The following command will show the device shadow document.
+
+```shell
+aws iot-data get-thing-shadow --thing-name OT-105783B5AA8C shadow.json
+```
+
+I have not shown the `shadow.json`, but you can view it.  If you don't see anything in the `reported` element then there is something wrong.  Use the `Monitor` command and restart the device to see if there are any issues.
+
+### Device Twin/Shadow Update
+
+ I will leave it up to you see what `desired` element does, when it is added to either Azure Device Twin object or AWS Shadow document.  Basically the LED brightness or Location settings on the device such update.  
+
+
+
+```json
+"desired": {
+  "device": {
+  	"location": "Office"
+  },
+  "ledInfo": {
+  	"brightness": 20
+  }
+}
+```
+
+It should only work when done on the cloud side.   See the relevant documentation on Azure and AWS.
+
+## Finishing
+
+You should now have a device that can securely connect to either Azure or AWS and can communicate bi-directionly using the Device Twin or Shadow document.  What's next.
+
+- Visualization of the telemetry of the device
+- Being able to update settings on the device remotely
+- JITR process on Azure/AWS
+- AWS Named Shadow
+- Indoor Location and OTA
+
+These will be covered in later articles.
 
 
 
