@@ -128,7 +128,7 @@ The `sampleRate` is the how often will the GPS information be requested.
 
 The sensor will retrieve the current temperature and humidity.  The sensor being used for this is the DHT-22, which has a bigger range and is more sensitive.  
 
-> Temperature Range: 0 to 125 °C +/- 5°C
+> Temperature Range: -40 to 80 °C +/- 5°C
 > Humidity Range: 0 - 100% +/- 2.5%
 
 The `data` pin is used for communication.  The device will use this pin for receiving of data.  Once set should never need changing.
