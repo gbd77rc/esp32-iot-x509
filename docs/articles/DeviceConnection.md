@@ -1009,8 +1009,8 @@ Now using that template we can create the following command.  Pay attention to t
 
 ```shell
 ▶ aws iot register-thing \
-    --template-body '{"Parameters":{"DeviceId":{"Type":"String"},"CertificateId":{"Type":"String"}},"Resources":{"thing":{"Type":"AWS::IoT::Thing","OverrideSettings":{"AttributePayload":"MERGE","ThingGroups":"DO_NOTHING"},"Properties":{"AttributePayload":{"version":"v1"},"ThingGroups":["ot-devices"],"ThingName":{"Ref":"DeviceId"}}},"certificate":{"Type":"AWS::IoT::Certificate","Properties":{"CertificateId":{"Ref":"CertificateId"}}}}}' \
-    --parameters '{"DeviceId":"OT-105783B5AA8C","CertificateId":"73...e1"}'
+    --template-body '{"Parameters":{"DeviceId":{"Type":"String"},"CertificateId":{"Type":"String"}},"Resources":{"thing":{"Type":"AWS::IoT::Thing","OverrideSettings":{"AttributePayload":"MERGE","ThingGroups":"DO_NOTHING"},"Properties":{"AttributePayload":{"version":"v1"},"ThingGroups":["rc-devices"],"ThingName":{"Ref":"DeviceId"}}},"certificate":{"Type":"AWS::IoT::Certificate","Properties":{"CertificateId":{"Ref":"CertificateId"}}}}}' \
+    --parameters '{"DeviceId":"RC-4C71A5C40A24","CertificateId":"92a9a670e84006cf4a708c4b9d84b6e373f8aa21724b963633e5255698e41d5a"}'
 {
     "certificatePem": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n",
     "resourceArns": {

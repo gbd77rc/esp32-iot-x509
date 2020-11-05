@@ -1,7 +1,10 @@
 #include "Display.h"
 #include "LogInfo.h"
 
-U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, 16, 15, 4);
+//U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, 16, 15, 4);
+
+//U8G2_SSD1327_MIDAS_128X128_F_2ND_4W_HW_SPI u8g2(U8G2_R0, 5, 16, 2);
+U8G2_SSD1327_MIDAS_128X128_F_3W_SW_SPI u8g2(U8G2_R0,10, 7, 5, 8);
 
 /**
  * Begin the initialization of the OLED Screen

@@ -125,10 +125,10 @@ void setup()
         OledDisplay.displayLine(0, 40, "Tim: %s", NTPInfo.getFormattedTime());
         OledDisplay.displayLine(0, 50, "Env: %s", EnvSensor.toString());
         OledDisplay.displayLine(0, 60, "GPS: %s", GpsSensor.toString());
-        if (CloudInfo.connect(buildDataObject, updateConfig) == false)
-        {
-            OledDisplay.displayExit(F("Not Connected to the cloud so rebooting to try again!"), 20);
-        }
+        // if (CloudInfo.connect(buildDataObject, updateConfig) == false)
+        // {
+        //     OledDisplay.displayExit(F("Not Connected to the cloud so rebooting to try again!"), 20);
+        // }
         if (heap_caps_check_integrity_all(true) == false)
         {
             LogInfo.log(LOG_ERROR, F("Heap Corruption detected! -setup -5"));
@@ -161,12 +161,12 @@ void loop()
             OledDisplay.displayExit(F("Heap Corruption detected! Rebooting"), 5);
         }
         OledDisplay.displayLine(30, 50, "%s", NTPInfo.getFormattedTime());
-        EnvSensor.tick();
-        GpsSensor.tick();
+        // EnvSensor.tick();
+        // GpsSensor.tick();
         delay(500);
         NTPInfo.tick();
-        CloudInfo.tick();
-        WakeUp.tick();
+        // CloudInfo.tick();
+        // WakeUp.tick();
         OledDisplay.displayLine(30, 40, "%s", EnvSensor.toString());
         OledDisplay.displayLine(30, 60, "%s", GpsSensor.toString());
         delay(500);

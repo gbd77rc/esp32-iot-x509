@@ -4,25 +4,24 @@
     },
     "ledInfo": {
         "brightness": 100,
-        "cloud": 25,
-        "wifi": 26,
-        "power": 27
-    },
+        "cloud": 12,
+        "wifi": 27,
+        "power": 25    },
     "gpsSensor": {
-        "enabled": true,
+        "enabled": false,
         "tx": 22,
         "rx": 23,
         "baud": 9600,
         "sampleRate": 5000
     },
     "envSensor": {
-        "enabled": true,
+        "enabled": false,
         "data": 14,
         "scale": 1,
         "sampleRate": 20000
     },
     "device": {
-        "prefix": "OT",
+        "prefix": "RC",
         "wakeup": 1200,
         "sleep": 60,
         "location": "<UNKNOWN>"
