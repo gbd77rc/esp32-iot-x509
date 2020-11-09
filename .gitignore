@@ -8,3 +8,4 @@ build/
 *.pem
 *.srl
 *.csr
+*.zip
